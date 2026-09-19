@@ -1,0 +1,35 @@
+---
+description: Полный стек: Expo, NativeWind, Query, Zustand, Reanimated, Supabase, RevenueCat
+alwaysApply: true
+---
+
+# Принцип стека
+
+Максимальный Time-to-Market, 60 FPS анимации, поддержка небольшой командой.
+
+# Фронтенд
+
+- `Expo` + `React Native` (TypeScript): общий код, Expo Go, iOS и Android без глубокой нативки.
+- `NativeWind`: утилитарные классы, без хардкода `style={{}}` кроме сильно динамичных случаев.
+- `TanStack Query`: серверное состояние, кэш запросов, бесконечный скролл ленты.
+- `Zustand`: клиентский стейт (тренировка, таймер, аватар).
+- `react-native-reanimated` + `Moti`: сочные Duolingo-анимации в нативном потоке.
+- Видео: `expo-video` (предпочтительно) или `react-native-video` с кэшем для вертикальной ленты как TikTok.
+
+# Бэкенд (Supabase)
+
+- PostgreSQL: друзья, лидерборды, логи тренировок.
+- Auth: Apple, Google, соцсети.
+- Realtime: лидерборды, чаты, активность друзей.
+- Storage: видео ленты и аватары.
+- Edge Functions (Deno/TS): сгорание серий, награды по таймеру, валидация платных турниров.
+
+# Монетизация и аналитика
+
+- `RevenueCat`: подписки Freemium, скины, щиты. Не настраивать сторы вручную.
+- `Amplitude` или `Mixpanel`: дроп на онбординге и в первый месяц.
+
+# Архитектура кода
+
+- Фичи в папках: `features/streaks`, `features/feed`, `features/avatar`.
+- UI отдельно от логики; сложный фетч и стейт — в хуках.

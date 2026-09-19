@@ -1,0 +1,42 @@
+# зависимости
+node_modules/
+.pnp
+.pnp.js
+
+# Expo / native
+.expo/
+dist/
+web-build/
+ios/
+android/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# env и секреты
+.env
+.env.*
+!.env.example
+
+# логи и ОС
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Cursor локальное (правила проекта в .cursor/rules оставляем)
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
+
+# сборки
+coverage/
