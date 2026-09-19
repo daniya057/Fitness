@@ -7,6 +7,7 @@ node_modules/
 .expo/
 dist/
 web-build/
+expo-env.d.ts
 ios/
 android/
 *.jks
@@ -40,3 +41,6 @@ Thumbs.db
 
 # сборки
 coverage/
+
+# анкеты пользователей (файлы в data/users)
+data/users/*.json

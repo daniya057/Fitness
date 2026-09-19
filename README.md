@@ -7,14 +7,22 @@
 | | |
 |---|---|
 | Аудитория | Gen Z, молодые миллениалы, СДВГ |
-| Стек | Expo, NativeWind, Supabase, RevenueCat |
-| Сейчас | Фаза 1 — инициализация MVP |
+| Стек | Expo (JSX), NativeWind, Supabase, RevenueCat |
+| Сейчас | Фаза 1 — экран Арена |
 | Язык | Русский (UI, доки, комментарии) |
+
+## Запуск
+
+```bash
+npm install
+npm run server
+npx expo start --web
+```
+
+Без `npm run server` регистрация не сохранится в `data/users/`.
+
+Веб: `npx expo start --web`. Телефон: Expo Go.
 
 ## Документация
 
-Всё живёт в [`docs/`](docs/README.md). Роадмап: [`docs/roadmap.md`](docs/roadmap.md).
-
-## Статус репозитория
-
-Приложение ещё не инициализировано (спринт 1). Когда появится Expo-проект, здесь будут команды `npx expo start` и переменные Supabase.
+Всё живёт в [`docs/`](docs/README.md). Роадмап: [`docs/roadmap.md`](docs/roadmap.md). Экран Арены: [`docs/screens/arena.md`](docs/screens/arena.md).

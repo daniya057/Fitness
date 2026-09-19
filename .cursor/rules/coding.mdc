@@ -5,7 +5,8 @@ alwaysApply: true
 
 # Код
 
-- Явные типы и интерфейсы для пропсов и схем БД.
+- UI: чистый JavaScript/JSX, без аннотаций TypeScript.
+- Схемы БД описывать в `docs/database.md`; в JS — понятные имена полей.
 - Запросы к Supabase с учётом Row Level Security.
 - Картинки и видео в ленте — через кэш (`expo-video` / кэш-слой), не грузить сырой поток каждый раз.
 - Анимации через Reanimated/Moti, не через JS-driven `Animated`, если нужна плавность 60 FPS.

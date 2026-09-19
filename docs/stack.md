@@ -7,7 +7,7 @@
 
 | Слой | Выбор | Зачем |
 |---|---|---|
-| Приложение | Expo Managed + React Native, TypeScript | Expo Go, iOS и Android без глубокой нативки |
+| Приложение | Expo Managed + React Native, **JavaScript (JSX)** | Expo Go, iOS и Android без глубокой нативки. UI без TypeScript |
 | Стили | NativeWind (Tailwind) | Быстрая вёрстка, хорошо генерируется в Cursor |
 | Серверное состояние | TanStack Query | Кэш, лента, бесконечный скролл |
 | Клиентское состояние | Zustand | Тренировка, таймер, кастом аватара |

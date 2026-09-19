@@ -12,8 +12,8 @@
 
 ### Спринт 1: среда и БД
 
-- [ ] Expo Managed Workflow + TypeScript
-- [ ] NativeWind и дизайн-токены (цвета бренда, шрифты)
+- [x] Expo Managed Workflow + JavaScript (JSX)
+- [x] NativeWind и дизайн-токены (светлая зелёная тема)
 - [ ] Проект Supabase и схема:
   - `profiles` (id, username, avatar_url, xp, level, core_streak)
   - `activities_log` (id, user_id, type, duration, created_at)
@@ -22,7 +22,7 @@
 
 ### Спринт 2: навигация и Quick-Start
 
-- [ ] Нижние вкладки: Профиль/Аватар | Лента | Дейлики | Социалка
+- [x] Нижние вкладки (портрет): Арена | Тренинг | Награды | Топливо | Профиль
 - [ ] Онбординг с кнопкой «Пропустить опрос»
 - [ ] 10-секундная активность: «Засчитать разминку» → запись в БД + анимация успеха
 

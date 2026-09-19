@@ -13,6 +13,8 @@
 | [database.md](database.md) | Схема Postgres, RLS, Storage |
 | [auth.md](auth.md) | Вход Email / Google / Apple |
 | [navigation.md](navigation.md) | Вкладки и экраны |
+| [screens/arena.md](screens/arena.md) | Экран Арена |
+| [screens/tabs.md](screens/tabs.md) | Пять вкладок, портрет |
 | [roadmap.md](roadmap.md) | Фазы и спринты с чекбоксами |
 | [glossary.md](glossary.md) | Термины |
 | [analytics.md](analytics.md) | События Amplitude / Mixpanel |
