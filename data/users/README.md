@@ -4,4 +4,4 @@
 
 Имя файла: `{id}.json` (случайный id). Пароль хранится как `scrypt` (соль:хеш), не открытым текстом.
 
-Сервер: `npm run server` → `http://localhost:8787`.
+Сервер: `npm run server`. Адрес API — в `keys/links.json`.

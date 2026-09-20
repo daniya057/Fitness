@@ -65,6 +65,15 @@ export function AuthProvider({ children }) {
         setToken("");
         setUser(null);
       },
+      async completeOnboarding(payload) {
+        const data = await api("/me", {
+          method: "PATCH",
+          token,
+          body: { ...payload, token, onboardingDone: true },
+        });
+        setUser(data.user);
+        return data.user;
+      },
       async patch(payload) {
         const data = await api("/me", { method: "PATCH", token, body: { ...payload, token } });
         setUser(data.user);

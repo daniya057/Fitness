@@ -6,6 +6,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthGate } from "../src/features/auth/AuthGate";
 import { AuthProvider } from "../src/features/auth/AuthContext";
+import { PortraitShell } from "../src/ui/PortraitShell";
 
 export default function RootLayout() {
   return (
@@ -13,9 +14,11 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <StatusBar style="dark" />
         <AuthProvider>
-          <AuthGate>
-            <Slot />
-          </AuthGate>
+          <PortraitShell>
+            <AuthGate>
+              <Slot />
+            </AuthGate>
+          </PortraitShell>
         </AuthProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

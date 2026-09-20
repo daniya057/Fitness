@@ -1,6 +1,8 @@
+import links from "../../../keys/links.json";
+
 const TOKEN_KEY = "fitness.auth.token";
 
-export const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8787";
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || links.api;
 
 export function readToken() {
   try {

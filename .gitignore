@@ -21,6 +21,8 @@ android/
 .env
 .env.*
 !.env.example
+keys/.env
+keys/admin/
 
 # логи и ОС
 npm-debug.*
@@ -44,3 +46,4 @@ coverage/
 
 # анкеты пользователей (файлы в data/users)
 data/users/*.json
+

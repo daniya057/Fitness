@@ -11,7 +11,8 @@
 | [stack.md](stack.md) | Технологический стек и зачем |
 | [architecture.md](architecture.md) | Папки, слои, паттерны кода |
 | [database.md](database.md) | Схема Postgres, RLS, Storage |
-| [auth.md](auth.md) | Вход Email / Google / Apple |
+| [auth.md](auth.md) | Вход приложения и админка |
+| [../keys/README.md](../keys/README.md) | Ссылки сайта/API и ключи |
 | [navigation.md](navigation.md) | Вкладки и экраны |
 | [screens/arena.md](screens/arena.md) | Экран Арена |
 | [screens/tabs.md](screens/tabs.md) | Пять вкладок, портрет |

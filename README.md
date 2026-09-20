@@ -15,13 +15,12 @@
 
 ```bash
 npm install
-npm run server
-npx expo start --web
+npm run dev
 ```
 
-Без `npm run server` регистрация не сохранится в `data/users/`.
+Сайт, API и админка: [`keys/README.md`](keys/README.md). Шаблон паролей: [`keys/env.example`](keys/env.example). 
 
-Веб: `npx expo start --web`. Телефон: Expo Go.
+Или двумя окнами: `npm run server` и `npx expo start --web`. Без API экран входа не сохранит аккаунт.
 
 ## Документация
 

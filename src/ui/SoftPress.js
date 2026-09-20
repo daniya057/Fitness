@@ -1,4 +1,4 @@
-import { Pressable } from "react-native";
+import { Pressable, View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -33,13 +33,10 @@ export function SoftPress({ children, onPress, className, disabled, style }) {
   };
 
   return (
-    <AnimatedPressable
-      onPress={handlePress}
-      disabled={disabled}
-      className={className}
-      style={[animated, style]}
-    >
-      {children}
+    <AnimatedPressable onPress={handlePress} disabled={disabled} style={animated}>
+      <View className={className} style={style}>
+        {children}
+      </View>
     </AnimatedPressable>
   );
 }
