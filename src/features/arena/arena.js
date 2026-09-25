@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { Flame, Medal, Star, Trophy, User } from "lucide-react-native";
 import { useRouter } from "expo-router";
@@ -9,12 +10,25 @@ import { useDayCountdown } from "./useDayCountdown";
 import { DAILY_COPY } from "../onboarding/catalog";
 import { useCatalog } from "../onboarding/useCatalog";
 import { useAuth } from "../auth/AuthContext";
+import { sumLog, utcDay } from "../calories/foods";
+import { dailyKcalTarget } from "../calories/target";
 
 const BADGES = [
   { id: "tone", title: "Тонус", Icon: Medal },
   { id: "power", title: "Сила", Icon: Trophy },
   { id: "week", title: "7 дней", Icon: Star },
 ];
+
+const RING = 80;
+
+function StatCell({ label, value }) {
+  return (
+    <View className="flex-1 items-center">
+      <Text className="text-[22px] font-semibold tabular-nums text-ink">{value}</Text>
+      <Text className="mt-1 text-[11px] text-mute">{label}</Text>
+    </View>
+  );
+}
 
 export default function ArenaScreen() {
   const insets = useSafeAreaInsets();
@@ -28,6 +42,12 @@ export default function ArenaScreen() {
   const daily = catalog.daily[primaryGoal] || DAILY_COPY[primaryGoal] || DAILY_COPY.walk;
   const span = weight.start - weight.goal;
   const toGoal = span <= 0 ? 1 : Math.max(0.08, Math.min(1, (weight.start - weight.current) / span));
+  const today = utcDay();
+  const eaten = useMemo(() => {
+    const items = user?.fuelLog?.date === today ? user.fuelLog.items || [] : [];
+    return sumLog(items).kcal;
+  }, [user, today]);
+  const target = useMemo(() => dailyKcalTarget(user), [user]);
 
   const openProfile = async () => {
     await lightTap();
@@ -37,6 +57,11 @@ export default function ArenaScreen() {
   const openDaily = async () => {
     await lightTap();
     router.replace("/workouts");
+  };
+
+  const openCalories = async () => {
+    await lightTap();
+    router.replace("/calories");
   };
 
   return (
@@ -68,22 +93,31 @@ export default function ArenaScreen() {
           </View>
         </View>
 
-        <Pressable onPress={openDaily} className="mt-6 items-center rounded-[28px] bg-mint px-5 py-7">
-          <Text className="text-[13px] font-medium tracking-[1px] text-accent">Сегодня</Text>
-          <Text className="mt-1 text-[22px] font-semibold text-ink">{daily.title}</Text>
-          <Text className="mt-1 text-[14px] text-mute">{daily.hint}</Text>
-          <View className="mt-5 items-center justify-center">
-            <CountdownRing progress={day.progress} />
-            <View className="absolute items-center justify-center" style={{ width: 148, height: 148 }}>
-              <Text className="text-[32px] font-semibold tabular-nums text-ink">{day.label}</Text>
-            </View>
+        <Pressable onPress={openCalories} className="mt-5 rounded-[28px] bg-mint px-4 py-5">
+          <View className="flex-row">
+            <StatCell label="Цель" value={target.kcal} />
+            <StatCell label="Съедено" value={eaten} />
           </View>
-          <View className="mt-5 rounded-full bg-canvas/70 px-5 py-2.5">
-            <Text className="text-[13px] font-medium text-ink">Открыть тренинг</Text>
+          <Text className="mt-3 text-center text-[11px] text-mute">ккал · тап — дневник</Text>
+        </Pressable>
+
+        <Pressable onPress={openDaily} className="mt-3 flex-row items-center rounded-[24px] bg-mint px-4 py-3.5">
+          <View className="mr-3 flex-1">
+            <Text className="text-[11px] font-medium tracking-[1px] text-accent">Сегодня</Text>
+            <Text className="mt-0.5 text-[16px] font-semibold text-ink">{daily.title}</Text>
+            <Text className="mt-0.5 text-[12px] leading-4 text-mute" numberOfLines={2}>
+              {daily.hint}
+            </Text>
+          </View>
+          <View className="items-center justify-center">
+            <CountdownRing progress={day.progress} size={RING} />
+            <View className="absolute items-center justify-center" style={{ width: RING, height: RING }}>
+              <Text className="text-[13px] font-semibold tabular-nums text-ink">{day.label}</Text>
+            </View>
           </View>
         </Pressable>
 
-        <View className="mt-4 rounded-[28px] bg-card px-5 py-4">
+        <View className="mt-3 rounded-[28px] bg-card px-5 py-4">
           <View className="mb-2 flex-row items-center justify-between">
             <Text className="text-[13px] text-mute">
               Вес: <Text className="font-semibold text-ink">{Number(weight.current).toFixed(1)} кг</Text>
@@ -97,13 +131,13 @@ export default function ArenaScreen() {
           </View>
         </View>
 
-        <View className="mt-4 rounded-[28px] bg-mint px-4 py-6">
-          <Text className="mb-5 text-center text-[18px] font-semibold text-ink">Достижения</Text>
+        <View className="mt-3 rounded-[28px] bg-mint px-4 py-5">
+          <Text className="mb-4 text-center text-[16px] font-semibold text-ink">Достижения</Text>
           <View className="flex-row justify-around">
             {BADGES.map((badge) => (
               <Pressable key={badge.id} onPress={openDaily} className="items-center">
-                <View className="h-14 w-14 items-center justify-center rounded-full bg-canvas">
-                  <badge.Icon size={24} color="#2E7D32" strokeWidth={1.6} />
+                <View className="h-12 w-12 items-center justify-center rounded-full bg-canvas">
+                  <badge.Icon size={22} color="#2E7D32" strokeWidth={1.6} />
                 </View>
                 <Text className="mt-2 text-[12px] font-medium text-ink">{badge.title}</Text>
               </Pressable>

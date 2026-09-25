@@ -220,6 +220,7 @@ function adminUserView(record) {
     heightCm: record.heightCm || null,
     birthDate: record.birthDate || null,
     age: record.age || null,
+    sex: record.sex === "male" || record.sex === "female" ? record.sex : null,
     goals: Array.isArray(record.goals) ? record.goals : [],
     daysPerWeek: record.daysPerWeek || null,
     weight: record.weight || null,

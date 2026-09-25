@@ -6,7 +6,7 @@ import { lightTap } from "../../lib/haptics";
 import { Field, PillButton, PrimaryButton, SectionLabel, StatRow } from "../../ui/kit";
 import { useAuth } from "../auth/AuthContext";
 import { BirthdayCalendar } from "../onboarding/BirthdayCalendar";
-import { GOALS, GOAL_LABELS } from "../onboarding/catalog";
+import { GOALS, GOAL_LABELS, SEX_LABELS, SEX_OPTIONS } from "../onboarding/catalog";
 import { ValueSlider } from "../onboarding/ValueSlider";
 
 const HISTORY = [
@@ -32,6 +32,7 @@ function seedForm(user) {
     weight: Number(user?.weight?.current) || 72,
     goal: Number(user?.weight?.goal) || 68,
     heightCm: Number(user?.heightCm) || 170,
+    sex: user?.sex === "male" || user?.sex === "female" ? user.sex : "",
     birthDate: user?.birthDate || "2000-01-15",
     goals: user?.goals?.length ? [...user.goals] : ["walk"],
     daysPerWeek: Number(user?.daysPerWeek) || 3,
@@ -85,6 +86,10 @@ export default function ProfileScreen() {
       setError("Выбери хотя бы одно направление");
       return;
     }
+    if (form.sex !== "male" && form.sex !== "female") {
+      setError("Укажи пол");
+      return;
+    }
     setBusy(true);
     try {
       await patch({
@@ -95,6 +100,7 @@ export default function ProfileScreen() {
         weight: form.weight,
         goal: form.goal,
         heightCm: form.heightCm,
+        sex: form.sex,
         birthDate: form.birthDate,
         goals: form.goals,
         daysPerWeek: form.daysPerWeek,
@@ -166,6 +172,24 @@ export default function ProfileScreen() {
               unit="см"
               onChange={(value) => setForm((prev) => ({ ...prev, heightCm: value }))}
             />
+            <SectionLabel>Пол</SectionLabel>
+            <View className="mb-6 flex-row gap-3">
+              {SEX_OPTIONS.map((item) => {
+                const on = form.sex === item.id;
+                return (
+                  <Pressable
+                    key={item.id}
+                    onPress={async () => {
+                      await lightTap();
+                      setForm((prev) => ({ ...prev, sex: item.id }));
+                    }}
+                    className={`h-14 flex-1 items-center justify-center rounded-full ${on ? "bg-mint" : "bg-card"}`}
+                  >
+                    <Text className="text-[18px] font-semibold text-ink">{item.title}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
             <SectionLabel>Дата рождения</SectionLabel>
             <BirthdayCalendar value={form.birthDate} onChange={(value) => setForm((prev) => ({ ...prev, birthDate: value }))} />
             <View className="mt-6">
@@ -205,16 +229,13 @@ export default function ProfileScreen() {
               <View className="rounded-[28px] bg-card px-5 py-1">
                 <StatRow label="Возраст" value={user?.age ? `${user.age}` : "—"} />
                 <StatRow label="Рост" value={user?.heightCm ? `${user.heightCm} см` : "—"} />
+                <StatRow label="Пол" value={SEX_LABELS[user?.sex] || "—"} />
                 <StatRow
                   label="Вес"
                   value={weight ? `${Number(weight.current).toFixed(1)} → ${Number(weight.goal).toFixed(1)} кг` : "—"}
                 />
                 <StatRow label="Цели" value={goalNames.length ? goalNames.join(", ") : "—"} />
-                <StatRow
-                  last
-                  label="В неделю"
-                  value={user?.daysPerWeek ? `${user.daysPerWeek} ${weekLabel(user.daysPerWeek)}` : "—"}
-                />
+                <StatRow last label="В неделю" value={user?.daysPerWeek ? `${user.daysPerWeek} ${weekLabel(user.daysPerWeek)}` : "—"} />
               </View>
             </View>
 

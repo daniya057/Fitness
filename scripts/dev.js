@@ -12,4 +12,4 @@ function run(command, args) {
 }
 
 run("node", ["server/auth-server.js"]);
-run("npx", ["expo", "start", "--web", `--port`, String(LINKS.webPort)]);
+run("npx", ["expo", "start", "--web", "--host", "lan", "--port", String(LINKS.webPort)]);

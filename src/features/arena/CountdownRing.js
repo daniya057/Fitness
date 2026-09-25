@@ -1,35 +1,33 @@
 import { View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 
-const SIZE = 148;
-const STROKE = 11;
-const RADIUS = (SIZE - STROKE) / 2;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-
-export function CountdownRing({ progress }) {
+export function CountdownRing({ progress, size = 148 }) {
+  const stroke = size < 100 ? 7 : 11;
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
   const clamped = Math.max(0.04, Math.min(1, progress));
-  const offset = CIRCUMFERENCE * (1 - clamped);
+  const offset = circumference * (1 - clamped);
 
   return (
-    <View style={{ width: SIZE, height: SIZE }}>
-      <Svg width={SIZE} height={SIZE} style={{ transform: [{ rotate: "-90deg" }] }}>
+    <View style={{ width: size, height: size }}>
+      <Svg width={size} height={size} style={{ transform: [{ rotate: "-90deg" }] }}>
         <Circle
-          cx={SIZE / 2}
-          cy={SIZE / 2}
-          r={RADIUS}
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
           stroke="#E8F5E9"
-          strokeWidth={STROKE}
+          strokeWidth={stroke}
           fill="none"
         />
         <Circle
-          cx={SIZE / 2}
-          cy={SIZE / 2}
-          r={RADIUS}
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
           stroke="#2E7D32"
-          strokeWidth={STROKE}
+          strokeWidth={stroke}
           fill="none"
           strokeLinecap="round"
-          strokeDasharray={`${CIRCUMFERENCE} ${CIRCUMFERENCE}`}
+          strokeDasharray={`${circumference} ${circumference}`}
           strokeDashoffset={offset}
         />
       </Svg>

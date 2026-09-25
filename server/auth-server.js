@@ -3,6 +3,7 @@ const fs = require("fs");
 const http = require("http");
 const path = require("path");
 const { LINKS, loadEnv } = require("./env");
+const { lookupBarcode, searchNutrition } = require("./nutrition");
 
 loadEnv();
 
@@ -81,6 +82,7 @@ function userPath(id) {
 }
 
 const ALLOWED_GOALS = ["strength", "run", "nutrition", "walk", "stretch", "bike"];
+const ALLOWED_SEX = ["male", "female"];
 
 function ageFromBirthDate(iso) {
   const birth = new Date(`${iso}T00:00:00`);
@@ -130,6 +132,13 @@ function applyQuizFields(record, body, { keepStart }) {
     return "Дни недели — от 1 до 7";
   }
 
+  const sex = String(body.sex || "").trim();
+  if (ALLOWED_SEX.includes(sex)) {
+    record.sex = sex;
+  } else if (!keepStart || !ALLOWED_SEX.includes(record.sex)) {
+    return "Укажи пол";
+  }
+
   const start = keepStart && Number.isFinite(Number(record.weight?.start))
     ? Number(record.weight.start)
     : current;
@@ -148,7 +157,59 @@ function applyQuizFields(record, body, { keepStart }) {
   return null;
 }
 
+function utcDay() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function emptyFuelLog() {
+  return { date: utcDay(), items: [] };
+}
+
+function ensureFuelLog(record) {
+  if (!record.fuelLog || record.fuelLog.date !== utcDay() || !Array.isArray(record.fuelLog.items)) {
+    record.fuelLog = emptyFuelLog();
+    return true;
+  }
+  return false;
+}
+
+function ensureDayLogs(record) {
+  return ensureFuelLog(record);
+}
+
+function sanitizeFuelLog(incoming) {
+  const today = utcDay();
+  if (!incoming || typeof incoming !== "object" || incoming.date !== today) {
+    return emptyFuelLog();
+  }
+  const raw = Array.isArray(incoming.items) ? incoming.items.slice(0, 80) : [];
+  const items = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") {
+      continue;
+    }
+    const foodId = String(item.foodId || "").trim().slice(0, 80);
+    const label = String(item.label || "").trim().slice(0, 80);
+    if (!foodId && !label) {
+      continue;
+    }
+    const grams = clamp(Number(item.grams) || 0, 0, 5000);
+    items.push({
+      id: String(item.id || "").trim().slice(0, 40) || `log-${items.length + 1}`,
+      foodId,
+      grams,
+      label: label || foodId,
+      kcal: clamp(Number(item.kcal) || 0, 0, 20000),
+      protein: clamp(Number(item.protein) || 0, 0, 2000),
+      fat: clamp(Number(item.fat) || 0, 0, 2000),
+      carbs: clamp(Number(item.carbs) || 0, 0, 2000),
+    });
+  }
+  return { date: today, items };
+}
+
 function publicUser(record) {
+  ensureDayLogs(record);
   return {
     id: record.id,
     name: record.name,
@@ -160,8 +221,10 @@ function publicUser(record) {
     heightCm: record.heightCm || null,
     birthDate: record.birthDate || null,
     age: record.age || null,
+    sex: ALLOWED_SEX.includes(record.sex) ? record.sex : null,
     goals: Array.isArray(record.goals) ? record.goals : [],
     daysPerWeek: record.daysPerWeek || null,
+    fuelLog: record.fuelLog,
     createdAt: record.createdAt,
   };
 }
@@ -249,6 +312,7 @@ const server = http.createServer(async (req, res) => {
         status: "Двигаюсь мягко",
         streak: 0,
         onboardingDone: false,
+        sex: null,
         heightCm: null,
         birthDate: null,
         age: null,
@@ -259,6 +323,7 @@ const server = http.createServer(async (req, res) => {
           current: 70,
           goal: 70,
         },
+        fuelLog: { date: now.slice(0, 10), items: [] },
         tokens: [token],
         createdAt: now,
         updatedAt: now,
@@ -304,6 +369,10 @@ const server = http.createServer(async (req, res) => {
         send(res, 401, { error: "Нужно войти" });
         return;
       }
+      if (ensureDayLogs(record)) {
+        record.updatedAt = new Date().toISOString();
+        saveUser(record);
+      }
       send(res, 200, { user: publicUser(record) });
       return;
     }
@@ -339,6 +408,15 @@ const server = http.createServer(async (req, res) => {
           return;
         }
       }
+
+      if (Object.prototype.hasOwnProperty.call(body, "fuelLog")) {
+        record.fuelLog = sanitizeFuelLog(body.fuelLog);
+      } else {
+        ensureFuelLog(record);
+      }
+
+      delete record.stepLog;
+      delete record.stepGoal;
 
       record.updatedAt = new Date().toISOString();
       saveUser(record);
@@ -415,6 +493,32 @@ const server = http.createServer(async (req, res) => {
 
     if (route === "GET /" || route === "GET /health") {
       send(res, 200, { ok: true, users: "data/users" });
+      return;
+    }
+
+    const barcodeMatch = url.pathname.match(/^\/barcode\/(\d{8,14})$/);
+    if (req.method === "GET" && barcodeMatch) {
+      try {
+        const food = await lookupBarcode(barcodeMatch[1]);
+        if (!food) {
+          send(res, 404, { error: "Не нашли в базе, поищи названием" });
+          return;
+        }
+        send(res, 200, { food });
+      } catch {
+        send(res, 502, { error: "База штрихкодов не ответила" });
+      }
+      return;
+    }
+
+    if (route === "GET /foods/search") {
+      const q = String(url.searchParams.get("q") || "").trim();
+      try {
+        const foods = await searchNutrition(q);
+        send(res, 200, { foods });
+      } catch {
+        send(res, 502, { error: "Поиск по базам не ответил" });
+      }
       return;
     }
 

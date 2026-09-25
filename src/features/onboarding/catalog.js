@@ -1,3 +1,10 @@
+export const SEX_OPTIONS = [
+  { id: "male", title: "м" },
+  { id: "female", title: "ж" },
+];
+
+export const SEX_LABELS = { male: "м", female: "ж" };
+
 export const GOALS = [
   { id: "strength", title: "Силовые", hint: "Приседания, корпус" },
   { id: "run", title: "Бег", hint: "Лёгкий кардио" },

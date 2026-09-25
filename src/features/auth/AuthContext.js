@@ -10,22 +10,24 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let alive = true;
-    const saved = readToken();
-    if (!saved) {
-      setBooting(false);
-      return undefined;
-    }
-    api("/me", { token: saved })
-      .then((data) => {
+    readToken()
+      .then((saved) => {
         if (!alive) {
-          return;
+          return null;
         }
-        setToken(saved);
-        setUser(data.user);
+        if (!saved) {
+          setBooting(false);
+          return null;
+        }
+        return api("/me", { token: saved }).then((data) => {
+          if (!alive) {
+            return;
+          }
+          setToken(saved);
+          setUser(data.user);
+        });
       })
-      .catch(() => {
-        writeToken("");
-      })
+      .catch(() => writeToken(""))
       .finally(() => {
         if (alive) {
           setBooting(false);
@@ -43,14 +45,14 @@ export function AuthProvider({ children }) {
       booting,
       async register(payload) {
         const data = await api("/register", { method: "POST", body: payload });
-        writeToken(data.token);
+        await writeToken(data.token);
         setToken(data.token);
         setUser(data.user);
         return data.user;
       },
       async login(payload) {
         const data = await api("/login", { method: "POST", body: payload });
-        writeToken(data.token);
+        await writeToken(data.token);
         setToken(data.token);
         setUser(data.user);
         return data.user;
@@ -61,7 +63,7 @@ export function AuthProvider({ children }) {
         } catch {
           // Выходим даже если сеть моргнула.
         }
-        writeToken("");
+        await writeToken("");
         setToken("");
         setUser(null);
       },

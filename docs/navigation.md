@@ -10,10 +10,10 @@
 
 | Вкладка | Файл | Смысл |
 |---|---|---|
-| Арена | `src/features/arena/arena.js` | Серия, задание дня (кольцо), вес, достижения |
+| Арена | `src/features/arena/arena.js` | Серия, ккал, компактный дейлик, вес, достижения |
 | Тренинг | `src/features/workouts/workouts.js` | Карточки активностей на сегодня |
 | Награды | `src/features/rewards/rewards.js` | Лидерборд 24ч и ачивки |
-| Топливо | `src/features/calories/calories.js` | Баланс энергии без вины |
+| Топливо | `src/features/calories/calories.js` | Дневник КБЖУ, плашка нормы, счётчик порции, сканер |
 | Профиль | `src/features/profile/profile.js` | Карточка, правка данных, история |
 
 Маршруты: `app/(tabs)/`.

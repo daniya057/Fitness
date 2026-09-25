@@ -13,6 +13,7 @@
 | [database.md](database.md) | Схема Postgres, RLS, Storage |
 | [auth.md](auth.md) | Вход приложения и админка |
 | [../keys/README.md](../keys/README.md) | Ссылки сайта/API и ключи |
+| [ios.md](ios.md) | Поставить на iPhone: Expo Go, EAS, лимит Safari |
 | [navigation.md](navigation.md) | Вкладки и экраны |
 | [screens/arena.md](screens/arena.md) | Экран Арена |
 | [screens/tabs.md](screens/tabs.md) | Пять вкладок, портрет |
@@ -28,6 +29,7 @@
 | Файл | О чём |
 |---|---|
 | [mechanics/streaks.md](mechanics/streaks.md) | Прощающая серия, щиты, Edge Function |
+| [mechanics/fuel.md](mechanics/fuel.md) | Дневник калорий на вкладке Топливо |
 | [mechanics/quick-start.md](mechanics/quick-start.md) | 10 секунд, «Засчитать разминку» |
 | [mechanics/daily.md](mechanics/daily.md) | Ежедневные челленджи |
 | [mechanics/avatar.md](mechanics/avatar.md) | Аватар, XP, уровни, бейджи |

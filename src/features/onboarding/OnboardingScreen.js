@@ -5,7 +5,7 @@ import { lightTap } from "../../lib/haptics";
 import { GhostButton, PrimaryButton, ScreenHeader, SectionLabel } from "../../ui/kit";
 import { useAuth } from "../auth/AuthContext";
 import { BirthdayCalendar } from "./BirthdayCalendar";
-import { GOALS } from "./catalog";
+import { GOALS, SEX_OPTIONS } from "./catalog";
 import { ValueSlider } from "./ValueSlider";
 
 export default function OnboardingScreen() {
@@ -15,6 +15,7 @@ export default function OnboardingScreen() {
   const [weight, setWeight] = useState(72);
   const [goal, setGoal] = useState(68);
   const [heightCm, setHeightCm] = useState(170);
+  const [sex, setSex] = useState("");
   const [birthDate, setBirthDate] = useState("2000-01-15");
   const [goals, setGoals] = useState(["walk"]);
   const [daysPerWeek, setDaysPerWeek] = useState(3);
@@ -26,8 +27,13 @@ export default function OnboardingScreen() {
     setGoals((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
   };
 
-  const next = () => {
+  const next = async () => {
     setError("");
+    if (sex !== "male" && sex !== "female") {
+      setError("Укажи пол — от этого считается ориентир калорий");
+      return;
+    }
+    await lightTap();
     setStep(2);
   };
 
@@ -48,6 +54,7 @@ export default function OnboardingScreen() {
         weight,
         goal,
         heightCm,
+        sex,
         birthDate,
         goals,
         daysPerWeek,
@@ -76,8 +83,28 @@ export default function OnboardingScreen() {
             <ValueSlider label="Текущий вес" value={weight} min={40} max={160} step={0.5} unit="кг" onChange={setWeight} />
             <ValueSlider label="Желаемый вес" value={goal} min={40} max={160} step={0.5} unit="кг" onChange={setGoal} />
             <ValueSlider label="Рост" value={heightCm} min={140} max={210} step={1} unit="см" onChange={setHeightCm} />
+            <SectionLabel>Пол</SectionLabel>
+            <View className="mb-6 flex-row gap-3">
+              {SEX_OPTIONS.map((item) => {
+                const on = sex === item.id;
+                return (
+                  <Pressable
+                    key={item.id}
+                    onPress={async () => {
+                      await lightTap();
+                      setSex(item.id);
+                      setError("");
+                    }}
+                    className={`h-14 flex-1 items-center justify-center rounded-full ${on ? "bg-mint" : "bg-card"}`}
+                  >
+                    <Text className="text-[18px] font-semibold text-ink">{item.title}</Text>
+                  </Pressable>
+                );
+              })}
+            </View>
             <SectionLabel>Дата рождения</SectionLabel>
             <BirthdayCalendar value={birthDate} onChange={setBirthDate} />
+            {error ? <Text className="mb-3 text-[14px] font-medium text-accent">{error}</Text> : null}
             <View className="mt-8">
               <PrimaryButton label="Дальше" onPress={next} />
             </View>
