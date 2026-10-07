@@ -26,12 +26,12 @@ export const DAILY_COPY = {
 };
 
 export const MISSIONS_BY_GOAL = {
-  strength: { id: "strength", title: "Силовая разминка", time: "8 мин", xp: 16 },
-  run: { id: "run", title: "Лёгкий бег", time: "10 мин", xp: 18 },
-  nutrition: { id: "nutrition", title: "Спокойный приём пищи", time: "15 мин", xp: 10 },
-  walk: { id: "walk", title: "Тихая прогулка", time: "12 мин", xp: 14 },
-  stretch: { id: "stretch", title: "Растяжка", time: "6 мин", xp: 12 },
-  bike: { id: "bike", title: "Велосессия", time: "12 мин", xp: 16 },
+  strength: { id: "strength", title: "Силовая разминка", time: "8 мин" },
+  run: { id: "run", title: "Лёгкий бег", time: "10 мин" },
+  nutrition: { id: "nutrition", title: "Спокойный приём пищи", time: "15 мин" },
+  walk: { id: "walk", title: "Тихая прогулка", time: "12 мин" },
+  stretch: { id: "stretch", title: "Растяжка", time: "6 мин" },
+  bike: { id: "bike", title: "Велосессия", time: "12 мин" },
 };
 
 export function ageFromBirthDate(iso) {

@@ -9,6 +9,8 @@ const SOURCE_LABEL = {
   off: "магазин",
   "off-ru": "магазин",
   usda: "USDA",
+  guess: "ориентир",
+  list: "Barcode List",
 };
 
 export function sourceLabel(food) {
@@ -31,48 +33,148 @@ export function mergeFoodLists(local, remote) {
   const extra = [];
   for (const item of remote || []) {
     const name = String(item.name || "").toLowerCase().trim();
-    if (!name || seen.has(name)) {
+    if (!name || seen.has(name) || isPantryName(item.name)) {
       continue;
     }
     seen.add(name);
     extra.push(item);
   }
-  return [...(local || []), ...extra].slice(0, 40);
+  const merged = [...(local || []), ...extra];
+  return extra.length ? merged.slice(0, 40) : merged;
 }
 
 export function utcDay(date = new Date()) {
   return date.toISOString().slice(0, 10);
 }
 
-function nameMatches(name, needle) {
-  const hay = String(name || "").toLowerCase();
-  if (!needle) {
-    return true;
+function foldName(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/ё/g, "е")
+    .replace(/[^a-zа-я0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const WORD_ENDINGS = [
+  "ами", "ями", "ого", "его", "ыми", "ими",
+  "ая", "яя", "ое", "ее", "ые", "ие", "ый", "ий", "ой",
+  "ов", "ев", "ам", "ям", "ах", "ях", "ом", "ем",
+  "ок", "ек", "ки", "ка", "цы", "ец",
+  "у", "ю", "а", "я", "ы", "и", "е", "о",
+];
+
+function extraNeedles(query) {
+  const list = [];
+  if (query.includes("гречн")) {
+    list.push("гречк");
   }
-  if (hay.includes(needle)) {
-    return true;
+  if (query.includes("картош")) {
+    list.push("картоф");
   }
-  const stem = needle.length >= 5 ? needle.slice(0, -1) : needle;
-  return stem.length >= 4 && hay.includes(stem);
+  if (query.startsWith("творог")) {
+    list.push("творож");
+  }
+  return list;
+}
+
+function stemsOf(query) {
+  if (query.length <= 3) {
+    return [];
+  }
+  const stems = [];
+  for (const ending of WORD_ENDINGS) {
+    if (!query.endsWith(ending)) {
+      continue;
+    }
+    const stem = query.slice(0, -ending.length);
+    const min = ending.length === 1 ? 3 : 4;
+    if (stem.length >= min) {
+      stems.push(stem);
+    }
+  }
+  return stems;
+}
+
+function scoreNeedle(folded, words, needle) {
+  if (!needle || !words.length) {
+    return 9;
+  }
+  if (words[0].startsWith(needle)) {
+    return 0;
+  }
+  if (words.some((word) => word === needle)) {
+    return 1;
+  }
+  if (words.some((word) => word.startsWith(needle))) {
+    return 2;
+  }
+  return 9;
+}
+
+function matchScore(name, query) {
+  const folded = foldName(name);
+  const q = foldName(query);
+  if (!q || !folded) {
+    return 9;
+  }
+  const words = folded.split(" ").filter(Boolean);
+  let best = 9;
+  for (const needle of [q, ...extraNeedles(q)]) {
+    best = Math.min(best, scoreNeedle(folded, words, needle));
+  }
+  if (q.length <= 3) {
+    return best;
+  }
+  if (words.some((word) => stemsOf(q).some((stem) => word.startsWith(stem)))) {
+    best = Math.min(best, 3);
+  }
+  return best;
 }
 
 export function foodById(id) {
   return data.foods.find((item) => item.id === id) || null;
 }
 
+export function isPantryName(name) {
+  const n = String(name || "").toLowerCase();
+  if (!n) {
+    return true;
+  }
+  if (/^мука(?:\s|$)|\bflour\b|^крахмал|\bstarch\b|какао-порошок|cocoa powder/.test(n)) {
+    return true;
+  }
+  if (/яичный порошок|^меланж$|^жир |спирт этиловый|yeast|дрожж/.test(n)) {
+    return true;
+  }
+  if (/макарон/.test(n) && !/варен|cooked/.test(n)) {
+    return true;
+  }
+  if ((/^рис /.test(n) && !/варен| с /.test(n)) || (/^rice,/.test(n) && !/cooked|boiled/.test(n)) || /, raw\b|\buncooked\b/.test(n)) {
+    return true;
+  }
+  return false;
+}
+
 export function searchFoods(query, categoryId) {
-  const needle = String(query || "")
-    .trim()
-    .toLowerCase();
-  return FOODS.filter((item) => {
+  const needle = foldName(query);
+  const list = FOODS.filter((item) => {
     if (categoryId && categoryId !== "all" && item.category !== categoryId) {
       return false;
     }
     if (!needle) {
       return Boolean(categoryId && categoryId !== "all");
     }
-    return nameMatches(item.name, needle);
-  }).slice(0, 36);
+    return matchScore(item.name, needle) < 9 && !isPantryName(item.name);
+  });
+  if (!needle) {
+    return list;
+  }
+  return list
+    .map((item, index) => ({ item, index, score: matchScore(item.name, needle) }))
+    .sort((a, b) => a.score - b.score || a.index - b.index)
+    .map((row) => row.item)
+    .slice(0, 36);
 }
 
 export function round1(value) {

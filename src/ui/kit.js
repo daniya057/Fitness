@@ -56,13 +56,15 @@ export function PillButton({ label, onPress, tone = "ghost" }) {
   );
 }
 
-export function Field({ label, ...props }) {
+export function Field({ label, inputName, ...props }) {
   return (
     <View className="mb-4">
       <Text className="mb-2 text-[12px] font-medium tracking-[0.8px] text-mute">{label}</Text>
       <TextInput
         className="rounded-2xl bg-card px-4 py-3.5 text-[16px] text-ink"
         placeholderTextColor="#9E9E9E"
+        nativeID={inputName}
+        {...(inputName ? { name: inputName } : {})}
         {...props}
       />
     </View>

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { Check } from "lucide-react-native";
+import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { lightTap } from "../../lib/haptics";
 import { Field, PillButton, PrimaryButton, SectionLabel, StatRow } from "../../ui/kit";
+import { AchievementPlaque } from "../achievements/plaque";
 import { useAuth } from "../auth/AuthContext";
 import { BirthdayCalendar } from "../onboarding/BirthdayCalendar";
 import { GOALS, GOAL_LABELS, SEX_LABELS, SEX_OPTIONS } from "../onboarding/catalog";
@@ -41,6 +43,7 @@ function seedForm(user) {
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const { user, logout, patch } = useAuth();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState(() => seedForm(user));
@@ -224,6 +227,14 @@ export default function ProfileScreen() {
           </View>
         ) : (
           <>
+            <AchievementPlaque
+              user={user}
+              onPress={async () => {
+                await lightTap();
+                router.replace("/rewards");
+              }}
+            />
+
             <View className="mt-8">
               <SectionLabel>Из опросника</SectionLabel>
               <View className="rounded-[28px] bg-card px-5 py-1">

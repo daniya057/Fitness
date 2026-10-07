@@ -22,6 +22,8 @@ const {
 
 const PORT = Number(process.env.AUTH_PORT) || LINKS.apiPort;
 const USERS_DIR = path.join(__dirname, "..", "data", "users");
+const ACHIEVEMENTS_PATH = path.join(__dirname, "..", "data", "content", "achievements.json");
+const WORKOUTS_PATH = path.join(__dirname, "..", "data", "content", "workouts.json");
 
 fs.mkdirSync(USERS_DIR, { recursive: true });
 
@@ -165,23 +167,410 @@ function emptyFuelLog() {
   return { date: utcDay(), items: [] };
 }
 
+function countedFuelItems(items) {
+  const times = (Array.isArray(items) ? items : [])
+    .map((item) => Date.parse(item?.loggedAt))
+    .filter((at) => Number.isFinite(at))
+    .sort((a, b) => a - b);
+  let count = 0;
+  let last = 0;
+  for (const at of times) {
+    if (!count || at - last >= FUEL_GAP_MS) {
+      count += 1;
+      last = at;
+    }
+  }
+  return count;
+}
+
 function ensureFuelLog(record) {
   if (!record.fuelLog || record.fuelLog.date !== utcDay() || !Array.isArray(record.fuelLog.items)) {
     record.fuelLog = emptyFuelLog();
     return true;
   }
-  return false;
+  const items = record.fuelLog.items;
+  if (!items.some((item) => !item?.loggedAt)) {
+    return false;
+  }
+  const missing = items.filter((item) => !item?.loggedAt).length;
+  const now = Date.now();
+  let index = 0;
+  record.fuelLog = {
+    date: record.fuelLog.date,
+    items: items.map((item) => {
+      if (item?.loggedAt) {
+        return item;
+      }
+      const at = new Date(now - (missing - 1 - index) * FUEL_GAP_MS).toISOString();
+      index += 1;
+      return { ...item, loggedAt: at };
+    }),
+  };
+  return true;
 }
 
 function ensureDayLogs(record) {
   return ensureFuelLog(record);
 }
 
-function sanitizeFuelLog(incoming) {
+const START_FREEZES = 1;
+
+function ensureFreezes(record) {
+  if (record.freezesLeft == null || record.freezesLeft === "") {
+    record.freezesLeft = START_FREEZES;
+    return true;
+  }
+  const next = clamp(Math.round(Number(record.freezesLeft) || 0), 0, 20);
+  if (next !== Number(record.freezesLeft)) {
+    record.freezesLeft = next;
+    return true;
+  }
+  record.freezesLeft = next;
+  return false;
+}
+
+function dayGap(from, to) {
+  const start = Date.parse(`${from}T00:00:00Z`);
+  const end = Date.parse(`${to}T00:00:00Z`);
+  if (!Number.isFinite(start) || !Number.isFinite(end)) {
+    return 0;
+  }
+  return Math.round((end - start) / 86400000);
+}
+
+const ACTIVITY_KINDS = ["strength", "run", "nutrition", "walk", "stretch", "bike"];
+const MIN_ACTIVITY_SEC = 60;
+const FUEL_GAP_MS = 20000;
+
+function noteShieldSave(record) {
+  const today = utcDay();
+  if (!record.lastActivityDate || record.lastActivityDate === today || record.shieldSavedDate === today) {
+    return false;
+  }
+  const gap = dayGap(record.lastActivityDate, today);
+  if (gap !== 2 || (Number(record.freezesLeft) || 0) < 1) {
+    return false;
+  }
+  record.freezesLeft = clamp((Number(record.freezesLeft) || 0) - 1, 0, 20);
+  record.shieldUsed = true;
+  record.shieldSavedDate = today;
+  return true;
+}
+
+function applyActivity(record) {
+  const today = utcDay();
+  if (record.lastActivityDate === today) {
+    return false;
+  }
+  const gap = record.lastActivityDate ? dayGap(record.lastActivityDate, today) : 0;
+  if (gap > 1) {
+    record.returned = true;
+    record.cleanStreak = 1;
+  } else {
+    record.cleanStreak = clamp((Number(record.cleanStreak) || 0) + 1, 1, 10000);
+  }
+  record.lastActivityDate = today;
+  record.streak = clamp((Number(record.streak) || 0) + 1, 1, 10000);
+  record.activityCount = clamp((Number(record.activityCount) || 0) + 1, 0, 100000);
+  return true;
+}
+
+function rememberActivity(record, body) {
+  const kind = String(body?.activityKind || "");
+  if (ACTIVITY_KINDS.includes(kind)) {
+    if (!Array.isArray(record.kindsDone)) {
+      record.kindsDone = [];
+    }
+    if (!record.kindsDone.includes(kind)) {
+      record.kindsDone.push(kind);
+    }
+    if (!Array.isArray(record.todayKinds)) {
+      record.todayKinds = [];
+    }
+    if (!record.todayKinds.includes(kind)) {
+      record.todayKinds.push(kind);
+    }
+  }
+  const sessionId = String(body?.activitySession || "").trim().slice(0, 80);
+  if (sessionId) {
+    if (!Array.isArray(record.todaySessions)) {
+      record.todaySessions = [];
+    }
+    if (!record.todaySessions.includes(sessionId)) {
+      record.todaySessions.push(sessionId);
+    }
+  }
+  const hour = Number(body?.activityHour);
+  if (Number.isInteger(hour) && hour >= 0 && hour <= 23) {
+    if (hour < 9) {
+      record.dawn = true;
+    }
+    if (hour >= 21) {
+      record.late = true;
+    }
+  }
+  const weekday = Number(body?.activityWeekday);
+  if (weekday === 0 || weekday === 6) {
+    record.weekend = true;
+  }
+}
+
+function kindsDoneSet(record) {
+  return new Set(Array.isArray(record.kindsDone) ? record.kindsDone : []);
+}
+
+function loadDailyPool() {
+  try {
+    const data = JSON.parse(fs.readFileSync(WORKOUTS_PATH, "utf8"));
+    const sessions = Array.isArray(data.sessions) ? data.sessions : [];
+    return sessions
+      .filter((item) => item && item.daily && item.id)
+      .map((item) => {
+        const moves = Array.isArray(item.moves) ? item.moves : [];
+        const hint = moves
+          .slice(0, 2)
+          .map((move) => String(move.title || "").trim())
+          .filter(Boolean)
+          .join(" · ");
+        return {
+          id: item.id,
+          title: String(item.title || "Мини-тренировка"),
+          hint: hint || "Мини-тренировка",
+          rule: "session",
+          sessionId: item.id,
+          kind: item.kind || "",
+        };
+      });
+  } catch {
+    return [];
+  }
+}
+
+function dailyHash(text) {
+  let hash = 2166136261;
+  const value = String(text || "");
+  for (let i = 0; i < value.length; i += 1) {
+    hash = Math.imul(hash ^ value.charCodeAt(i), 16777619);
+  }
+  return hash >>> 0;
+}
+
+function pickDailyTasks(userId, day) {
+  const pool = loadDailyPool();
+  let state = dailyHash(`${userId}|${day}`);
+  const picked = [];
+  while (picked.length < 3 && pool.length) {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    const index = state % pool.length;
+    const [next] = pool.splice(index, 1);
+    picked.push(next);
+  }
+  return picked;
+}
+
+function ensureDaily(record) {
+  const today = utcDay();
+  const tasks = record.daily && Array.isArray(record.daily.tasks) ? record.daily.tasks : [];
+  const fresh = record.daily && record.daily.date === today && tasks.length > 0 && tasks.every((task) => task.rule === "session" && task.sessionId);
+  if (fresh) {
+    return false;
+  }
+  record.daily = {
+    date: today,
+    tasks: pickDailyTasks(record.id, today),
+    done: [],
+    shieldGranted: false,
+  };
+  record.todayKinds = [];
+  record.todaySessions = [];
+  return true;
+}
+
+function dailyTaskMet(record, task) {
+  if (task.rule === "session") {
+    return Array.isArray(record.todaySessions) && record.todaySessions.includes(task.sessionId);
+  }
+  if (task.rule === "any") {
+    return record.lastActivityDate === utcDay();
+  }
+  if (task.rule === "kind") {
+    return Array.isArray(record.todayKinds) && record.todayKinds.includes(task.kind);
+  }
+  if (task.rule === "fuel") {
+    const items = record.fuelLog && Array.isArray(record.fuelLog.items) ? record.fuelLog.items : [];
+    return countedFuelItems(items) >= (Number(task.need) || 1);
+  }
+  return false;
+}
+
+function scoreDaily(record) {
+  let changed = ensureDaily(record);
+  if (record.dailyDoneCount == null) {
+    record.dailyDoneCount = 0;
+    changed = true;
+  }
+  if (record.dailyClearDays == null) {
+    record.dailyClearDays = 0;
+    changed = true;
+  }
+  const tasks = Array.isArray(record.daily.tasks) ? record.daily.tasks : [];
+  const prev = new Set(Array.isArray(record.daily.done) ? record.daily.done : []);
+  const done = new Set(prev);
+  for (const task of tasks) {
+    if (dailyTaskMet(record, task)) {
+      done.add(task.id);
+    }
+  }
+  if (done.size !== prev.size) {
+    changed = true;
+  }
+  record.dailyDoneCount += [...done].filter((id) => !prev.has(id)).length;
+  record.daily.done = [...done];
+  if (!record.daily.shieldGranted && tasks.length > 0 && tasks.every((task) => done.has(task.id))) {
+    record.freezesLeft = clamp((Number(record.freezesLeft) || 0) + 1, 0, 20);
+    record.daily.shieldGranted = true;
+    record.dailyClearDays += 1;
+    changed = true;
+  }
+  return changed;
+}
+
+function loadAchievements() {
+  try {
+    const data = JSON.parse(fs.readFileSync(ACHIEVEMENTS_PATH, "utf8"));
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+function achievementMet(record, item) {
+  const need = Number(item.need) || 1;
+  if (item.rule === "streak") {
+    return (Number(record.streak) || 0) >= need;
+  }
+  if (item.rule === "activity") {
+    return (Number(record.activityCount) || 0) >= need;
+  }
+  if (item.rule === "onboarding") {
+    return Boolean(record.onboardingDone);
+  }
+  if (item.rule === "fuel") {
+    const items = record.fuelLog && Array.isArray(record.fuelLog.items) ? record.fuelLog.items : [];
+    return countedFuelItems(items) >= need;
+  }
+  if (item.rule === "clean") {
+    return !record.shieldUsed && (Number(record.cleanStreak) || 0) >= need;
+  }
+  if (item.rule === "return") {
+    return Boolean(record.returned);
+  }
+  if (item.rule === "kind") {
+    return kindsDoneSet(record).has(item.kind);
+  }
+  if (item.rule === "kinds") {
+    const done = kindsDoneSet(record);
+    return ACTIVITY_KINDS.every((id) => done.has(id));
+  }
+  if (item.rule === "dawn") {
+    return Boolean(record.dawn);
+  }
+  if (item.rule === "late") {
+    return Boolean(record.late);
+  }
+  if (item.rule === "weekend") {
+    return Boolean(record.weekend);
+  }
+  if (item.rule === "shieldSave") {
+    return Boolean(record.shieldSavedDate) && record.shieldSavedDate === record.lastActivityDate;
+  }
+  if (item.rule === "dailyCount") {
+    return (Number(record.dailyDoneCount) || 0) >= need;
+  }
+  if (item.rule === "dailyClear") {
+    return (Number(record.dailyClearDays) || 0) >= need;
+  }
+  return false;
+}
+
+function ensureAchievements(record) {
+  let seeded = false;
+  if (record.activityCount == null || record.activityCount === "") {
+    record.activityCount = Number(record.streak) || 0;
+    seeded = true;
+  }
+  if (record.shieldUsed == null) {
+    record.shieldUsed = (Number(record.freezesLeft) || 0) < START_FREEZES;
+    seeded = true;
+  }
+  if (record.cleanStreak == null || record.cleanStreak === "") {
+    const gap = record.lastActivityDate ? dayGap(record.lastActivityDate, utcDay()) : 99;
+    record.cleanStreak = gap <= 1 ? Number(record.streak) || 0 : 0;
+    seeded = true;
+  }
+  if (record.returned == null) {
+    record.returned = false;
+    seeded = true;
+  }
+  if (!Array.isArray(record.kindsDone)) {
+    record.kindsDone = [];
+    seeded = true;
+  }
+  if (noteShieldSave(record)) {
+    seeded = true;
+  }
+  if (scoreDaily(record)) {
+    seeded = true;
+  }
+  const catalog = loadAchievements().filter((item) => item && item.id);
+  const known = new Set(catalog.map((item) => item.id));
+  const prev = Array.isArray(record.achievements) ? record.achievements.filter((id) => known.has(id)) : [];
+  const earned = new Set(prev);
+  let changed = seeded || !Array.isArray(record.achievements) || prev.length !== record.achievements.length;
+  for (const item of catalog) {
+    if (earned.has(item.id)) {
+      continue;
+    }
+    if (achievementMet(record, item)) {
+      earned.add(item.id);
+      changed = true;
+    }
+  }
+  const next = [...earned];
+  if (next.length !== prev.length) {
+    changed = true;
+  }
+  record.achievements = next;
+  const count = clamp(Math.round(Number(record.activityCount) || 0), 0, 100000);
+  if (record.activityCount !== count) {
+    record.activityCount = count;
+    changed = true;
+  }
+  return changed;
+}
+
+function finiteNonNeg(value) {
+  const n = Math.round(Number(value));
+  if (!Number.isFinite(n) || n < 0) {
+    return 0;
+  }
+  return n;
+}
+
+function sanitizeFuelLog(incoming, previous) {
   const today = utcDay();
   if (!incoming || typeof incoming !== "object" || incoming.date !== today) {
     return emptyFuelLog();
   }
+  const prevAt = new Map();
+  if (previous && previous.date === today && Array.isArray(previous.items)) {
+    for (const item of previous.items) {
+      if (item?.id && typeof item.loggedAt === "string" && item.loggedAt) {
+        prevAt.set(item.id, item.loggedAt);
+      }
+    }
+  }
+  const now = new Date().toISOString();
   const raw = Array.isArray(incoming.items) ? incoming.items.slice(0, 80) : [];
   const items = [];
   for (const item of raw) {
@@ -193,16 +582,21 @@ function sanitizeFuelLog(incoming) {
     if (!foodId && !label) {
       continue;
     }
-    const grams = clamp(Number(item.grams) || 0, 0, 5000);
+    const grams = Math.round(Number(item.grams));
+    if (!Number.isFinite(grams) || grams < 1) {
+      continue;
+    }
+    const id = String(item.id || "").trim().slice(0, 40) || `log-${items.length + 1}`;
     items.push({
-      id: String(item.id || "").trim().slice(0, 40) || `log-${items.length + 1}`,
+      id,
       foodId,
       grams,
       label: label || foodId,
-      kcal: clamp(Number(item.kcal) || 0, 0, 20000),
-      protein: clamp(Number(item.protein) || 0, 0, 2000),
-      fat: clamp(Number(item.fat) || 0, 0, 2000),
-      carbs: clamp(Number(item.carbs) || 0, 0, 2000),
+      kcal: finiteNonNeg(item.kcal),
+      protein: finiteNonNeg(item.protein),
+      fat: finiteNonNeg(item.fat),
+      carbs: finiteNonNeg(item.carbs),
+      loggedAt: prevAt.get(id) || now,
     });
   }
   return { date: today, items };
@@ -210,6 +604,7 @@ function sanitizeFuelLog(incoming) {
 
 function publicUser(record) {
   ensureDayLogs(record);
+  ensureFreezes(record);
   return {
     id: record.id,
     name: record.name,
@@ -217,6 +612,23 @@ function publicUser(record) {
     status: record.status,
     weight: record.weight,
     streak: record.streak || 0,
+    freezesLeft: record.freezesLeft,
+    lastActivityDate: record.lastActivityDate || null,
+    activityCount: record.activityCount || 0,
+    cleanStreak: record.cleanStreak || 0,
+    returned: Boolean(record.returned),
+    kindsDone: Array.isArray(record.kindsDone) ? record.kindsDone : [],
+    dailyDoneCount: record.dailyDoneCount || 0,
+    dailyClearDays: record.dailyClearDays || 0,
+    daily: record.daily
+      ? {
+          date: record.daily.date,
+          tasks: Array.isArray(record.daily.tasks) ? record.daily.tasks : [],
+          done: Array.isArray(record.daily.done) ? record.daily.done : [],
+          shieldGranted: Boolean(record.daily.shieldGranted),
+        }
+      : null,
+    achievements: Array.isArray(record.achievements) ? record.achievements : [],
     onboardingDone: Boolean(record.onboardingDone),
     heightCm: record.heightCm || null,
     birthDate: record.birthDate || null,
@@ -311,6 +723,10 @@ const server = http.createServer(async (req, res) => {
         passwordHash: hashPassword(password),
         status: "Двигаюсь мягко",
         streak: 0,
+        activityCount: 0,
+        achievements: [],
+        lastActivityDate: null,
+        freezesLeft: START_FREEZES,
         onboardingDone: false,
         sex: null,
         heightCm: null,
@@ -328,6 +744,7 @@ const server = http.createServer(async (req, res) => {
         createdAt: now,
         updatedAt: now,
       };
+      ensureAchievements(record);
       saveUser(record);
       send(res, 201, { token, user: publicUser(record) });
       return;
@@ -344,6 +761,7 @@ const server = http.createServer(async (req, res) => {
       }
       const token = crypto.randomBytes(24).toString("hex");
       record.tokens = [...(record.tokens || []), token].slice(-8);
+      ensureAchievements(record);
       record.updatedAt = new Date().toISOString();
       saveUser(record);
       send(res, 200, { token, user: publicUser(record) });
@@ -369,7 +787,7 @@ const server = http.createServer(async (req, res) => {
         send(res, 401, { error: "Нужно войти" });
         return;
       }
-      if (ensureDayLogs(record)) {
+      if (ensureDayLogs(record) || ensureFreezes(record) || ensureAchievements(record)) {
         record.updatedAt = new Date().toISOString();
         saveUser(record);
       }
@@ -410,13 +828,21 @@ const server = http.createServer(async (req, res) => {
       }
 
       if (Object.prototype.hasOwnProperty.call(body, "fuelLog")) {
-        record.fuelLog = sanitizeFuelLog(body.fuelLog);
+        record.fuelLog = sanitizeFuelLog(body.fuelLog, record.fuelLog);
       } else {
         ensureFuelLog(record);
       }
 
       delete record.stepLog;
       delete record.stepGoal;
+      ensureFreezes(record);
+      ensureDaily(record);
+      if (body.activityDone === true && Number(body.elapsedSec) >= MIN_ACTIVITY_SEC) {
+        noteShieldSave(record);
+        applyActivity(record);
+        rememberActivity(record, body);
+      }
+      ensureAchievements(record);
 
       record.updatedAt = new Date().toISOString();
       saveUser(record);

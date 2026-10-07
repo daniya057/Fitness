@@ -2,7 +2,7 @@ const { spawn } = require("child_process");
 const { LINKS } = require("../server/env");
 
 function run(command, args) {
-  const child = spawn(command, args, { stdio: "inherit", shell: true, env: { ...process.env, CI: "1" } });
+  const child = spawn(command, args, { stdio: "inherit", shell: true, env: { ...process.env } });
   child.on("exit", (code) => {
     if (code && code !== 0) {
       process.exit(code);

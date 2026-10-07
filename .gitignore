@@ -47,3 +47,10 @@ coverage/
 # анкеты пользователей (файлы в data/users)
 data/users/*.json
 
+# сырьё и собранный справочник штрихкодов (npm run barcodes)
+data/cache/
+data/content/barcodes.sqlite
+data/content/barcodes.sqlite-*
+data/content/barcodes.build.sqlite
+data/content/barcodes.build.sqlite-*
+

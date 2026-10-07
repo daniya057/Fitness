@@ -10,9 +10,9 @@
 
 | Вкладка | Файл | Смысл |
 |---|---|---|
-| Арена | `src/features/arena/arena.js` | Серия, ккал, компактный дейлик, вес, достижения |
-| Тренинг | `src/features/workouts/workouts.js` | Карточки активностей на сегодня |
-| Награды | `src/features/rewards/rewards.js` | Лидерборд 24ч и ачивки |
+| Арена | `src/features/arena/arena.js` | Крупная серия и щиты, ккал, компактный дейлик, вес, достижения |
+| Тренинг | `src/features/workouts/workouts.js` | Семь групп, цветные сессии, таймер-плейлист |
+| Награды | `src/features/rewards/rewards.js` | Карточки достижений |
 | Топливо | `src/features/calories/calories.js` | Дневник КБЖУ, плашка нормы, счётчик порции, сканер |
 | Профиль | `src/features/profile/profile.js` | Карточка, правка данных, история |
 

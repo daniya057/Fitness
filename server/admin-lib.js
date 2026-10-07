@@ -25,12 +25,12 @@ const DEFAULT_CATALOG = {
     bike: { title: "Задание дня", hint: "Короткая велосессия" },
   },
   missions: {
-    strength: { id: "strength", title: "Силовая разминка", time: "8 мин", xp: 16 },
-    run: { id: "run", title: "Лёгкий бег", time: "10 мин", xp: 18 },
-    nutrition: { id: "nutrition", title: "Спокойный приём пищи", time: "15 мин", xp: 10 },
-    walk: { id: "walk", title: "Тихая прогулка", time: "12 мин", xp: 14 },
-    stretch: { id: "stretch", title: "Растяжка", time: "6 мин", xp: 12 },
-    bike: { id: "bike", title: "Велосессия", time: "12 мин", xp: 16 },
+    strength: { id: "strength", title: "Силовая разминка", time: "8 мин" },
+    run: { id: "run", title: "Лёгкий бег", time: "10 мин" },
+    nutrition: { id: "nutrition", title: "Спокойный приём пищи", time: "15 мин" },
+    walk: { id: "walk", title: "Тихая прогулка", time: "12 мин" },
+    stretch: { id: "stretch", title: "Растяжка", time: "6 мин" },
+    bike: { id: "bike", title: "Велосессия", time: "12 мин" },
   },
 };
 
@@ -182,13 +182,11 @@ function sanitizeCatalog(input) {
     const hint = clip(dailyRow.hint, 80) || DEFAULT_CATALOG.daily[id].hint;
     const missionTitle = clip(missionRow.title, 60) || DEFAULT_CATALOG.missions[id].title;
     const time = clip(missionRow.time, 16) || DEFAULT_CATALOG.missions[id].time;
-    const xp = Math.round(Number(missionRow.xp));
     daily[id] = { title, hint };
     missions[id] = {
       id,
       title: missionTitle,
       time,
-      xp: Number.isFinite(xp) && xp >= 1 && xp <= 99 ? xp : DEFAULT_CATALOG.missions[id].xp,
     };
   }
   return { daily, missions };
@@ -216,6 +214,7 @@ function adminUserView(record) {
     email: record.email,
     status: record.status,
     streak: record.streak || 0,
+    freezesLeft: record.freezesLeft == null ? 1 : Number(record.freezesLeft) || 0,
     onboardingDone: Boolean(record.onboardingDone),
     heightCm: record.heightCm || null,
     birthDate: record.birthDate || null,

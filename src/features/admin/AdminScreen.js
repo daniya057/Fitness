@@ -53,7 +53,7 @@ function weightLabel(weight) {
 export default function AdminScreen() {
   const insets = useSafeAreaInsets();
   const [token, setToken] = useState("");
-  const [login, setLogin] = useState("admin");
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -143,7 +143,7 @@ export default function AdminScreen() {
         ...prev[kind],
         [id]: {
           ...(prev[kind]?.[id] || {}),
-          [field]: field === "xp" ? value.replace(/[^\d]/g, "") : value,
+          [field]: value,
         },
       },
     }));
@@ -188,13 +188,28 @@ export default function AdminScreen() {
             </Text>
           </View>
           <View className="mt-8">
-            <Field label="Логин" value={login} onChangeText={setLogin} autoCapitalize="none" />
+            <Field
+              label="Логин"
+              value={login}
+              onChangeText={setLogin}
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="off"
+              textContentType="none"
+              importantForAutofill="no"
+              inputName="fitness-admin-login"
+            />
             <Field
               label="Пароль"
               value={password}
               onChangeText={setPassword}
               secureTextEntry
               placeholder="От 10 символов"
+              autoCorrect={false}
+              autoComplete="off"
+              textContentType="none"
+              importantForAutofill="no"
+              inputName="fitness-admin-password"
             />
             {error ? <Text className="mb-4 text-[14px] font-medium text-accent">{error}</Text> : null}
             <PrimaryButton label="Войти" onPress={signIn} busy={busy} />
@@ -236,6 +251,7 @@ export default function AdminScreen() {
             <Text className="mt-1 text-[13px] text-mute">{user.email}</Text>
             <Text className="mt-3 text-[13px] leading-5 text-mute">
               {user.age ? `${user.age} лет` : "возраст —"} · {weightLabel(user.weight)} · серия {user.streak || 0}
+              {user.freezesLeft != null ? ` · щит ${user.freezesLeft}` : ""}
             </Text>
             <Text className="mt-1 text-[13px] leading-5 text-mute">
               {(user.goals || []).map((id) => GOAL_LABELS[id] || id).join(", ") || "цели не выбраны"}
@@ -272,12 +288,6 @@ export default function AdminScreen() {
                 label="Время"
                 value={mission.time || ""}
                 onChangeText={(value) => patchCatalog("missions", goal.id, "time", value)}
-              />
-              <Field
-                label="XP"
-                value={String(mission.xp ?? "")}
-                keyboardType="number-pad"
-                onChangeText={(value) => patchCatalog("missions", goal.id, "xp", value)}
               />
             </View>
           );

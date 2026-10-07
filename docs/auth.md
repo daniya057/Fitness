@@ -8,7 +8,7 @@
 
 Папка **`data/users/`**. Один человек — один файл `{id}.json`.
 
-Поля опросника в том же файле: `heightCm`, `birthDate`, `age`, `sex` (`male`/`female`), `weight`, `goals`, `daysPerWeek`, `onboardingDone`. Дневник топлива — `fuelLog` (дата UTC и список порций).
+Поля опросника в том же файле: `heightCm`, `birthDate`, `age`, `sex` (`male`/`female`), `weight`, `goals`, `daysPerWeek`, `onboardingDone`. Дневник топлива — `fuelLog` (дата UTC и список порций). Серия — `streak`, щиты — `freezesLeft` (старт 1), последняя активность — `lastActivityDate`.
 
 ## API
 
@@ -17,17 +17,17 @@
 - `POST /register` — имя, почта, пароль
 - `POST /login`
 - `GET /me`
-- `PATCH /me` — имя, статус; опрос (`onboardingDone: true`); правки профиля (`updateProfile: true`, стартовый вес не сбрасывается); дневник `fuelLog`
+- `PATCH /me` — имя, статус; опрос (`onboardingDone: true`); правки профиля (`updateProfile: true`, стартовый вес не сбрасывается); дневник `fuelLog`; `activityDone: true` — серия +1 раз за UTC-день
 - `POST /logout`
 - `GET /catalog` — тексты заданий дня (публично)
-- `GET /barcode/:code` — штрихкод: Open Food Facts ru/world, затем USDA GTIN, КБЖУ на 100 г (публично)
+- `GET /barcode/:code` — штрихкод: локальный справочник, затем Open Food Facts ru/world и USDA. Если КБЖУ нет — Barcode List за названием (кэш в `data/cache`). Ориентир из обычной таблицы, если цифр нет (публично)
 - `GET /foods/search?q=` — поиск: локальная таблица + OFF + USDA (публично)
 
 Запуск: `npm run dev` или `npm run server` + Expo.
 
 ## Админка
 
-Отдельный вход: [`/admin`](http://localhost:8081/admin). Не вкладка приложения.
+Отдельный вход: [`/admin`](http://localhost:8081/admin). Не вкладка приложения. Поля админки с `autocomplete=off` и своими именами, чтобы браузер не подставлял эту пару в обычный вход. На регистрации пароль — `new-password`.
 
 Пароль: `ADMIN_LOGIN` + `ADMIN_PASSWORD` в `keys/.env` (пароль от 10 символов). Шаблон — `keys/env.example`. Если env пустой, первый пароль пишется в `keys/admin/BOOTSTRAP.txt` (gitignore).
 

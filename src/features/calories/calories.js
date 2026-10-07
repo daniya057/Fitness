@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PillButton, PrimaryButton, ScreenHeader, SectionLabel } from "../../ui/kit";
 import { SoftPress } from "../../ui/SoftPress";
+import { ValueSlider } from "../onboarding/ValueSlider";
 import { useAuth } from "../auth/AuthContext";
 import { BarcodeScan } from "./BarcodeScan";
 import {
@@ -31,10 +32,30 @@ function MacroCell({ label, value, unit }) {
 }
 
 function GramCounter({ value, onChange }) {
-  const bump = (delta) => {
-    const next = Math.max(10, Math.min(500, value + delta));
-    onChange(next);
+  const [draft, setDraft] = useState(String(value));
+  const [room, setRoom] = useState(300);
+
+  useEffect(() => {
+    setDraft(String(value));
+  }, [value]);
+
+  const applyText = (text) => {
+    const digits = String(text).replace(/\D/g, "");
+    setDraft(digits);
+    if (!digits) {
+      return;
+    }
+    const next = Number(digits);
+    if (next >= 1) {
+      onChange(next);
+    }
   };
+
+  const bump = (delta) => {
+    onChange(Math.max(1, value + delta));
+  };
+
+  const trackMax = Math.max(room, value);
 
   return (
     <View className="mb-5">
@@ -42,19 +63,46 @@ function GramCounter({ value, onChange }) {
       <View className="flex-row items-center justify-between">
         <SoftPress
           onPress={() => bump(-10)}
-          className="h-14 w-14 items-center justify-center rounded-full bg-canvas"
+          className="h-14 w-14 shrink-0 items-center justify-center rounded-full bg-canvas"
         >
           <Text className="text-[28px] leading-8 text-ink">−</Text>
         </SoftPress>
-        <Text className="text-[32px] font-semibold text-ink">
-          {value} <Text className="text-[16px] font-medium text-mute">г</Text>
-        </Text>
+        <View className="mx-3 h-14 flex-1 flex-row items-center justify-center rounded-2xl bg-canvas px-3">
+          <TextInput
+            value={draft}
+            onChangeText={applyText}
+            onBlur={() => {
+              if (!draft || Number(draft) < 1) {
+                setDraft(String(value));
+              }
+            }}
+            keyboardType="number-pad"
+            className="text-center text-[32px] font-semibold text-ink"
+            style={{ width: Math.max(72, String(draft || value).length * 22), flexGrow: 0 }}
+          />
+          <Text className="text-[16px] font-medium text-mute">г</Text>
+        </View>
         <SoftPress
           onPress={() => bump(10)}
-          className="h-14 w-14 items-center justify-center rounded-full bg-canvas"
+          className="h-14 w-14 shrink-0 items-center justify-center rounded-full bg-canvas"
         >
           <Text className="text-[28px] leading-8 text-ink">+</Text>
         </SoftPress>
+      </View>
+      <View className="mt-4">
+        <ValueSlider
+          bare
+          value={value}
+          min={1}
+          max={trackMax}
+          step={1}
+          onChange={(next) => {
+            onChange(next);
+            if (next >= trackMax) {
+              setRoom(trackMax + 500);
+            }
+          }}
+        />
       </View>
     </View>
   );
@@ -72,6 +120,8 @@ export default function CaloriesScreen() {
   const [scanOpen, setScanOpen] = useState(false);
   const [remote, setRemote] = useState([]);
   const [searching, setSearching] = useState(false);
+  const scrollRef = useRef(null);
+  const portionRef = useRef(null);
 
   const today = utcDay();
   const items = user?.fuelLog?.date === today ? user.fuelLog.items || [] : [];
@@ -131,6 +181,38 @@ export default function CaloriesScreen() {
     }
   };
 
+  const scrollToPortion = () => {
+    const scroller = scrollRef.current;
+    const card = portionRef.current;
+    if (!scroller || !card) {
+      return;
+    }
+    const host = typeof scroller.getInnerViewNode === "function" ? scroller.getInnerViewNode() : scroller;
+    if (typeof card.measureLayout === "function" && host) {
+      card.measureLayout(
+        host,
+        (_x, y) => {
+          scroller.scrollTo({ y: Math.max(0, y - 12), animated: true });
+        },
+        () => {
+          if (typeof card.scrollIntoView === "function") {
+            card.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }
+      );
+      return;
+    }
+    if (typeof card.scrollIntoView === "function") {
+      card.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const revealPortion = (food) => {
+    setPicked(food);
+    setGrams(100);
+    setTimeout(scrollToPortion, 60);
+  };
+
   const addFood = (food, portionGrams) => {
     if (!food || busy) {
       return;
@@ -145,6 +227,7 @@ export default function CaloriesScreen() {
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
       <ScrollView
+        ref={scrollRef}
         className="flex-1"
         contentContainerStyle={{ paddingHorizontal: 22, paddingBottom: 28 }}
         keyboardShouldPersistTaps="handled"
@@ -208,15 +291,51 @@ export default function CaloriesScreen() {
             ))}
           </ScrollView>
 
+          {picked && portion ? (
+            <View ref={portionRef} className="mt-4 rounded-[28px] bg-mint px-5 py-6">
+              <Text className="text-[18px] font-semibold text-ink">{picked.name}</Text>
+              <Text className="mt-1 text-[13px] text-mute">
+                На 100 г: {Math.round(picked.kcal)} ккал · Б {picked.protein} · Ж {picked.fat} · У {picked.carbs}
+                {picked.source === "guess" ? " · ориентир по названию пачки, не с этикетки" : ""}
+                {picked.source === "list" ? " · название с Barcode List, КБЖУ на этикетке не нашли" : ""}
+              </Text>
+              <View className="mt-5">
+                <GramCounter key={picked.id || picked.name} value={grams} onChange={setGrams} />
+              </View>
+              {picked.packGrams ? (
+                <SoftPress
+                  onPress={() => setGrams(Math.round(Number(picked.packGrams)))}
+                  className="mb-5 items-center rounded-full bg-canvas py-3"
+                >
+                  <Text className="text-[15px] font-semibold text-ink">
+                    Вся пачка · {picked.packGrams} {picked.packUnit === "ml" ? "мл" : "г"}
+                  </Text>
+                </SoftPress>
+              ) : null}
+              <View className="mb-5 flex-row">
+                <MacroCell label="ккал" value={portion.kcal} />
+                <MacroCell label="Б" value={portion.protein} />
+                <MacroCell label="Ж" value={portion.fat} />
+                <MacroCell label="У" value={portion.carbs} />
+              </View>
+              <PrimaryButton
+                label="В дневник"
+                busy={busy}
+                onPress={() => {
+                  addFood(picked, grams);
+                  setPicked(null);
+                  setQuery("");
+                }}
+              />
+            </View>
+          ) : null}
+
           {found.length > 0 ? (
             <View className="mt-4 overflow-hidden rounded-[24px] bg-card">
               {found.map((food, index) => (
                 <SoftPress
                   key={`${food.id}-${index}`}
-                  onPress={() => {
-                    setPicked(food);
-                    setGrams(100);
-                  }}
+                  onPress={() => revealPortion(food)}
                   className={`px-4 py-3.5 ${index < found.length - 1 ? "border-b border-ink/5" : ""}`}
                 >
                   <View className="flex-row items-center justify-between">
@@ -240,33 +359,6 @@ export default function CaloriesScreen() {
             </Text>
           )}
         </View>
-
-        {picked && portion ? (
-          <View className="mt-6 rounded-[28px] bg-mint px-5 py-6">
-            <Text className="text-[18px] font-semibold text-ink">{picked.name}</Text>
-            <Text className="mt-1 text-[13px] text-mute">
-              На 100 г: {Math.round(picked.kcal)} ккал · Б {picked.protein} · Ж {picked.fat} · У {picked.carbs}
-            </Text>
-            <View className="mt-5">
-              <GramCounter value={grams} onChange={setGrams} />
-            </View>
-            <View className="mb-5 flex-row">
-              <MacroCell label="ккал" value={portion.kcal} />
-              <MacroCell label="Б" value={portion.protein} />
-              <MacroCell label="Ж" value={portion.fat} />
-              <MacroCell label="У" value={portion.carbs} />
-            </View>
-            <PrimaryButton
-              label="В дневник"
-              busy={busy}
-              onPress={() => {
-                addFood(picked, grams);
-                setPicked(null);
-                setQuery("");
-              }}
-            />
-          </View>
-        ) : null}
 
         <View className="mt-8">
           <SectionLabel>За сегодня</SectionLabel>
@@ -302,10 +394,9 @@ export default function CaloriesScreen() {
         <BarcodeScan
           onClose={() => setScanOpen(false)}
           onFood={(food) => {
-            setPicked(food);
-            setGrams(100);
             setScanOpen(false);
             setError("");
+            revealPortion(food);
           }}
         />
       ) : null}

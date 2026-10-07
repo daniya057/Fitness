@@ -1,0 +1,215 @@
+[
+  {
+    "id": "first",
+    "title": "Первый шаг",
+    "hint": "Закрой одну тренировку",
+    "secret": false,
+    "rule": "activity",
+    "need": 1
+  },
+  {
+    "id": "streak3",
+    "title": "3 дня",
+    "hint": "Серия 3 дня",
+    "secret": false,
+    "rule": "streak",
+    "need": 3
+  },
+  {
+    "id": "streak7",
+    "title": "Неделя",
+    "hint": "Серия 7 дней",
+    "secret": false,
+    "rule": "streak",
+    "need": 7
+  },
+  {
+    "id": "streak30",
+    "title": "Месяц",
+    "hint": "Серия 30 дней",
+    "secret": false,
+    "rule": "streak",
+    "need": 30
+  },
+  {
+    "id": "quiz",
+    "title": "Знакомство",
+    "hint": "Пройди опрос",
+    "secret": false,
+    "rule": "onboarding",
+    "need": 1
+  },
+  {
+    "id": "fuel",
+    "title": "Тарелка",
+    "hint": "Запиши еду",
+    "secret": false,
+    "rule": "fuel",
+    "need": 1
+  },
+  {
+    "id": "shield",
+    "title": "Щит не понадобился",
+    "hint": "14 дней подряд, щит не списан",
+    "secret": false,
+    "rule": "clean",
+    "need": 14
+  },
+  {
+    "id": "hundred",
+    "title": "Сотня",
+    "hint": "Серия 100 дней",
+    "secret": true,
+    "rule": "streak",
+    "need": 100
+  },
+  {
+    "id": "ten",
+    "title": "Десять дней",
+    "hint": "10 дней с тренировкой",
+    "secret": true,
+    "rule": "activity",
+    "need": 10
+  },
+  {
+    "id": "return",
+    "title": "Возвращение",
+    "hint": "Закрой тренировку после пропуска",
+    "secret": true,
+    "rule": "return",
+    "need": 1
+  },
+  {
+    "id": "fuel3",
+    "title": "Три записи",
+    "hint": "Запиши 3 продукта за день",
+    "secret": false,
+    "rule": "fuel",
+    "need": 3
+  },
+  {
+    "id": "fuel5",
+    "title": "Полная тарелка",
+    "hint": "Запиши 5 продуктов за день",
+    "secret": false,
+    "rule": "fuel",
+    "need": 5
+  },
+  {
+    "id": "kindStrength",
+    "title": "Силовая",
+    "hint": "Закрой силовую тренировку",
+    "secret": false,
+    "rule": "kind",
+    "kind": "strength",
+    "need": 1
+  },
+  {
+    "id": "kindRun",
+    "title": "Лёгкий бег",
+    "hint": "Закрой лёгкий бег",
+    "secret": false,
+    "rule": "kind",
+    "kind": "run",
+    "need": 1
+  },
+  {
+    "id": "kindWalk",
+    "title": "Прогулка",
+    "hint": "Закрой прогулку",
+    "secret": false,
+    "rule": "kind",
+    "kind": "walk",
+    "need": 1
+  },
+  {
+    "id": "kindBike",
+    "title": "Вело",
+    "hint": "Закрой велосессию",
+    "secret": false,
+    "rule": "kind",
+    "kind": "bike",
+    "need": 1
+  },
+  {
+    "id": "allKinds",
+    "title": "Все шесть",
+    "hint": "Силовая, бег, еда, прогулка, растяжка и вело",
+    "secret": false,
+    "rule": "kinds",
+    "need": 6
+  },
+  {
+    "id": "shieldSave",
+    "title": "Щит сработал",
+    "hint": "Тренировка в день, когда щит спас серию",
+    "secret": true,
+    "rule": "shieldSave",
+    "need": 1
+  },
+  {
+    "id": "dawn",
+    "title": "Рассвет",
+    "hint": "Тренировка до 9:00",
+    "secret": true,
+    "rule": "dawn",
+    "need": 1
+  },
+  {
+    "id": "late",
+    "title": "Поздний",
+    "hint": "Тренировка после 21:00",
+    "secret": true,
+    "rule": "late",
+    "need": 1
+  },
+  {
+    "id": "weekend",
+    "title": "Выходной",
+    "hint": "Тренировка в субботу или воскресенье",
+    "secret": true,
+    "rule": "weekend",
+    "need": 1
+  },
+  {
+    "id": "daily1",
+    "title": "Задание",
+    "hint": "Закрой одно задание дня",
+    "secret": false,
+    "rule": "dailyCount",
+    "need": 1
+  },
+  {
+    "id": "daily5",
+    "title": "Пять заданий",
+    "hint": "Закрой 5 заданий дня",
+    "secret": false,
+    "rule": "dailyCount",
+    "need": 5
+  },
+  {
+    "id": "dailyDay",
+    "title": "День закрыт",
+    "hint": "Закрой все задания одного дня",
+    "secret": false,
+    "rule": "dailyClear",
+    "need": 1
+  },
+  {
+    "id": "dailyWeek",
+    "title": "Неделя заданий",
+    "hint": "7 дней, когда закрыты все задания",
+    "secret": true,
+    "rule": "dailyClear",
+    "need": 7
+  },
+  {
+    "id": "short",
+    "title": "Короткая",
+    "hint": "Закрой растяжку",
+    "secret": true,
+    "rule": "kind",
+    "kind": "stretch",
+    "need": 1
+  }
+]

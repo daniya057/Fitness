@@ -32,6 +32,10 @@ export default function AuthScreen() {
 
   const toggle = () => {
     setError("");
+    setPassword("");
+    if (mode === "login") {
+      setEmail("");
+    }
     setMode(mode === "register" ? "login" : "register");
   };
 
@@ -58,7 +62,15 @@ export default function AuthScreen() {
 
         <View className="mt-8">
           {mode === "register" ? (
-            <Field label="Имя" value={name} onChangeText={setName} placeholder="Как к тебе обращаться" />
+            <Field
+              label="Имя"
+              value={name}
+              onChangeText={setName}
+              placeholder="Как к тебе обращаться"
+              autoComplete="name"
+              textContentType="name"
+              inputName="fitness-name"
+            />
           ) : null}
           <Field
             label="Почта"
@@ -67,6 +79,10 @@ export default function AuthScreen() {
             placeholder="you@mail.com"
             autoCapitalize="none"
             keyboardType="email-address"
+            autoComplete={mode === "register" ? "off" : "email"}
+            textContentType="emailAddress"
+            importantForAutofill={mode === "register" ? "no" : "yes"}
+            inputName={mode === "register" ? "fitness-register-email" : "fitness-email"}
           />
           <Field
             label="Пароль"
@@ -74,6 +90,10 @@ export default function AuthScreen() {
             onChangeText={setPassword}
             placeholder="От 6 символов"
             secureTextEntry
+            autoComplete={mode === "register" ? "new-password" : "current-password"}
+            textContentType={mode === "register" ? "newPassword" : "password"}
+            importantForAutofill={mode === "register" ? "no" : "yes"}
+            inputName={mode === "register" ? "fitness-register-password" : "fitness-password"}
           />
           {error ? <Text className="mb-4 text-[14px] font-medium text-accent">{error}</Text> : null}
           <PrimaryButton

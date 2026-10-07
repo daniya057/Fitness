@@ -1,4 +1,4 @@
-import { Pressable, View } from "react-native";
+import { Pressable } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -8,8 +8,6 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { lightTap } from "../lib/haptics";
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function SoftPress({ children, onPress, className, disabled, style }) {
   const scale = useSharedValue(1);
@@ -33,10 +31,8 @@ export function SoftPress({ children, onPress, className, disabled, style }) {
   };
 
   return (
-    <AnimatedPressable onPress={handlePress} disabled={disabled} style={animated}>
-      <View className={className} style={style}>
-        {children}
-      </View>
-    </AnimatedPressable>
+    <Pressable accessibilityRole="button" onPress={handlePress} disabled={disabled} className={className} style={style}>
+      <Animated.View style={animated}>{children}</Animated.View>
+    </Pressable>
   );
 }

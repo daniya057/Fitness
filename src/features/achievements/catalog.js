@@ -1,0 +1,131 @@
+import { Award, Bike, Calendar, Dumbbell, Flame, Footprints, Layers, Medal, Moon, RotateCcw, Shield, ShieldCheck, Sparkles, Star, Sunrise, Timer, Trophy, User, Utensils, Zap } from "lucide-react-native";
+import data from "../../../data/content/achievements.json";
+
+const ICONS = {
+  first: Medal,
+  streak3: Star,
+  streak7: Flame,
+  streak30: Trophy,
+  quiz: User,
+  fuel: Utensils,
+  shield: Shield,
+  hundred: Sparkles,
+  ten: Zap,
+  return: RotateCcw,
+  fuel3: Utensils,
+  fuel5: Utensils,
+  kindStrength: Dumbbell,
+  kindRun: Flame,
+  kindWalk: Footprints,
+  kindBike: Bike,
+  allKinds: Layers,
+  shieldSave: ShieldCheck,
+  dawn: Sunrise,
+  late: Moon,
+  weekend: Calendar,
+  short: Timer,
+  daily1: Zap,
+  daily5: Layers,
+  dailyDay: Shield,
+  dailyWeek: Calendar,
+};
+
+const ALL_KINDS = ["strength", "run", "nutrition", "walk", "stretch", "bike"];
+const FUEL_GAP_MS = 20000;
+
+function countedFuelItems(items) {
+  const times = (Array.isArray(items) ? items : [])
+    .map((item) => Date.parse(item?.loggedAt))
+    .filter((at) => Number.isFinite(at))
+    .sort((a, b) => a - b);
+  let count = 0;
+  let last = 0;
+  for (const at of times) {
+    if (!count || at - last >= FUEL_GAP_MS) {
+      count += 1;
+      last = at;
+    }
+  }
+  return count;
+}
+
+function utcToday() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+export const ACHIEVEMENTS = data;
+
+export function iconOf(id) {
+  return ICONS[id] || Award;
+}
+
+export function earnedSet(user) {
+  return new Set(Array.isArray(user?.achievements) ? user.achievements : []);
+}
+
+export function shownAchievements(user) {
+  const earned = earnedSet(user);
+  const rank = (item) => {
+    if (earned.has(item.id)) {
+      return 0;
+    }
+    return item.secret ? 2 : 1;
+  };
+  return [...ACHIEVEMENTS].sort((a, b) => rank(a) - rank(b));
+}
+
+export function isHidden(user, item) {
+  return Boolean(item?.secret) && !earnedSet(user).has(item.id);
+}
+
+export function progressValue(user, item) {
+  if (item.rule === "streak") {
+    return Number(user?.streak) || 0;
+  }
+  if (item.rule === "activity") {
+    return Number(user?.activityCount) || 0;
+  }
+  if (item.rule === "fuel") {
+    const log = user?.fuelLog;
+    if (!log || log.date !== utcToday() || !Array.isArray(log.items)) {
+      return 0;
+    }
+    return countedFuelItems(log.items);
+  }
+  if (item.rule === "onboarding") {
+    return user?.onboardingDone ? 1 : 0;
+  }
+  if (item.rule === "clean") {
+    return Number(user?.cleanStreak) || 0;
+  }
+  if (item.rule === "return") {
+    return user?.returned ? 1 : 0;
+  }
+  if (item.rule === "kind") {
+    const done = Array.isArray(user?.kindsDone) ? user.kindsDone : [];
+    return done.includes(item.kind) ? 1 : 0;
+  }
+  if (item.rule === "kinds") {
+    const done = new Set(Array.isArray(user?.kindsDone) ? user.kindsDone : []);
+    return ALL_KINDS.filter((id) => done.has(id)).length;
+  }
+  if (item.rule === "dawn") {
+    return user?.dawn ? 1 : 0;
+  }
+  if (item.rule === "late") {
+    return user?.late ? 1 : 0;
+  }
+  if (item.rule === "weekend") {
+    return user?.weekend ? 1 : 0;
+  }
+  if (item.rule === "shieldSave") {
+    return 0;
+  }
+  if (item.rule === "dailyCount") {
+    return Number(user?.dailyDoneCount) || 0;
+  }
+  if (item.rule === "dailyClear") {
+    return Number(user?.dailyClearDays) || 0;
+  }
+  return 0;
+}

@@ -1,25 +1,37 @@
 import { useMemo } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { Flame, Medal, Star, Trophy, User } from "lucide-react-native";
+import { Shield, User } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { lightTap } from "../../lib/haptics";
 import { ScreenHeader } from "../../ui/kit";
 import { CountdownRing } from "./CountdownRing";
 import { useDayCountdown } from "./useDayCountdown";
-import { DAILY_COPY } from "../onboarding/catalog";
-import { useCatalog } from "../onboarding/useCatalog";
 import { useAuth } from "../auth/AuthContext";
 import { sumLog, utcDay } from "../calories/foods";
 import { dailyKcalTarget } from "../calories/target";
-
-const BADGES = [
-  { id: "tone", title: "Тонус", Icon: Medal },
-  { id: "power", title: "Сила", Icon: Trophy },
-  { id: "week", title: "7 дней", Icon: Star },
-];
+import { lookOfStreak } from "../streaks/look";
+import { AchievementPlaque } from "../achievements/plaque";
+import { sessionById } from "../workouts/catalog";
+import { useSession } from "../workouts/sessionStore";
 
 const RING = 80;
+
+function freezeWord(count) {
+  const n = Math.abs(Math.round(Number(count) || 0));
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod100 >= 11 && mod100 <= 14) {
+    return "щитов";
+  }
+  if (mod10 === 1) {
+    return "щит";
+  }
+  if (mod10 >= 2 && mod10 <= 4) {
+    return "щита";
+  }
+  return "щитов";
+}
 
 function StatCell({ label, value }) {
   return (
@@ -34,12 +46,15 @@ export default function ArenaScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { user } = useAuth();
-  const catalog = useCatalog();
+  const openSession = useSession((state) => state.open);
   const day = useDayCountdown();
   const streak = user?.streak || 0;
+  const look = lookOfStreak(streak);
+  const StreakIcon = look.Icon;
+  const freezesLeft = Number(user?.freezesLeft) || 0;
   const weight = user?.weight || { start: 70, current: 70, goal: 70 };
-  const primaryGoal = (user?.goals && user.goals[0]) || "walk";
-  const daily = catalog.daily[primaryGoal] || DAILY_COPY[primaryGoal] || DAILY_COPY.walk;
+  const dailyTasks = Array.isArray(user?.daily?.tasks) ? user.daily.tasks : [];
+  const dailyDone = new Set(Array.isArray(user?.daily?.done) ? user.daily.done : []);
   const span = weight.start - weight.goal;
   const toGoal = span <= 0 ? 1 : Math.max(0.08, Math.min(1, (weight.start - weight.current) / span));
   const today = utcDay();
@@ -54,14 +69,23 @@ export default function ArenaScreen() {
     router.replace("/profile");
   };
 
-  const openDaily = async () => {
+  const openTask = async (task) => {
     await lightTap();
+    const session = sessionById(task?.sessionId);
+    if (session) {
+      openSession(session);
+    }
     router.replace("/workouts");
   };
 
   const openCalories = async () => {
     await lightTap();
     router.replace("/calories");
+  };
+
+  const openRewards = async () => {
+    await lightTap();
+    router.replace("/rewards");
   };
 
   return (
@@ -83,17 +107,44 @@ export default function ArenaScreen() {
           }
         />
 
-        <View className="-mt-2 flex-row items-center">
-          <View className="mr-3 h-2 flex-1 overflow-hidden rounded-full bg-card">
-            <View className="h-full rounded-full bg-accent" style={{ width: `${Math.min(100, streak * 12)}%` }} />
+        <View className="px-6 py-8" style={{ backgroundColor: look.card, borderRadius: look.radius }}>
+          <View className="items-center">
+            <View
+              className="h-[88px] w-[88px] items-center justify-center rounded-full"
+              style={{ backgroundColor: look.iconBg }}
+            >
+              <StreakIcon
+                size={44}
+                color={look.flame}
+                strokeWidth={1.8}
+                fill={look.fillIcon ? look.flame : "none"}
+              />
+            </View>
+            <Text
+              className="mt-4 text-[64px] font-semibold leading-[68px] tabular-nums"
+              style={{ color: look.ink }}
+            >
+              {look.days}
+            </Text>
+            <Text className="mt-1 text-[15px]" style={{ color: look.mute }}>
+              {look.unit}
+            </Text>
+            <Text className="mt-3 text-center text-[16px] font-semibold" style={{ color: look.ink }}>
+              {look.line}
+            </Text>
           </View>
-          <View className="flex-row items-center rounded-full bg-mint px-2.5 py-1">
-            <Flame size={16} color="#2E7D32" strokeWidth={1.8} fill="#2E7D32" />
-            <Text className="ml-1 text-[16px] font-semibold text-ink">{streak}</Text>
+          <View
+            className="mt-6 flex-row items-center justify-center rounded-full px-4 py-2.5"
+            style={{ backgroundColor: look.chip }}
+          >
+            <Shield size={18} color={look.flame} strokeWidth={1.8} fill={freezesLeft > 0 ? look.flame : "none"} />
+            <Text className="ml-2 text-[14px] font-medium" style={{ color: look.ink }}>
+              {freezesLeft} {freezeWord(freezesLeft)}
+            </Text>
           </View>
         </View>
 
-        <Pressable onPress={openCalories} className="mt-5 rounded-[28px] bg-mint px-4 py-5">
+        <Pressable onPress={openCalories} className="mt-3 rounded-[28px] bg-mint px-4 py-5">
           <View className="flex-row">
             <StatCell label="Цель" value={target.kcal} />
             <StatCell label="Съедено" value={eaten} />
@@ -101,21 +152,36 @@ export default function ArenaScreen() {
           <Text className="mt-3 text-center text-[11px] text-mute">ккал · тап — дневник</Text>
         </Pressable>
 
-        <Pressable onPress={openDaily} className="mt-3 flex-row items-center rounded-[24px] bg-mint px-4 py-3.5">
-          <View className="mr-3 flex-1">
-            <Text className="text-[11px] font-medium tracking-[1px] text-accent">Сегодня</Text>
-            <Text className="mt-0.5 text-[16px] font-semibold text-ink">{daily.title}</Text>
-            <Text className="mt-0.5 text-[12px] leading-4 text-mute" numberOfLines={2}>
-              {daily.hint}
-            </Text>
-          </View>
-          <View className="items-center justify-center">
-            <CountdownRing progress={day.progress} size={RING} />
-            <View className="absolute items-center justify-center" style={{ width: RING, height: RING }}>
-              <Text className="text-[13px] font-semibold tabular-nums text-ink">{day.label}</Text>
+        <View className="mt-3 rounded-[24px] bg-mint px-4 py-3.5">
+          <View className="flex-row items-center">
+            <View className="mr-3 flex-1">
+              <Text className="text-[11px] font-medium tracking-[1px] text-accent">Сегодня</Text>
+              <Text className="mt-0.5 text-[16px] font-semibold text-ink">Задания дня</Text>
+              <Text className="mt-0.5 text-[12px] leading-4 text-mute">
+                {dailyDone.size} / {dailyTasks.length || 3}
+                {user?.daily?.shieldGranted ? " · щит уже твой" : " · все три — щит"}
+              </Text>
+            </View>
+            <View className="items-center justify-center">
+              <CountdownRing progress={day.progress} size={RING} />
+              <View className="absolute items-center justify-center" style={{ width: RING, height: RING }}>
+                <Text className="text-[13px] font-semibold tabular-nums text-ink">{day.label}</Text>
+              </View>
             </View>
           </View>
-        </Pressable>
+          {dailyTasks.map((task) => {
+            const on = dailyDone.has(task.id);
+            return (
+              <Pressable key={task.id} onPress={() => openTask(task)} className="mt-3">
+                <Text className={`text-[15px] font-semibold ${on ? "text-accent" : "text-ink"}`}>
+                  {on ? "✓ " : ""}
+                  {task.title}
+                </Text>
+                <Text className="text-[12px] leading-4 text-mute">{task.hint}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
 
         <View className="mt-3 rounded-[28px] bg-card px-5 py-4">
           <View className="mb-2 flex-row items-center justify-between">
@@ -131,19 +197,7 @@ export default function ArenaScreen() {
           </View>
         </View>
 
-        <View className="mt-3 rounded-[28px] bg-mint px-4 py-5">
-          <Text className="mb-4 text-center text-[16px] font-semibold text-ink">Достижения</Text>
-          <View className="flex-row justify-around">
-            {BADGES.map((badge) => (
-              <Pressable key={badge.id} onPress={openDaily} className="items-center">
-                <View className="h-12 w-12 items-center justify-center rounded-full bg-canvas">
-                  <badge.Icon size={22} color="#2E7D32" strokeWidth={1.6} />
-                </View>
-                <Text className="mt-2 text-[12px] font-medium text-ink">{badge.title}</Text>
-              </Pressable>
-            ))}
-          </View>
-        </View>
+        <AchievementPlaque user={user} onPress={openRewards} />
       </ScrollView>
     </View>
   );
