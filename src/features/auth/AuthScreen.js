@@ -1,7 +1,10 @@
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from "react-native";
 import { useState } from "react";
+import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Field, GhostButton, PrimaryButton } from "../../ui/kit";
+import { AmbientWash, glassStyle } from "../../ui/Glass";
+import { getPalette } from "../../ui/theme";
 import { useAuth } from "./AuthContext";
 
 export default function AuthScreen() {
@@ -41,38 +44,39 @@ export default function AuthScreen() {
 
   return (
     <KeyboardAvoidingView
-      className="flex-1 bg-canvas"
+      className="flex-1"
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={{ paddingTop: insets.top }}
+      style={{ paddingTop: insets.top, backgroundColor: getPalette().bg }}
     >
+      <StatusBar style="light" />
+      <AmbientWash />
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingHorizontal: 22, paddingBottom: 40 }}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="mt-8 rounded-[28px] bg-mint px-6 py-8">
-          <Text className="text-[12px] font-medium tracking-[1.2px] text-accent">FITNESS</Text>
-          <Text className="mt-2 text-[28px] font-semibold text-ink">
-            {mode === "register" ? "Создай аккаунт" : "С возвращением"}
-          </Text>
-          <Text className="mt-2 text-[14px] leading-5 text-mute">
-            Короткий вход, без стен текста. Дальше подстроим тренировки под тебя.
+        <View className="mt-8 rounded-[28px] px-6 py-8" style={glassStyle({ borderRadius: 28 })}>
+          <Text className="text-[12px] font-medium tracking-[1.2px] text-[#9BFFC8]">FITNESS</Text>
+          <Text className="mt-2 text-[28px] font-semibold text-white">
+            {mode === "register" ? "Регистрация" : "Вход"}
           </Text>
         </View>
 
         <View className="mt-8">
           {mode === "register" ? (
             <Field
+              glass
               label="Имя"
               value={name}
               onChangeText={setName}
-              placeholder="Как к тебе обращаться"
+              placeholder="Имя"
               autoComplete="name"
               textContentType="name"
               inputName="fitness-name"
             />
           ) : null}
           <Field
+            glass
             label="Почта"
             value={email}
             onChangeText={setEmail}
@@ -85,6 +89,7 @@ export default function AuthScreen() {
             inputName={mode === "register" ? "fitness-register-email" : "fitness-email"}
           />
           <Field
+            glass
             label="Пароль"
             value={password}
             onChangeText={setPassword}
@@ -103,6 +108,7 @@ export default function AuthScreen() {
           />
           <View className="mt-4">
             <GhostButton
+              glass
               label={mode === "register" ? "Уже есть аккаунт — войти" : "Нет аккаунта — создать"}
               onPress={toggle}
             />

@@ -56,10 +56,10 @@ export function dailyKcalTarget(user) {
 
 export function targetHint(target) {
   if (target.mode === "lose") {
-    return "Мягкий дефицит к желаемому весу. Ориентир, не суд.";
+    return "Дефицит";
   }
   if (target.mode === "gain") {
-    return "Небольшой запас к набору. Ориентир, не суд.";
+    return "Набор";
   }
-  return "Поддержание. Ориентир, не суд.";
+  return "Поддержание";
 }

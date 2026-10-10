@@ -1,4 +1,4 @@
-import { Award, Bike, Calendar, Dumbbell, Flame, Footprints, Layers, Medal, Moon, RotateCcw, Shield, ShieldCheck, Sparkles, Star, Sunrise, Timer, Trophy, User, Utensils, Zap } from "lucide-react-native";
+import { Award, Bike, Calendar, Dumbbell, Flame, Footprints, Layers, Medal, Moon, RotateCcw, Shield, ShieldCheck, Sparkles, Star, Sun, Sunrise, Sunset, Timer, Trophy, User, Utensils, Zap } from "lucide-react-native";
 import data from "../../../data/content/achievements.json";
 
 const ICONS = {
@@ -28,6 +28,9 @@ const ICONS = {
   daily5: Layers,
   dailyDay: Shield,
   dailyWeek: Calendar,
+  warmupMorning: Sun,
+  warmupEvening: Sunset,
+  warmupDay: Sparkles,
 };
 
 const ALL_KINDS = ["strength", "run", "nutrition", "walk", "stretch", "bike"];
@@ -126,6 +129,15 @@ export function progressValue(user, item) {
   }
   if (item.rule === "dailyClear") {
     return Number(user?.dailyClearDays) || 0;
+  }
+  if (item.rule === "session") {
+    const done = Array.isArray(user?.sessionsDone) ? user.sessionsDone : [];
+    return done.includes(item.sessionId) ? 1 : 0;
+  }
+  if (item.rule === "sessionsToday") {
+    const needIds = Array.isArray(item.sessionIds) ? item.sessionIds : [];
+    const today = Array.isArray(user?.todaySessions) ? user.todaySessions : [];
+    return needIds.length > 0 && needIds.every((id) => today.includes(id)) ? 1 : 0;
   }
   return 0;
 }

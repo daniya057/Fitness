@@ -6,32 +6,44 @@ export const SEX_OPTIONS = [
 export const SEX_LABELS = { male: "м", female: "ж" };
 
 export const GOALS = [
-  { id: "strength", title: "Силовые", hint: "Приседания, корпус" },
-  { id: "run", title: "Бег", hint: "Лёгкий кардио" },
-  { id: "nutrition", title: "Питание", hint: "Забота, не запреты" },
-  { id: "walk", title: "Ходьба", hint: "Прогулки" },
-  { id: "stretch", title: "Растяжка", hint: "Мягкая подвижность" },
-  { id: "bike", title: "Вело", hint: "Крутить педали" },
+  { id: "strength", title: "Силовые" },
+  { id: "run", title: "Бег" },
+  { id: "nutrition", title: "Питание" },
+  { id: "walk", title: "Ходьба" },
+  { id: "stretch", title: "Растяжка" },
+  { id: "bike", title: "Вело" },
 ];
 
 export const GOAL_LABELS = Object.fromEntries(GOALS.map((item) => [item.id, item.title]));
 
+export const EXPERIENCE = [
+  { id: "none", title: "Не занимаюсь", hint: "0" },
+  { id: "m1_3", title: "Только начал", hint: "1–3 месяца" },
+  { id: "m3_6", title: "3–6 месяцев", hint: "" },
+  { id: "m6_12", title: "6 месяцев — год", hint: "" },
+  { id: "y1", title: "Больше года", hint: "" },
+];
+
+export const EXPERIENCE_LABELS = Object.fromEntries(
+  EXPERIENCE.map((item) => [item.id, item.hint ? `${item.title}, ${item.hint}` : item.title])
+);
+
 export const DAILY_COPY = {
-  strength: { title: "Задание дня", hint: "Силовая микро-сессия" },
-  run: { title: "Задание дня", hint: "Лёгкий бег" },
-  nutrition: { title: "Задание дня", hint: "Осознанный приём пищи" },
-  walk: { title: "Задание дня", hint: "Тихая прогулка" },
-  stretch: { title: "Задание дня", hint: "Растяжка на 2 мин" },
-  bike: { title: "Задание дня", hint: "Короткая велосессия" },
+  strength: { title: "Задание дня", hint: "Силовая" },
+  run: { title: "Задание дня", hint: "Бег" },
+  nutrition: { title: "Задание дня", hint: "Еда" },
+  walk: { title: "Задание дня", hint: "Прогулка" },
+  stretch: { title: "Задание дня", hint: "Растяжка" },
+  bike: { title: "Задание дня", hint: "Вело" },
 };
 
 export const MISSIONS_BY_GOAL = {
-  strength: { id: "strength", title: "Силовая разминка", time: "8 мин" },
-  run: { id: "run", title: "Лёгкий бег", time: "10 мин" },
-  nutrition: { id: "nutrition", title: "Спокойный приём пищи", time: "15 мин" },
-  walk: { id: "walk", title: "Тихая прогулка", time: "12 мин" },
+  strength: { id: "strength", title: "Силовая", time: "8 мин" },
+  run: { id: "run", title: "Бег", time: "10 мин" },
+  nutrition: { id: "nutrition", title: "Еда", time: "15 мин" },
+  walk: { id: "walk", title: "Прогулка", time: "12 мин" },
   stretch: { id: "stretch", title: "Растяжка", time: "6 мин" },
-  bike: { id: "bike", title: "Велосессия", time: "12 мин" },
+  bike: { id: "bike", title: "Вело", time: "12 мин" },
 };
 
 export function ageFromBirthDate(iso) {

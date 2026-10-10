@@ -1,16 +1,21 @@
 import { Pressable, Text, View } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import { Slot, usePathname, useRouter } from "expo-router";
 import { Dumbbell, Home, Trophy, User, Utensils } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { lightTap } from "../../src/lib/haptics";
+import { AmbientWash, glassStyle, movePill, screenEnter } from "../../src/ui/Glass";
+import { getPalette } from "../../src/ui/theme";
 import { lockPortrait, unlockPortrait } from "../../src/ui/orientationLock";
+import { ShieldNotice } from "../../src/features/streaks/ShieldNotice";
 
 const TABS = [
   { href: "/", label: "Арена", Icon: Home, match: (path) => path === "/" },
   { href: "/workouts", label: "Тренинг", Icon: Dumbbell, match: (path) => path.startsWith("/workouts") },
   { href: "/rewards", label: "Награды", Icon: Trophy, match: (path) => path.startsWith("/rewards") },
-  { href: "/calories", label: "Топливо", Icon: Utensils, match: (path) => path.startsWith("/calories") },
+  { href: "/calories", label: "Калории", Icon: Utensils, match: (path) => path.startsWith("/calories") },
   { href: "/profile", label: "Профиль", Icon: User, match: (path) => path.startsWith("/profile") },
 ];
 
@@ -18,6 +23,9 @@ export default function TabsLayout() {
   const pathname = usePathname();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const [barWidth, setBarWidth] = useState(0);
+  const pillX = useSharedValue(0);
+  const activeIndex = Math.max(0, TABS.findIndex((tab) => tab.match(pathname)));
 
   useEffect(() => {
     lockPortrait()?.catch?.(() => {});
@@ -26,20 +34,72 @@ export default function TabsLayout() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!barWidth) {
+      return;
+    }
+    const inner = Math.max(0, barWidth - 8);
+    const tabWidth = inner / TABS.length;
+    movePill(pillX, 4 + activeIndex * tabWidth);
+  }, [activeIndex, barWidth, pillX]);
+
+  const pillStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: pillX.value }],
+  }));
+  const tabWidth = barWidth ? Math.max(0, barWidth - 8) / TABS.length : 0;
+
   return (
-    <View className="flex-1 bg-canvas">
+    <View className="flex-1" style={{ backgroundColor: getPalette().bg }}>
+      <StatusBar style="light" />
+      <AmbientWash />
+      <ShieldNotice />
       <View className="flex-1">
-        <Slot />
+        <Animated.View key={pathname} entering={screenEnter} style={{ flex: 1 }}>
+          <Slot />
+        </Animated.View>
+        <View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 36,
+            backgroundImage: `linear-gradient(to bottom, transparent, ${getPalette().bg})`,
+          }}
+        />
       </View>
-      <View className="bg-canvas px-3 pt-1" style={{ paddingBottom: Math.max(insets.bottom, 10) }}>
-        <View className="flex-row rounded-[28px] bg-card px-1 py-2">
+      <View className="px-3 pt-1" style={{ paddingBottom: Math.max(insets.bottom, 10) }}>
+        <View
+          className="flex-row rounded-[28px] px-1 py-2"
+          style={glassStyle({ borderRadius: 28 })}
+          onLayout={(event) => setBarWidth(event.nativeEvent.layout.width)}
+        >
+          {tabWidth ? (
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                glassStyle({
+                  variant: "fill",
+                  position: "absolute",
+                  top: 6,
+                  left: 0,
+                  width: tabWidth,
+                  bottom: 6,
+                  borderRadius: 22,
+                  backgroundColor: getPalette().pill,
+                }),
+                pillStyle,
+              ]}
+            />
+          ) : null}
           {TABS.map((tab) => {
             const active = tab.match(pathname);
-            const color = active ? "#2E7D32" : "#8A8A8A";
+            const color = active ? getPalette().accent : getPalette().mute;
             return (
               <Pressable
                 key={tab.href}
-                className={`flex-1 items-center rounded-[22px] py-2 ${active ? "bg-mint" : ""}`}
+                className="flex-1 items-center rounded-[22px] py-2"
                 onPress={() => {
                   lightTap();
                   router.replace(tab.href);
@@ -49,9 +109,9 @@ export default function TabsLayout() {
                   size={20}
                   color={color}
                   strokeWidth={active ? 2.2 : 1.7}
-                  fill={active && tab.href === "/" ? "#2E7D32" : "none"}
+                  fill={active && tab.href === "/" ? color : "none"}
                 />
-                <Text className={`mt-1 text-[10px] font-medium ${active ? "text-accent" : "text-mute"}`}>
+                <Text className="mt-1 text-[10px] font-medium" style={{ color }}>
                   {tab.label}
                 </Text>
               </Pressable>

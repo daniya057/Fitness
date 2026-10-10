@@ -1,12 +1,15 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SoftPress } from "../../ui/SoftPress";
+import { glassStyle } from "../../ui/Glass";
+import { getPalette } from "../../ui/theme";
 import { lightTap } from "../../lib/haptics";
 import { useAuth } from "../auth/AuthContext";
 import { CountdownRing } from "../arena/CountdownRing";
-import { repsLabel } from "./catalog";
+import { levelLabel, repsLabel } from "./catalog";
 import { lookOfGroup } from "./look";
+import { MoveHintButton, MoveHintModal } from "./MoveHint";
 import { MIN_ACTIVITY_SEC, PREP_SEC, useSession } from "./sessionStore";
 
 function clock(sec) {
@@ -30,8 +33,10 @@ export function SessionPlayer() {
   const play = useSession((s) => s.play);
   const pause = useSession((s) => s.pause);
   const skip = useSession((s) => s.skip);
+  const skipPrep = useSession((s) => s.skipPrep);
   const close = useSession((s) => s.close);
   const tick = useSession((s) => s.tick);
+  const [hintTitle, setHintTitle] = useState("");
   const logged = useRef(false);
   const prevIndex = useRef(index);
 
@@ -41,7 +46,8 @@ export function SessionPlayer() {
   const look = lookOfGroup(session?.group);
   const reps = repsLabel(step);
 
-  const live = prep > 0 || running;
+  const hintOpen = Boolean(hintTitle);
+  const live = !hintOpen && (prep > 0 || running);
 
   useEffect(() => {
     if (!live) {
@@ -96,13 +102,13 @@ export function SessionPlayer() {
   }
 
   return (
-    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
+    <View className="flex-1" style={{ paddingTop: insets.top, backgroundColor: "transparent" }}>
       <View className="flex-1 px-6 pb-8">
         <View className="flex-row items-center justify-between pt-2">
-          <SoftPress onPress={close} className="rounded-full bg-card px-4 py-2">
-            <Text className="text-[14px] font-medium text-ink">Назад</Text>
+          <SoftPress onPress={close} className="rounded-full px-4 py-2" style={glassStyle({ borderRadius: 999 })}>
+            <Text className="text-[14px] font-medium text-white">Назад</Text>
           </SoftPress>
-          <Text className="text-[13px] text-mute">
+          <Text className="text-[13px] text-white/55">
             {prep > 0
               ? "Сейчас начнём"
               : step.rounds > 1
@@ -110,10 +116,18 @@ export function SessionPlayer() {
                 : `${index + 1} / ${steps.length}`}
           </Text>
         </View>
+        {levelLabel(session.level) ? (
+          <Text className="mt-4 text-center text-[15px] font-medium" style={{ color: look.accent }}>
+            {levelLabel(session.level)}
+          </Text>
+        ) : null}
 
         <View
           className="mt-8 flex-1 items-center justify-center rounded-[32px] px-6 py-10"
-          style={{ backgroundColor: rest ? "#F8F9FA" : look.player }}
+          style={glassStyle({
+            borderRadius: 32,
+            backgroundColor: rest ? "rgba(255,255,255,0.05)" : "rgba(125,255,179,0.08)",
+          })}
         >
           {prep > 0 ? (
             <Text className="text-center text-[40px] font-semibold leading-[44px]" style={{ color: look.accent }}>
@@ -127,8 +141,8 @@ export function SessionPlayer() {
           <Text
             className={
               prep > 0
-                ? "mt-3 text-center text-[18px] font-medium leading-6 text-ink"
-                : "mt-3 text-center text-[28px] font-semibold leading-8 text-ink"
+                ? "mt-3 text-center text-[18px] font-medium leading-6 text-white"
+                : "mt-3 text-center text-[28px] font-semibold leading-8 text-white"
             }
           >
             {prep > 0 ? session.title : step.title}
@@ -138,37 +152,46 @@ export function SessionPlayer() {
               {reps}
             </Text>
           ) : null}
+          {prep > 0 || (!rest && !finished) ? (
+            <MoveHintButton title={step.title} onPress={setHintTitle} />
+          ) : null}
           <View className="relative mt-8 items-center justify-center" style={{ width: 220, height: 220 }}>
             <CountdownRing
               smooth
-              running={prep > 0 || (running && !finished)}
+              running={live && !finished}
               stepKey={prep > 0 ? "prep" : index}
               totalSec={prep > 0 ? PREP_SEC : step.sec}
               remaining={prep > 0 ? prep : remaining}
               progress={prep > 0 ? prep / PREP_SEC : step.sec > 0 ? remaining / step.sec : 0}
               size={220}
-              track={rest && !prep ? "#E6E6E6" : look.chipOff}
-              stroke={rest && !prep ? "#9E9E9E" : look.accent}
+              track={getPalette().track}
+              stroke={rest && !prep ? getPalette().faint : look.accent}
             />
             <View className="absolute inset-0 items-center justify-center">
-              <Text className="text-[64px] font-semibold leading-[68px] tabular-nums text-ink">
+              <Text className="text-[64px] font-semibold leading-[68px] tabular-nums text-white">
                 {clock(prep > 0 ? prep : remaining)}
               </Text>
             </View>
           </View>
           {prep > 0 ? (
-            <Text className="mt-6 text-center text-[14px] text-mute">дальше: {step.title}</Text>
+            <Text className="mt-6 text-center text-[14px] text-white/55">дальше: {step.title}</Text>
           ) : next ? (
-            <Text className="mt-6 text-center text-[14px] text-mute">дальше: {next.title}</Text>
+            <Text className="mt-6 text-center text-[14px] text-white/55">дальше: {next.title}</Text>
           ) : (
-            <Text className="mt-6 text-center text-[14px] text-mute">последний блок</Text>
+            <Text className="mt-6 text-center text-[14px] text-white/55">последний блок</Text>
           )}
         </View>
 
-        {prep > 0 ? null : finished ? (
+        {prep > 0 ? (
           <View className="mt-6">
-            <Text className="mb-4 text-center text-[18px] font-semibold text-ink">
-              {elapsed >= MIN_ACTIVITY_SEC ? "Готово. Засчитали." : "Так быстро не считается"}
+            <SoftPress onPress={skipPrep} className="items-center rounded-full py-4" style={glassStyle({ borderRadius: 999 })}>
+              <Text className="text-[15px] font-medium text-white">Пропустить подготовку</Text>
+            </SoftPress>
+          </View>
+        ) : finished ? (
+          <View className="mt-6">
+            <Text className="mb-4 text-center text-[18px] font-semibold text-white">
+              {elapsed >= MIN_ACTIVITY_SEC ? "Готово" : "Меньше минуты — не засчитано"}
             </Text>
             <SoftPress onPress={close} className="items-center rounded-full py-4" style={{ backgroundColor: look.accent }}>
               <Text className="text-[15px] font-semibold text-white">К списку</Text>
@@ -183,12 +206,13 @@ export function SessionPlayer() {
             >
               <Text className="text-[15px] font-semibold text-white">{running ? "Пауза" : "Старт"}</Text>
             </SoftPress>
-            <SoftPress onPress={skip} className="items-center rounded-full bg-card px-6 py-4">
-              <Text className="text-[15px] font-medium text-ink">Дальше</Text>
+            <SoftPress onPress={skip} className="items-center rounded-full px-6 py-4" style={glassStyle({ borderRadius: 999 })}>
+              <Text className="text-[15px] font-medium text-white">Дальше</Text>
             </SoftPress>
           </View>
         )}
       </View>
+      <MoveHintModal title={hintTitle} onClose={() => setHintTitle("")} />
     </View>
   );
 }

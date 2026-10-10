@@ -1,6 +1,8 @@
 import { Pressable, Text, View } from "react-native";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { lightTap } from "../../lib/haptics";
+import { glassStyle } from "../../ui/Glass";
+import { getPalette } from "../../ui/theme";
 import { ageFromBirthDate } from "./catalog";
 
 const MONTHS = [
@@ -32,7 +34,7 @@ function mondayIndex(jsDay) {
   return (jsDay + 6) % 7;
 }
 
-export function BirthdayCalendar({ value, onChange }) {
+export function BirthdayCalendar({ value, onChange, glass = false }) {
   const selected = value ? new Date(`${value}T00:00:00`) : null;
   const cursor = selected && !Number.isNaN(selected.getTime()) ? selected : new Date(2000, 0, 1);
   const year = cursor.getFullYear();
@@ -68,29 +70,29 @@ export function BirthdayCalendar({ value, onChange }) {
   const age = ageFromBirthDate(value);
 
   return (
-    <View className="rounded-[24px] bg-mint px-4 py-4">
+    <View className={`rounded-[24px] px-4 py-4 ${glass ? "" : "bg-mint"}`} style={glass ? glassStyle({ borderRadius: 24 }) : undefined}>
       <View className="mb-3 flex-row items-center justify-between">
         <Pressable onPress={() => shiftMonth(-1)} className="h-9 w-9 items-center justify-center">
-          <ChevronLeft size={20} color="#1A1A1A" />
+          <ChevronLeft size={20} color={glass ? getPalette().ink : "#1A1A1A"} />
         </Pressable>
         <View className="flex-row items-center gap-2">
           <Pressable onPress={() => shiftYear(-1)}>
-            <Text className="text-[13px] text-mute">год −</Text>
+            <Text className={`text-[13px] ${glass ? "text-white/55" : "text-mute"}`}>год −</Text>
           </Pressable>
-          <Text className="text-[16px] font-semibold text-ink">
+          <Text className={`text-[16px] font-semibold ${glass ? "text-white" : "text-ink"}`}>
             {MONTHS[month]} {year}
           </Text>
           <Pressable onPress={() => shiftYear(1)}>
-            <Text className="text-[13px] text-mute">год +</Text>
+            <Text className={`text-[13px] ${glass ? "text-white/55" : "text-mute"}`}>год +</Text>
           </Pressable>
         </View>
         <Pressable onPress={() => shiftMonth(1)} className="h-9 w-9 items-center justify-center">
-          <ChevronRight size={20} color="#1A1A1A" />
+          <ChevronRight size={20} color={glass ? getPalette().ink : "#1A1A1A"} />
         </Pressable>
       </View>
       <View className="mb-2 flex-row">
         {WEEK.map((item) => (
-          <Text key={item} className="flex-1 text-center text-[11px] text-mute">
+          <Text key={item} className={`flex-1 text-center text-[11px] ${glass ? "text-white/45" : "text-mute"}`}>
             {item}
           </Text>
         ))}
@@ -114,14 +116,14 @@ export function BirthdayCalendar({ value, onChange }) {
             >
               {day ? (
                 <View className={`h-8 w-8 items-center justify-center rounded-full ${active ? "bg-accent" : ""}`}>
-                  <Text className={`text-[13px] ${active ? "text-white" : "text-ink"}`}>{day}</Text>
+                  <Text className={`text-[13px] ${active || glass ? "text-white" : "text-ink"}`}>{day}</Text>
                 </View>
               ) : null}
             </Pressable>
           );
         })}
       </View>
-      <Text className="mt-3 text-center text-[14px] text-ink">
+      <Text className={`mt-3 text-center text-[14px] ${glass ? "text-white" : "text-ink"}`}>
         {age ? `Тебе ${age}` : "Выбери день рождения"}
       </Text>
     </View>

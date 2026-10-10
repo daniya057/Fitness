@@ -3,7 +3,7 @@ import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { api } from "../auth/api";
 import { Field, GhostButton, PrimaryButton, ScreenHeader, SectionLabel } from "../../ui/kit";
-import { GOAL_LABELS, GOALS } from "../onboarding/catalog";
+import { EXPERIENCE_LABELS, GOAL_LABELS, GOALS } from "../onboarding/catalog";
 
 const TOKEN_KEY = "fitness.admin.token";
 const EMPTY_STATS = {
@@ -61,8 +61,6 @@ export default function AdminScreen() {
   const [stats, setStats] = useState(EMPTY_STATS);
   const [users, setUsers] = useState([]);
   const [query, setQuery] = useState("");
-  const [catalog, setCatalog] = useState({ daily: {}, missions: {} });
-  const [saved, setSaved] = useState("");
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -76,17 +74,12 @@ export default function AdminScreen() {
   }, [users, query]);
 
   const loadAll = async (session) => {
-    const [statsData, usersData, catalogData] = await Promise.all([
+    const [statsData, usersData] = await Promise.all([
       api("/admin/stats", { token: session }),
       api("/admin/users", { token: session }),
-      api("/admin/catalog", { token: session }),
     ]);
     setStats(statsData.stats || EMPTY_STATS);
     setUsers(usersData.users || []);
-    setCatalog({
-      daily: catalogData.daily || {},
-      missions: catalogData.missions || {},
-    });
   };
 
   useEffect(() => {
@@ -134,38 +127,6 @@ export default function AdminScreen() {
     setToken("");
     setUsers([]);
     setStats(EMPTY_STATS);
-  };
-
-  const patchCatalog = (kind, id, field, value) => {
-    setCatalog((prev) => ({
-      ...prev,
-      [kind]: {
-        ...prev[kind],
-        [id]: {
-          ...(prev[kind]?.[id] || {}),
-          [field]: value,
-        },
-      },
-    }));
-  };
-
-  const saveTasks = async () => {
-    setError("");
-    setSaved("");
-    setBusy(true);
-    try {
-      const next = await api("/admin/catalog", {
-        method: "PUT",
-        token,
-        body: { token, daily: catalog.daily, missions: catalog.missions },
-      });
-      setCatalog({ daily: next.daily, missions: next.missions });
-      setSaved("Задания сохранены");
-    } catch (err) {
-      setError(err.message || "Не сохранилось");
-    } finally {
-      setBusy(false);
-    }
   };
 
   if (booting) {
@@ -256,6 +217,7 @@ export default function AdminScreen() {
             <Text className="mt-1 text-[13px] leading-5 text-mute">
               {(user.goals || []).map((id) => GOAL_LABELS[id] || id).join(", ") || "цели не выбраны"}
               {user.daysPerWeek ? ` · ${user.daysPerWeek} дн.` : ""}
+              {EXPERIENCE_LABELS[user.experience] ? ` · ${EXPERIENCE_LABELS[user.experience]}` : ""}
             </Text>
             <Text className="mt-1 text-[12px] text-mute">с {formatDate(user.createdAt)}</Text>
           </View>
@@ -263,38 +225,11 @@ export default function AdminScreen() {
         {filtered.length === 0 ? <Text className="mb-6 text-[14px] text-mute">Никого не нашлось</Text> : null}
 
         <SectionLabel>Задания дня</SectionLabel>
-        {GOALS.map((goal) => {
-          const daily = catalog.daily?.[goal.id] || {};
-          const mission = catalog.missions?.[goal.id] || {};
-          return (
-            <View key={goal.id} className="mb-4 rounded-[24px] bg-card px-4 py-4">
-              <Text className="mb-3 text-[16px] font-semibold text-ink">{goal.title}</Text>
-              <Field
-                label="Заголовок на арене"
-                value={daily.title || ""}
-                onChangeText={(value) => patchCatalog("daily", goal.id, "title", value)}
-              />
-              <Field
-                label="Подпись на арене"
-                value={daily.hint || ""}
-                onChangeText={(value) => patchCatalog("daily", goal.id, "hint", value)}
-              />
-              <Field
-                label="Карточка в тренинге"
-                value={mission.title || ""}
-                onChangeText={(value) => patchCatalog("missions", goal.id, "title", value)}
-              />
-              <Field
-                label="Время"
-                value={mission.time || ""}
-                onChangeText={(value) => patchCatalog("missions", goal.id, "time", value)}
-              />
-            </View>
-          );
-        })}
-        {error ? <Text className="mb-3 text-[14px] font-medium text-accent">{error}</Text> : null}
-        {saved ? <Text className="mb-3 text-[14px] font-medium text-accent">{saved}</Text> : null}
-        <PrimaryButton label="Сохранить задания" onPress={saveTasks} busy={busy} />
+        <View className="mb-6 rounded-[24px] bg-card px-4 py-4">
+          <Text className="text-[14px] leading-5 text-mute">
+            Три мини-тренировки на Арене сервер сам берёт из сессий с пометкой daily в data/content/workouts.json. Старый редактор catalog.json на живые задания больше не влияет.
+          </Text>
+        </View>
       </ScrollView>
     </View>
   );

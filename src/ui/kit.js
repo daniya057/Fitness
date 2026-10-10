@@ -1,20 +1,28 @@
 import { Text, TextInput, View } from "react-native";
 import { SoftPress } from "./SoftPress";
+import { glassStyle } from "./Glass";
+import { getPalette } from "./theme";
 
-export function ScreenHeader({ title, subtitle, right }) {
+export function ScreenHeader({ title, subtitle, right, glass = false }) {
   return (
     <View className="mb-6 pt-2">
       <View className="flex-row items-center justify-between">
-        <Text className="flex-1 text-[28px] font-semibold text-ink">{title}</Text>
+        <Text className={`flex-1 text-[28px] font-semibold ${glass ? "text-white" : "text-ink"}`}>{title}</Text>
         {right}
       </View>
-      {subtitle ? <Text className="mt-2 text-[14px] leading-5 text-mute">{subtitle}</Text> : null}
+      {subtitle ? (
+        <Text className={`mt-2 text-[14px] leading-5 ${glass ? "text-white/60" : "text-mute"}`}>{subtitle}</Text>
+      ) : null}
     </View>
   );
 }
 
-export function SectionLabel({ children }) {
-  return <Text className="mb-3 text-[12px] font-medium tracking-[1.2px] text-mute">{children}</Text>;
+export function SectionLabel({ children, glass = false }) {
+  return (
+    <Text className={`mb-3 text-[12px] font-medium tracking-[1.2px] ${glass ? "text-white/55" : "text-mute"}`}>
+      {children}
+    </Text>
+  );
 }
 
 export function PrimaryButton({ label, onPress, busy, disabled }) {
@@ -30,10 +38,14 @@ export function PrimaryButton({ label, onPress, busy, disabled }) {
   );
 }
 
-export function GhostButton({ label, onPress }) {
+export function GhostButton({ label, onPress, glass = false }) {
   return (
-    <SoftPress onPress={onPress} className="items-center rounded-full bg-card px-5 py-3">
-      <Text className="text-[14px] font-medium text-ink">{label}</Text>
+    <SoftPress
+      onPress={onPress}
+      className={`items-center rounded-full px-5 py-3 ${glass ? "" : "bg-card"}`}
+      style={glass ? glassStyle({ borderRadius: 999 }) : undefined}
+    >
+      <Text className={`text-[14px] font-medium ${glass ? "text-white" : "text-ink"}`}>{label}</Text>
     </SoftPress>
   );
 }
@@ -47,22 +59,38 @@ export function MintButton({ label, onPress }) {
 }
 
 export function PillButton({ label, onPress, tone = "ghost" }) {
-  const bg = tone === "mint" ? "bg-mint" : tone === "accent" ? "bg-accent" : tone === "canvas" ? "bg-canvas" : "bg-card";
-  const color = tone === "accent" ? "text-white" : "text-ink";
+  const glass = tone === "glass" || tone === "glassOn" || tone === "fill";
+  const bg = tone === "mint" ? "bg-mint" : tone === "accent" ? "bg-accent" : tone === "canvas" ? "bg-canvas" : glass ? "" : "bg-card";
+  const color = tone === "accent" || tone === "glassOn" ? "text-white" : tone === "glass" || tone === "fill" ? "text-white/80" : "text-ink";
   return (
-    <SoftPress onPress={onPress} className={`rounded-full px-4 py-2.5 ${bg} ${tone === "canvas" ? "border border-ink/10" : ""}`}>
-      <Text className={`text-[13px] font-medium ${color}`}>{label}</Text>
+    <SoftPress
+      onPress={onPress}
+      className={`rounded-full px-4 py-2.5 ${bg} ${tone === "canvas" ? "border border-ink/10" : ""}`}
+      style={
+        glass
+          ? glassStyle({
+              variant: tone === "fill" ? "fill" : "material",
+              borderRadius: 999,
+              backgroundColor: tone === "glassOn" ? "rgba(125,255,179,0.16)" : "rgba(255,255,255,0.1)",
+            })
+          : undefined
+      }
+    >
+      <Text className={`text-[13px] font-medium ${color}`} style={tone === "glassOn" ? { color: getPalette().accent } : undefined}>
+        {label}
+      </Text>
     </SoftPress>
   );
 }
 
-export function Field({ label, inputName, ...props }) {
+export function Field({ label, inputName, glass = false, ...props }) {
   return (
     <View className="mb-4">
-      <Text className="mb-2 text-[12px] font-medium tracking-[0.8px] text-mute">{label}</Text>
+      <Text className={`mb-2 text-[12px] font-medium tracking-[0.8px] ${glass ? "text-white/55" : "text-mute"}`}>{label}</Text>
       <TextInput
-        className="rounded-2xl bg-card px-4 py-3.5 text-[16px] text-ink"
-        placeholderTextColor="#9E9E9E"
+        className={`rounded-2xl px-4 py-3.5 text-[16px] ${glass ? "text-white" : "bg-card text-ink"}`}
+        placeholderTextColor={glass ? "#8A8A8A" : "#9E9E9E"}
+        style={glass ? glassStyle({ borderRadius: 16 }) : undefined}
         nativeID={inputName}
         {...(inputName ? { name: inputName } : {})}
         {...props}
@@ -71,14 +99,14 @@ export function Field({ label, inputName, ...props }) {
   );
 }
 
-export function StatRow({ label, value, last }) {
+export function StatRow({ label, value, last, glass = false }) {
   return (
     <View>
       <View className="flex-row items-center justify-between py-4">
-        <Text className="text-[15px] text-ink">{label}</Text>
-        <Text className="ml-4 flex-1 text-right text-[14px] font-medium text-mute">{value}</Text>
+        <Text className={`text-[15px] ${glass ? "text-white/80" : "text-ink"}`}>{label}</Text>
+        <Text className={`ml-4 flex-1 text-right text-[14px] font-medium ${glass ? "text-white/55" : "text-mute"}`}>{value}</Text>
       </View>
-      {last ? null : <View className="h-px bg-ink/5" />}
+      {last ? null : <View className="h-px" style={{ backgroundColor: glass ? "rgba(255,255,255,0.1)" : "rgba(26,26,26,0.05)" }} />}
     </View>
   );
 }

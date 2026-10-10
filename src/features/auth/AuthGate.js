@@ -1,5 +1,7 @@
 import { usePathname } from "expo-router";
 import { Text, View } from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { getPalette } from "../../ui/theme";
 import { useAuth } from "./AuthContext";
 import AuthScreen from "./AuthScreen";
 import OnboardingScreen from "../onboarding/OnboardingScreen";
@@ -24,8 +26,9 @@ export function AuthGate({ children }) {
 
   if (booting) {
     return (
-      <View className="flex-1 items-center justify-center bg-canvas">
-        <Text className="text-[16px] text-mute">Секунду</Text>
+      <View className="flex-1 items-center justify-center" style={{ backgroundColor: getPalette().bg }}>
+        <StatusBar style="light" />
+        <Text className="text-[16px] text-white/60">Секунду</Text>
       </View>
     );
   }

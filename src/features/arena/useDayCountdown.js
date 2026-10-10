@@ -6,10 +6,9 @@ function pad(value) {
   return String(value).padStart(2, "0");
 }
 
-function msUntilLocalMidnight(now) {
-  const end = new Date(now);
-  end.setHours(24, 0, 0, 0);
-  return Math.max(0, end.getTime() - now.getTime());
+function msUntilUtcMidnight(now) {
+  const next = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
+  return Math.max(0, next - now.getTime());
 }
 
 function formatHm(ms) {
@@ -20,10 +19,10 @@ function formatHm(ms) {
 }
 
 export function useDayCountdown() {
-  const [ms, setMs] = useState(() => msUntilLocalMidnight(new Date()));
+  const [ms, setMs] = useState(() => msUntilUtcMidnight(new Date()));
 
   useEffect(() => {
-    const tick = () => setMs(msUntilLocalMidnight(new Date()));
+    const tick = () => setMs(msUntilUtcMidnight(new Date()));
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);

@@ -38,6 +38,24 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (!token) {
+      return undefined;
+    }
+    let day = new Date().toISOString().slice(0, 10);
+    const id = setInterval(() => {
+      const next = new Date().toISOString().slice(0, 10);
+      if (next === day) {
+        return;
+      }
+      day = next;
+      api("/me", { token })
+        .then((data) => setUser(data.user))
+        .catch(() => {});
+    }, 15000);
+    return () => clearInterval(id);
+  }, [token]);
+
   const value = useMemo(
     () => ({
       user,
@@ -78,6 +96,14 @@ export function AuthProvider({ children }) {
       },
       async patch(payload) {
         const data = await api("/me", { method: "PATCH", token, body: { ...payload, token } });
+        setUser(data.user);
+        return data.user;
+      },
+      async refresh() {
+        if (!token) {
+          return null;
+        }
+        const data = await api("/me", { token });
         setUser(data.user);
         return data.user;
       },

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Text, TextInput, View } from "react-native";
 import { GhostButton, PrimaryButton } from "../../ui/kit";
+import { glassStyle } from "../../ui/Glass";
 import { cleanBarcode, lookupBarcode } from "./barcode";
 
 export function BarcodeScan({ onClose, onFood }) {
@@ -118,24 +119,25 @@ export function BarcodeScan({ onClose, onFood }) {
 
   return (
     <View className="absolute inset-0 z-20 justify-end bg-ink/50">
-      <View className="rounded-t-[28px] bg-canvas px-5 pb-8 pt-5">
-        <Text className="text-[20px] font-semibold text-ink">Сканер</Text>
-        <Text className="mt-2 text-[13px] leading-5 text-mute">{hint}</Text>
-        <View ref={hostRef} className="mt-4 h-[220px] overflow-hidden rounded-[22px] bg-card" />
+      <View className="rounded-t-[28px] px-5 pb-8 pt-5" style={glassStyle({ borderRadius: 28, backgroundColor: "rgba(7,20,15,0.94)" })}>
+        <Text className="text-[20px] font-semibold text-white">Сканер</Text>
+        <Text className="mt-2 text-[13px] leading-5 text-white/60">{hint}</Text>
+        <View ref={hostRef} className="mt-4 h-[220px] overflow-hidden rounded-[22px]" style={{ backgroundColor: "rgba(255,255,255,0.06)" }} />
         <TextInput
           value={digits}
           onChangeText={(value) => setDigits(cleanBarcode(value))}
           keyboardType="number-pad"
           placeholder="Цифры с пачки"
-          placeholderTextColor="#9E9E9E"
-          className="mt-4 rounded-2xl bg-card px-4 py-3.5 text-[16px] text-ink"
+          placeholderTextColor="#8A8A8A"
+          className="mt-4 rounded-2xl px-4 py-3.5 text-[16px] text-white"
+          style={glassStyle({ borderRadius: 16 })}
         />
         {error ? <Text className="mt-3 text-[13px] text-accent">{error}</Text> : null}
         <View className="mt-5">
           <PrimaryButton label="Найти" onPress={search} busy={busy} disabled={digits.length < 8} />
         </View>
         <View className="mt-3">
-          <GhostButton label="Закрыть" onPress={onClose} />
+          <GhostButton glass label="Закрыть" onPress={onClose} />
         </View>
       </View>
     </View>

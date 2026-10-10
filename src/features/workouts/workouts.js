@@ -3,31 +3,80 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SoftPress } from "../../ui/SoftPress";
 import { ScreenHeader } from "../../ui/kit";
+import { glassStyle } from "../../ui/Glass";
+import { getPalette } from "../../ui/theme";
+import { MoveHintModal, MoveList } from "./MoveHint";
 import { SessionPlayer } from "./SessionPlayer";
-import { WORKOUT_GROUPS, sessionDetail, sessionsInGroup } from "./catalog";
+import {
+  WORKOUT_GROUPS,
+  levelLabel,
+  levelProgressCount,
+  nextLockedSession,
+  openLevel,
+  openSessions,
+  sessionDetail,
+  warmupSessions,
+  workoutsLeftPhrase,
+} from "./catalog";
+import { useAuth } from "../auth/AuthContext";
 import { lookOfGroup } from "./look";
 import { useSession } from "./sessionStore";
+import { Sun, Sunset } from "lucide-react-native";
 
 export default function WorkoutsScreen() {
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   const session = useSession((s) => s.session);
   const open = useSession((s) => s.open);
   const [groupId, setGroupId] = useState(WORKOUT_GROUPS[0].id);
-  const list = useMemo(() => sessionsInGroup(groupId), [groupId]);
+  const [hintTitle, setHintTitle] = useState("");
+  const list = useMemo(() => openSessions(groupId, user), [groupId, user]);
+  const locked = useMemo(() => nextLockedSession(groupId, user), [groupId, user]);
+  const warmups = useMemo(() => warmupSessions(), []);
+  const todaySessions = new Set(Array.isArray(user?.todaySessions) ? user.todaySessions : []);
   const look = lookOfGroup(groupId);
+  const current = openLevel(user);
+  const leftPhrase = current >= 5 ? "Все уровни открыты" : workoutsLeftPhrase(levelProgressCount(user));
 
   if (session) {
     return <SessionPlayer />;
   }
 
   return (
-    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
+    <View className="flex-1" style={{ paddingTop: insets.top, backgroundColor: "transparent" }}>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingHorizontal: 22, paddingBottom: 28 }}
         showsVerticalScrollIndicator={false}
       >
-        <ScreenHeader title="Тренинг" subtitle="Без железа. Короткие круги и длинные на несколько подходов." />
+        <ScreenHeader glass title="Тренинг" subtitle="Следующий уровень — после трёх тренировок" />
+        <Text className="mb-4 text-[15px] font-medium text-white">
+          {levelLabel(current)}. {leftPhrase}.
+        </Text>
+        {warmups.length ? (
+          <View className="mb-5 flex-row gap-2">
+            {warmups.map((item) => {
+              const on = todaySessions.has(item.id);
+              const evening = item.id === "warmup-evening";
+              const Icon = evening ? Sunset : Sun;
+              return (
+                <Pressable
+                  key={item.id}
+                  onPress={() => open(item)}
+                  className="flex-1 rounded-[24px] px-4 py-4"
+                  style={glassStyle({
+                    borderRadius: 24,
+                    backgroundColor: on ? "rgba(125,255,179,0.12)" : undefined,
+                  })}
+                >
+                  <Icon size={18} color={on ? getPalette().accent : getPalette().ink} strokeWidth={1.8} />
+                  <Text className="mt-2 text-[15px] font-semibold text-white">{item.title}</Text>
+                  <Text className="mt-1 text-[12px] text-white/45">{on ? "уже сегодня" : sessionDetail(item)}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        ) : null}
         <View className="mb-5 flex-row flex-wrap gap-2">
           {WORKOUT_GROUPS.map((group) => {
             const on = group.id === groupId;
@@ -37,9 +86,13 @@ export default function WorkoutsScreen() {
                 key={group.id}
                 onPress={() => setGroupId(group.id)}
                 className="rounded-full px-4 py-2.5"
-                style={{ backgroundColor: on ? chip.chipOn : chip.chipOff }}
+                style={glassStyle({
+                  borderRadius: 999,
+                  backgroundColor: on ? getPalette().pill : getPalette().fill,
+                  borderColor: on ? chip.accent : getPalette().line,
+                })}
               >
-                <Text className="text-[13px] font-medium" style={{ color: on ? "#FFFFFF" : chip.ink }}>
+                <Text className="text-[13px] font-medium" style={{ color: on ? getPalette().ink : getPalette().mute }}>
                   {group.title}
                 </Text>
               </Pressable>
@@ -50,16 +103,16 @@ export default function WorkoutsScreen() {
         {list.map((item) => {
           const Icon = look.Icon;
           return (
-            <View key={item.id} className="mb-3 rounded-[28px] px-5 py-6" style={{ backgroundColor: look.card }}>
-              <View className="mb-3 h-10 w-10 items-center justify-center rounded-full bg-white">
-                <Icon size={20} color={look.accent} strokeWidth={2.2} />
+            <View key={item.id} className="mb-3 rounded-[28px] px-5 py-6" style={glassStyle({ borderRadius: 28 })}>
+              <View className="mb-3 h-10 w-10 items-center justify-center rounded-full" style={glassStyle({ variant: "fill", borderRadius: 999 })}>
+                <Icon size={20} color={getPalette().ink} strokeWidth={2.2} />
               </View>
-              <Text className="text-[22px] font-semibold leading-7" style={{ color: look.ink }}>
-                {item.title}
+              <Text className="text-[13px] font-medium" style={{ color: look.accent }}>
+                {levelLabel(item.level)}
               </Text>
-              <Text className="mt-2 text-[13px]" style={{ color: look.mute }}>
-                {sessionDetail(item)}
-              </Text>
+              <Text className="mt-1 text-[22px] font-semibold leading-7 text-white">{item.title}</Text>
+              <Text className="mt-2 text-[13px] text-white/55">{sessionDetail(item)}</Text>
+              <MoveList session={item} onHint={setHintTitle} />
               <SoftPress
                 onPress={() => open(item)}
                 className="mt-5 items-center rounded-full py-3.5"
@@ -70,7 +123,18 @@ export default function WorkoutsScreen() {
             </View>
           );
         })}
+        {locked ? (
+          <View className="mb-3 rounded-[28px] px-5 py-6 opacity-70" style={glassStyle({ borderRadius: 28 })}>
+            <Text className="text-[13px] font-medium text-white/55">{levelLabel(locked.level)}</Text>
+            <Text className="mt-1 text-[22px] font-semibold leading-7 text-white">{locked.title}</Text>
+            <Text className="mt-2 text-[13px] text-white/55">
+              {sessionDetail(locked)}. {leftPhrase} — и эта откроется.
+            </Text>
+            <MoveList session={locked} onHint={setHintTitle} />
+          </View>
+        ) : null}
       </ScrollView>
+      <MoveHintModal title={hintTitle} onClose={() => setHintTitle("")} />
     </View>
   );
 }

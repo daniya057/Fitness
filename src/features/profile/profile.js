@@ -1,21 +1,17 @@
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { Check } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { lightTap } from "../../lib/haptics";
 import { Field, PillButton, PrimaryButton, SectionLabel, StatRow } from "../../ui/kit";
+import { glassStyle } from "../../ui/Glass";
+import { getPalette } from "../../ui/theme";
 import { AchievementPlaque } from "../achievements/plaque";
 import { useAuth } from "../auth/AuthContext";
 import { BirthdayCalendar } from "../onboarding/BirthdayCalendar";
-import { GOALS, GOAL_LABELS, SEX_LABELS, SEX_OPTIONS } from "../onboarding/catalog";
+import { GOALS, GOAL_LABELS, EXPERIENCE_LABELS, SEX_LABELS, SEX_OPTIONS } from "../onboarding/catalog";
+import { ExperiencePicker } from "../onboarding/ExperiencePicker";
 import { ValueSlider } from "../onboarding/ValueSlider";
-
-const HISTORY = [
-  { id: "1", title: "Микро-разминка", time: "08:14", done: true },
-  { id: "2", title: "Минута фокуса", time: "12:02", done: true },
-  { id: "3", title: "Тихая прогулка", time: "18:40", done: false },
-];
 
 function weekLabel(count) {
   if (count === 1) {
@@ -30,7 +26,7 @@ function weekLabel(count) {
 function seedForm(user) {
   return {
     name: user?.name || "",
-    status: user?.status || "Двигаюсь мягко",
+    status: user?.status || "",
     weight: Number(user?.weight?.current) || 72,
     goal: Number(user?.weight?.goal) || 68,
     heightCm: Number(user?.heightCm) || 170,
@@ -38,6 +34,7 @@ function seedForm(user) {
     birthDate: user?.birthDate || "2000-01-15",
     goals: user?.goals?.length ? [...user.goals] : ["walk"],
     daysPerWeek: Number(user?.daysPerWeek) || 3,
+    experience: EXPERIENCE_LABELS[user?.experience] ? user.experience : "",
   };
 }
 
@@ -51,7 +48,7 @@ export default function ProfileScreen() {
   const [busy, setBusy] = useState(false);
 
   const name = user?.name || "Гость";
-  const status = user?.status || "Двигаюсь мягко";
+  const status = String(user?.status || "").trim();
   const goalNames = (user?.goals || []).map((id) => GOAL_LABELS[id]).filter(Boolean);
   const weight = user?.weight;
 
@@ -81,10 +78,6 @@ export default function ProfileScreen() {
       setError("Имя от 2 символов");
       return;
     }
-    if (!form.status.trim()) {
-      setError("Напиши короткий статус");
-      return;
-    }
     if (form.goals.length < 1) {
       setError("Выбери хотя бы одно направление");
       return;
@@ -93,13 +86,17 @@ export default function ProfileScreen() {
       setError("Укажи пол");
       return;
     }
+    if (!form.experience) {
+      setError("Выбери, как давно занимаешься");
+      return;
+    }
     setBusy(true);
     try {
       await patch({
         updateProfile: true,
         onboardingDone: true,
         name: form.name,
-        status: form.status,
+        status: form.status.trim(),
         weight: form.weight,
         goal: form.goal,
         heightCm: form.heightCm,
@@ -107,6 +104,7 @@ export default function ProfileScreen() {
         birthDate: form.birthDate,
         goals: form.goals,
         daysPerWeek: form.daysPerWeek,
+        experience: form.experience,
       });
       setEditing(false);
     } catch (err) {
@@ -117,33 +115,36 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
+    <View className="flex-1" style={{ paddingTop: insets.top, backgroundColor: "transparent" }}>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingHorizontal: 22, paddingBottom: 28 }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="mt-2 rounded-[28px] bg-mint px-6 py-7">
-          <Text className="text-[12px] font-medium tracking-[1.2px] text-accent">Профиль</Text>
-          <Text className="mt-2 text-[28px] font-semibold text-ink">{name}</Text>
-          <Text className="mt-1 text-[14px] text-mute">{status}</Text>
-          <Text className="mt-2 text-[13px] text-mute">{user?.email}</Text>
+        <View className="mt-2 rounded-[28px] px-6 py-7" style={glassStyle({ borderRadius: 28 })}>
+          <Text className="text-[12px] font-medium tracking-[1.2px]" style={{ color: getPalette().accent }}>
+            Профиль
+          </Text>
+          <Text className="mt-2 text-[28px] font-semibold text-white">{name}</Text>
+          {status ? <Text className="mt-1 text-[14px] text-white/60">{status}</Text> : null}
+          <Text className="mt-2 text-[13px] text-white/45">{user?.email}</Text>
           <View className="mt-6 flex-row flex-wrap gap-2">
             {editing ? (
-              <PillButton label="Отмена" onPress={cancelEdit} tone="canvas" />
+              <PillButton label="Отмена" onPress={cancelEdit} tone="fill" />
             ) : (
-              <PillButton label="Изменить" onPress={startEdit} tone="canvas" />
+              <PillButton label="Изменить" onPress={startEdit} tone="fill" />
             )}
-            <PillButton label="Выйти" onPress={logout} tone="canvas" />
+            <PillButton label="Выйти" onPress={logout} tone="fill" />
           </View>
         </View>
 
         {editing ? (
           <View className="mt-8">
-            <SectionLabel>Редактирование</SectionLabel>
-            <Field label="Имя" value={form.name} onChangeText={(value) => setForm((prev) => ({ ...prev, name: value }))} />
+            <SectionLabel glass>Редактирование</SectionLabel>
+            <Field glass label="Имя" value={form.name} onChangeText={(value) => setForm((prev) => ({ ...prev, name: value }))} />
             <Field
+              glass
               label="Статус"
               value={form.status}
               onChangeText={(value) => setForm((prev) => ({ ...prev, status: value }))}
@@ -155,6 +156,7 @@ export default function ProfileScreen() {
               max={160}
               step={0.5}
               unit="кг"
+              glass
               onChange={(value) => setForm((prev) => ({ ...prev, weight: value }))}
             />
             <ValueSlider
@@ -164,6 +166,7 @@ export default function ProfileScreen() {
               max={160}
               step={0.5}
               unit="кг"
+              glass
               onChange={(value) => setForm((prev) => ({ ...prev, goal: value }))}
             />
             <ValueSlider
@@ -173,9 +176,10 @@ export default function ProfileScreen() {
               max={210}
               step={1}
               unit="см"
+              glass
               onChange={(value) => setForm((prev) => ({ ...prev, heightCm: value }))}
             />
-            <SectionLabel>Пол</SectionLabel>
+            <SectionLabel glass>Пол</SectionLabel>
             <View className="mb-6 flex-row gap-3">
               {SEX_OPTIONS.map((item) => {
                 const on = form.sex === item.id;
@@ -186,17 +190,21 @@ export default function ProfileScreen() {
                       await lightTap();
                       setForm((prev) => ({ ...prev, sex: item.id }));
                     }}
-                    className={`h-14 flex-1 items-center justify-center rounded-full ${on ? "bg-mint" : "bg-card"}`}
+                    className="h-14 flex-1 items-center justify-center rounded-full"
+                    style={glassStyle({
+                      borderRadius: 999,
+                      backgroundColor: on ? "rgba(125,255,179,0.16)" : "rgba(255,255,255,0.08)",
+                    })}
                   >
-                    <Text className="text-[18px] font-semibold text-ink">{item.title}</Text>
+                    <Text className="text-[18px] font-semibold text-white">{item.title}</Text>
                   </Pressable>
                 );
               })}
             </View>
-            <SectionLabel>Дата рождения</SectionLabel>
-            <BirthdayCalendar value={form.birthDate} onChange={(value) => setForm((prev) => ({ ...prev, birthDate: value }))} />
+            <SectionLabel glass>Дата рождения</SectionLabel>
+            <BirthdayCalendar glass value={form.birthDate} onChange={(value) => setForm((prev) => ({ ...prev, birthDate: value }))} />
             <View className="mt-6">
-              <SectionLabel>Цели</SectionLabel>
+              <SectionLabel glass>Цели</SectionLabel>
             </View>
             <View className="flex-row flex-wrap justify-between">
               {GOALS.map((item) => {
@@ -205,13 +213,24 @@ export default function ProfileScreen() {
                   <Pressable
                     key={item.id}
                     onPress={() => toggleGoal(item.id)}
-                    className={`mb-3 w-[48%] rounded-[22px] px-4 py-4 ${on ? "bg-mint" : "bg-card"}`}
+                    className="mb-3 w-[48%] rounded-[22px] px-4 py-4"
+                    style={glassStyle({
+                      borderRadius: 22,
+                      backgroundColor: on ? "rgba(125,255,179,0.16)" : "rgba(255,255,255,0.08)",
+                    })}
                   >
-                    <Text className="text-[16px] font-semibold text-ink">{item.title}</Text>
-                    <Text className="mt-1 text-[12px] text-mute">{item.hint}</Text>
+                    <Text className="text-[16px] font-semibold text-white">{item.title}</Text>
+                    {item.hint ? <Text className="mt-1 text-[12px] text-white/50">{item.hint}</Text> : null}
                   </Pressable>
                 );
               })}
+            </View>
+            <View className="mt-2">
+              <ExperiencePicker
+                glass
+                value={form.experience}
+                onChange={(id) => setForm((prev) => ({ ...prev, experience: id }))}
+              />
             </View>
             <ValueSlider
               label="Раз в неделю"
@@ -220,6 +239,7 @@ export default function ProfileScreen() {
               max={7}
               step={1}
               unit={form.daysPerWeek === 1 ? "день" : "дней"}
+              glass
               onChange={(value) => setForm((prev) => ({ ...prev, daysPerWeek: value }))}
             />
             {error ? <Text className="mb-3 text-[14px] font-medium text-accent">{error}</Text> : null}
@@ -228,6 +248,7 @@ export default function ProfileScreen() {
         ) : (
           <>
             <AchievementPlaque
+              tone="glass"
               user={user}
               onPress={async () => {
                 await lightTap();
@@ -236,33 +257,20 @@ export default function ProfileScreen() {
             />
 
             <View className="mt-8">
-              <SectionLabel>Из опросника</SectionLabel>
-              <View className="rounded-[28px] bg-card px-5 py-1">
-                <StatRow label="Возраст" value={user?.age ? `${user.age}` : "—"} />
-                <StatRow label="Рост" value={user?.heightCm ? `${user.heightCm} см` : "—"} />
-                <StatRow label="Пол" value={SEX_LABELS[user?.sex] || "—"} />
+              <SectionLabel glass>Из опросника</SectionLabel>
+              <View className="rounded-[28px] px-5 py-1" style={glassStyle({ borderRadius: 28 })}>
+                <StatRow glass label="Возраст" value={user?.age ? `${user.age}` : "—"} />
+                <StatRow glass label="Рост" value={user?.heightCm ? `${user.heightCm} см` : "—"} />
+                <StatRow glass label="Пол" value={SEX_LABELS[user?.sex] || "—"} />
                 <StatRow
+                  glass
                   label="Вес"
                   value={weight ? `${Number(weight.current).toFixed(1)} → ${Number(weight.goal).toFixed(1)} кг` : "—"}
                 />
-                <StatRow label="Цели" value={goalNames.length ? goalNames.join(", ") : "—"} />
-                <StatRow last label="В неделю" value={user?.daysPerWeek ? `${user.daysPerWeek} ${weekLabel(user.daysPerWeek)}` : "—"} />
+                <StatRow glass label="Цели" value={goalNames.length ? goalNames.join(", ") : "—"} />
+                <StatRow glass label="В неделю" value={user?.daysPerWeek ? `${user.daysPerWeek} ${weekLabel(user.daysPerWeek)}` : "—"} />
+                <StatRow glass last label="Как давно" value={EXPERIENCE_LABELS[user?.experience] || "—"} />
               </View>
-            </View>
-
-            <View className="mt-8">
-              <SectionLabel>История сегодня</SectionLabel>
-              {HISTORY.map((item) => (
-                <View key={item.id} className="mb-2 flex-row items-center rounded-[22px] bg-card px-4 py-4">
-                  <View
-                    className={`mr-3 h-7 w-7 items-center justify-center rounded-full ${item.done ? "bg-accent" : "bg-canvas"}`}
-                  >
-                    {item.done ? <Check size={14} color="#FFFFFF" strokeWidth={2.2} /> : null}
-                  </View>
-                  <Text className="flex-1 text-[15px] font-medium text-ink">{item.title}</Text>
-                  <Text className="text-[12px] font-medium text-mute">{item.time}</Text>
-                </View>
-              ))}
             </View>
           </>
         )}

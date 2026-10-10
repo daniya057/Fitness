@@ -1,908 +1,653 @@
 {
+  "unlockEvery": 3,
+  "experienceRank": {
+    "none": 1,
+    "m1_3": 2,
+    "m3_6": 3,
+    "m6_12": 4,
+    "y1": 5
+  },
+  "levels": [
+    { "id": 1, "title": "Новичок" },
+    { "id": 2, "title": "Начинающий" },
+    { "id": 3, "title": "Средний" },
+    { "id": 4, "title": "Продвинутый" },
+    { "id": 5, "title": "Опытный" }
+  ],
   "groups": [
-    {
-      "id": "full",
-      "title": "Всё тело"
-    },
-    {
-      "id": "push",
-      "title": "Жим"
-    },
-    {
-      "id": "pull",
-      "title": "Тяга"
-    },
-    {
-      "id": "legs",
-      "title": "Ноги"
-    },
-    {
-      "id": "core",
-      "title": "Кор"
-    },
-    {
-      "id": "cardio",
-      "title": "Кардио"
-    },
-    {
-      "id": "stretch",
-      "title": "Растяжка"
-    },
-    {
-      "id": "meal",
-      "title": "Еда"
-    }
+    { "id": "full", "title": "Всё тело" },
+    { "id": "push", "title": "Жим" },
+    { "id": "pull", "title": "Спина" },
+    { "id": "legs", "title": "Ноги" },
+    { "id": "core", "title": "Пресс" },
+    { "id": "cardio", "title": "Кардио" },
+    { "id": "stretch", "title": "Растяжка" },
+    { "id": "meal", "title": "Еда" }
   ],
   "sessions": [
     {
-      "id": "full-beginner",
+      "id": "full-1",
       "group": "full",
       "kind": "strength",
-      "title": "Круг новичка",
+      "level": 1,
+      "title": "Базовая тренировка",
+      "restSec": 15,
       "moves": [
-        {
-          "title": "Приседания",
-          "sec": 40
-        },
-        {
-          "title": "Отжимания с колен",
-          "sec": 30
-        },
-        {
-          "title": "Ягодичный мост",
-          "sec": 35
-        },
-        {
-          "title": "Планка",
-          "sec": 25
-        },
-        {
-          "title": "Марш на месте",
-          "sec": 30
-        }
+        { "title": "Приседания до стула", "sec": 40 },
+        { "title": "Отжимания от стены", "sec": 30 },
+        { "title": "Ягодичный мост", "sec": 40 },
+        { "title": "Птица-собака", "sec": 40 },
+        { "title": "Марш на месте", "sec": 30 }
       ]
     },
     {
-      "id": "full-seven",
+      "id": "full-2",
       "group": "full",
       "kind": "strength",
-      "restSec": 10,
-      "title": "Семь минут",
+      "level": 2,
+      "title": "Круговая тренировка",
+      "rounds": 2,
+      "restSec": 15,
+      "roundRestSec": 45,
       "moves": [
-        {
-          "title": "Прыжки ноги врозь",
-          "sec": 30
-        },
-        {
-          "title": "Стена-стул",
-          "sec": 30
-        },
-        {
-          "title": "Отжимания с колен",
-          "sec": 30
-        },
-        {
-          "title": "Скручивания",
-          "sec": 30
-        },
-        {
-          "title": "Выпады на месте",
-          "sec": 30
-        },
-        {
-          "title": "Планка",
-          "sec": 30
-        },
-        {
-          "title": "Приседания",
-          "sec": 30
-        },
-        {
-          "title": "Супермен",
-          "sec": 30
-        }
+        { "title": "Приседания", "sec": 35 },
+        { "title": "Отжимания с колен", "sec": 30 },
+        { "title": "Ягодичный мост", "sec": 35 },
+        { "title": "Супермен", "sec": 30 }
       ]
     },
     {
-      "id": "full-rounds",
+      "id": "full-3",
       "group": "full",
       "kind": "strength",
+      "level": 3,
       "title": "Три круга",
       "rounds": 3,
       "restSec": 15,
-      "roundRestSec": 45,
+      "roundRestSec": 60,
       "moves": [
-        {
-          "title": "Приседания",
-          "sec": 40
-        },
-        {
-          "title": "Отжимания с колен",
-          "sec": 40
-        },
-        {
-          "title": "Выпады на месте",
-          "sec": 40
-        },
-        {
-          "title": "Планка",
-          "sec": 40
-        },
-        {
-          "title": "Супермен",
-          "sec": 40
-        },
-        {
-          "title": "Ягодичный мост",
-          "sec": 40
-        }
+        { "title": "Приседания", "sec": 40 },
+        { "title": "Отжимания с колен", "sec": 35 },
+        { "title": "Выпады назад", "sec": 40 },
+        { "title": "Ягодичный мост", "sec": 40 },
+        { "title": "Супермен", "sec": 35 },
+        { "title": "Планка", "sec": 30 }
       ]
     },
     {
-      "id": "full-full",
+      "id": "full-4",
       "group": "full",
       "kind": "strength",
+      "level": 4,
+      "title": "Семь минут",
+      "restSec": 10,
+      "moves": [
+        { "title": "Прыжки ноги врозь", "sec": 30 },
+        { "title": "Стена-стул", "sec": 30 },
+        { "title": "Отжимания с колен", "sec": 30 },
+        { "title": "Скручивания", "sec": 30 },
+        { "title": "Выпады на месте", "sec": 30 },
+        { "title": "Приседания", "sec": 30 },
+        { "title": "Отжимания узко с колен", "sec": 30 },
+        { "title": "Планка", "sec": 30 },
+        { "title": "Марш высоким коленом", "sec": 30 },
+        { "title": "Выпады назад", "sec": 30 },
+        { "title": "Боковая планка слева", "sec": 30 },
+        { "title": "Боковая планка справа", "sec": 30 }
+      ]
+    },
+    {
+      "id": "full-5",
+      "group": "full",
+      "kind": "strength",
+      "level": 5,
       "title": "Полная тренировка",
-      "rounds": 4,
-      "restSec": 15,
-      "roundRestSec": 45,
+      "rounds": 3,
+      "restSec": 12,
+      "roundRestSec": 50,
       "moves": [
-        {
-          "title": "Приседания",
-          "sec": 50
-        },
-        {
-          "title": "Отжимания с колен",
-          "sec": 45
-        },
-        {
-          "title": "Выпады на месте",
-          "sec": 45
-        },
-        {
-          "title": "Ягодичный мост",
-          "sec": 45
-        },
-        {
-          "title": "Планка",
-          "sec": 40
-        },
-        {
-          "title": "Супермен",
-          "sec": 40
-        },
-        {
-          "title": "Скручивания",
-          "sec": 40
-        },
-        {
-          "title": "Марш на месте",
-          "sec": 45
-        }
+        { "title": "Приседания", "sec": 45 },
+        { "title": "Отжимания узко с колен", "sec": 40 },
+        { "title": "Выпады назад", "sec": 40 },
+        { "title": "Ягодичный мост на одной", "sec": 35 },
+        { "title": "Супермен", "sec": 40 },
+        { "title": "Планка", "sec": 30 },
+        { "title": "Марш высоким коленом", "sec": 35 }
       ]
     },
     {
-      "id": "push-easy",
+      "id": "push-1",
       "group": "push",
       "kind": "strength",
-      "title": "Жим с колен",
+      "level": 1,
+      "title": "Отжимания от стены",
+      "restSec": 15,
       "moves": [
-        {
-          "title": "Отжимания от стены",
-          "sec": 40
-        },
-        {
-          "title": "Отжимания с колен",
-          "sec": 30
-        },
-        {
-          "title": "Планка на коленях",
-          "sec": 25
-        },
-        {
-          "title": "Круги руками",
-          "sec": 30
-        }
+        { "title": "Отжимания от стены", "sec": 40 },
+        { "title": "Планка на коленях", "sec": 25 },
+        { "title": "Круги руками", "sec": 30 },
+        { "title": "Подъёмы рук в стороны", "sec": 30 }
       ]
     },
     {
-      "id": "push-rounds",
+      "id": "push-2",
       "group": "push",
       "kind": "strength",
-      "title": "Жим три подхода",
-      "rounds": 3,
-      "restSec": 15,
-      "roundRestSec": 45,
-      "moves": [
-        {
-          "title": "Отжимания от стены",
-          "sec": 40
-        },
-        {
-          "title": "Отжимания с колен",
-          "sec": 40
-        },
-        {
-          "title": "Отжимания узко с колен",
-          "sec": 40
-        },
-        {
-          "title": "Касания плеч в планке",
-          "sec": 40
-        },
-        {
-          "title": "Планка на прямых руках",
-          "sec": 40
-        }
-      ]
-    },
-    {
-      "id": "push-full",
-      "group": "push",
-      "kind": "strength",
-      "title": "Жим полностью",
-      "rounds": 4,
-      "restSec": 15,
-      "roundRestSec": 45,
-      "moves": [
-        {
-          "title": "Отжимания от стены",
-          "sec": 50
-        },
-        {
-          "title": "Отжимания с колен",
-          "sec": 45
-        },
-        {
-          "title": "Отжимания узко с колен",
-          "sec": 40
-        },
-        {
-          "title": "Планка на прямых руках",
-          "sec": 40
-        },
-        {
-          "title": "Касания плеч в планке",
-          "sec": 40
-        },
-        {
-          "title": "Планка на коленях",
-          "sec": 40
-        },
-        {
-          "title": "Подъёмы рук в стороны",
-          "sec": 45
-        },
-        {
-          "title": "Круги руками",
-          "sec": 40
-        }
-      ]
-    },
-    {
-      "id": "pull-posture",
-      "group": "pull",
-      "kind": "strength",
-      "title": "Осанка за столом",
-      "moves": [
-        {
-          "title": "Сведение лопаток",
-          "sec": 35
-        },
-        {
-          "title": "Кошка-корова",
-          "sec": 40
-        },
-        {
-          "title": "Растяжка груди у стены",
-          "sec": 30
-        },
-        {
-          "title": "Поза ребёнка",
-          "sec": 35
-        }
-      ]
-    },
-    {
-      "id": "pull-rounds",
-      "group": "pull",
-      "kind": "strength",
-      "title": "Тяга три подхода",
-      "rounds": 3,
-      "restSec": 15,
-      "roundRestSec": 45,
-      "moves": [
-        {
-          "title": "Супермен",
-          "sec": 40
-        },
-        {
-          "title": "Птица-собака",
-          "sec": 40
-        },
-        {
-          "title": "Сведение лопаток",
-          "sec": 40
-        },
-        {
-          "title": "Ягодичный мост",
-          "sec": 40
-        },
-        {
-          "title": "Супермен руки вперёд",
-          "sec": 40
-        }
-      ]
-    },
-    {
-      "id": "pull-full",
-      "group": "pull",
-      "kind": "strength",
-      "title": "Тяга полностью",
-      "rounds": 4,
-      "restSec": 15,
-      "roundRestSec": 45,
-      "moves": [
-        {
-          "title": "Супермен",
-          "sec": 45
-        },
-        {
-          "title": "Птица-собака",
-          "sec": 45
-        },
-        {
-          "title": "Сведение лопаток",
-          "sec": 45
-        },
-        {
-          "title": "Ягодичный мост",
-          "sec": 45
-        },
-        {
-          "title": "Супермен руки вперёд",
-          "sec": 40
-        },
-        {
-          "title": "Кошка-корова",
-          "sec": 40
-        },
-        {
-          "title": "Растяжка груди у стены",
-          "sec": 40
-        },
-        {
-          "title": "Поза ребёнка",
-          "sec": 40
-        }
-      ]
-    },
-    {
-      "id": "legs-easy",
-      "group": "legs",
-      "kind": "strength",
-      "title": "Ноги мягко",
-      "moves": [
-        {
-          "title": "Приседания до стула",
-          "sec": 40
-        },
-        {
-          "title": "Подъём на носки",
-          "sec": 30
-        },
-        {
-          "title": "Ягодичный мост",
-          "sec": 35
-        },
-        {
-          "title": "Марш на месте",
-          "sec": 30
-        }
-      ]
-    },
-    {
-      "id": "legs-rounds",
-      "group": "legs",
-      "kind": "strength",
-      "title": "Ноги три подхода",
-      "rounds": 3,
-      "restSec": 15,
-      "roundRestSec": 45,
-      "moves": [
-        {
-          "title": "Приседания",
-          "sec": 40
-        },
-        {
-          "title": "Выпады назад",
-          "sec": 40
-        },
-        {
-          "title": "Ягодичный мост",
-          "sec": 40
-        },
-        {
-          "title": "Подъём на носки",
-          "sec": 40
-        },
-        {
-          "title": "Стена-стул",
-          "sec": 40
-        },
-        {
-          "title": "Марш высоким коленом",
-          "sec": 40
-        }
-      ]
-    },
-    {
-      "id": "legs-full",
-      "group": "legs",
-      "kind": "strength",
-      "title": "Ноги полностью",
-      "rounds": 4,
-      "restSec": 15,
-      "roundRestSec": 45,
-      "moves": [
-        {
-          "title": "Приседания",
-          "sec": 50
-        },
-        {
-          "title": "Выпады на месте",
-          "sec": 45
-        },
-        {
-          "title": "Выпады назад",
-          "sec": 45
-        },
-        {
-          "title": "Ягодичный мост",
-          "sec": 45
-        },
-        {
-          "title": "Ягодичный мост на одной",
-          "sec": 40
-        },
-        {
-          "title": "Подъём на носки",
-          "sec": 40
-        },
-        {
-          "title": "Стена-стул",
-          "sec": 40
-        },
-        {
-          "title": "Марш высоким коленом",
-          "sec": 45
-        }
-      ]
-    },
-    {
-      "id": "core-plank",
-      "group": "core",
-      "kind": "strength",
-      "title": "Планка на сегодня",
-      "moves": [
-        {
-          "title": "Планка",
-          "sec": 30
-        },
-        {
-          "title": "Планка на коленях",
-          "sec": 25
-        },
-        {
-          "title": "Боковая планка слева",
-          "sec": 20
-        },
-        {
-          "title": "Боковая планка справа",
-          "sec": 20
-        },
-        {
-          "title": "Планка",
-          "sec": 25
-        }
-      ]
-    },
-    {
-      "id": "core-rounds",
-      "group": "core",
-      "kind": "strength",
-      "title": "Кор три подхода",
-      "rounds": 3,
-      "restSec": 15,
-      "roundRestSec": 45,
-      "moves": [
-        {
-          "title": "Планка",
-          "sec": 40
-        },
-        {
-          "title": "Мёртвый жук",
-          "sec": 40
-        },
-        {
-          "title": "Велосипед лёжа",
-          "sec": 40
-        },
-        {
-          "title": "Скручивания",
-          "sec": 40
-        },
-        {
-          "title": "Боковая планка слева",
-          "sec": 30
-        },
-        {
-          "title": "Боковая планка справа",
-          "sec": 30
-        }
-      ]
-    },
-    {
-      "id": "core-full",
-      "group": "core",
-      "kind": "strength",
-      "title": "Кор полностью",
-      "rounds": 4,
+      "level": 2,
+      "title": "Отжимания с колен",
+      "rounds": 2,
       "restSec": 15,
       "roundRestSec": 40,
       "moves": [
-        {
-          "title": "Планка",
-          "sec": 45
-        },
-        {
-          "title": "Планка на коленях",
-          "sec": 40
-        },
-        {
-          "title": "Мёртвый жук",
-          "sec": 45
-        },
-        {
-          "title": "Велосипед лёжа",
-          "sec": 40
-        },
-        {
-          "title": "Скручивания",
-          "sec": 40
-        },
-        {
-          "title": "Боковая планка слева",
-          "sec": 35
-        },
-        {
-          "title": "Боковая планка справа",
-          "sec": 35
-        },
-        {
-          "title": "Птица-собака",
-          "sec": 40
-        }
+        { "title": "Отжимания с колен", "sec": 35 },
+        { "title": "Отжимания от стены", "sec": 30 },
+        { "title": "Планка на коленях", "sec": 25 },
+        { "title": "Касания плеч в планке", "sec": 25 }
       ]
     },
     {
-      "id": "cardio-tabata",
-      "group": "cardio",
-      "kind": "run",
-      "restSec": 10,
-      "title": "Табата 4 минуты",
+      "id": "push-3",
+      "group": "push",
+      "kind": "strength",
+      "level": 3,
+      "title": "Отжимания, 3 подхода",
+      "rounds": 3,
+      "restSec": 20,
+      "roundRestSec": 60,
       "moves": [
-        {
-          "title": "Прыжки ноги врозь",
-          "sec": 20
-        },
-        {
-          "title": "Приседания",
-          "sec": 20
-        },
-        {
-          "title": "Прыжки ноги врозь",
-          "sec": 20
-        },
-        {
-          "title": "Приседания",
-          "sec": 20
-        },
-        {
-          "title": "Марш высоким коленом",
-          "sec": 20
-        },
-        {
-          "title": "Прыжки ноги врозь",
-          "sec": 20
-        },
-        {
-          "title": "Приседания",
-          "sec": 20
-        },
-        {
-          "title": "Марш высоким коленом",
-          "sec": 20
-        }
+        { "title": "Отжимания с колен", "sec": 40 },
+        { "title": "Отжимания узко с колен", "sec": 35 },
+        { "title": "Касания плеч в планке", "sec": 30 },
+        { "title": "Планка на прямых руках", "sec": 30 },
+        { "title": "Подъёмы рук в стороны", "sec": 35 }
       ]
     },
     {
-      "id": "cardio-walk",
+      "id": "push-4",
+      "group": "push",
+      "kind": "strength",
+      "level": 4,
+      "title": "Отжимания и плечи",
+      "rounds": 3,
+      "restSec": 15,
+      "roundRestSec": 45,
+      "moves": [
+        { "title": "Отжимания с колен", "sec": 40 },
+        { "title": "Отжимания узко с колен", "sec": 40 },
+        { "title": "Касания плеч в планке", "sec": 35 },
+        { "title": "Планка на прямых руках", "sec": 35 },
+        { "title": "Подъёмы рук в стороны", "sec": 35 }
+      ]
+    },
+    {
+      "id": "push-5",
+      "group": "push",
+      "kind": "strength",
+      "level": 5,
+      "title": "Отжимания узким хватом",
+      "rounds": 3,
+      "restSec": 12,
+      "roundRestSec": 40,
+      "moves": [
+        { "title": "Отжимания с колен", "sec": 45 },
+        { "title": "Отжимания узко с колен", "sec": 40 },
+        { "title": "Касания плеч в планке", "sec": 35 },
+        { "title": "Планка на прямых руках", "sec": 40 },
+        { "title": "Подъёмы рук в стороны", "sec": 40 },
+        { "title": "Отжимания от стены", "sec": 30 }
+      ]
+    },
+    {
+      "id": "pull-1",
+      "group": "pull",
+      "kind": "strength",
+      "level": 1,
+      "title": "Осанка",
+      "restSec": 12,
+      "moves": [
+        { "title": "Сведение лопаток", "sec": 40 },
+        { "title": "Кошка-корова", "sec": 40 },
+        { "title": "Поза ребёнка", "sec": 30 }
+      ]
+    },
+    {
+      "id": "pull-2",
+      "group": "pull",
+      "kind": "strength",
+      "level": 2,
+      "title": "Спина лёжа",
+      "rounds": 2,
+      "restSec": 15,
+      "roundRestSec": 40,
+      "moves": [
+        { "title": "Супермен", "sec": 35 },
+        { "title": "Птица-собака", "sec": 35 },
+        { "title": "Сведение лопаток", "sec": 30 },
+        { "title": "Ягодичный мост", "sec": 30 }
+      ]
+    },
+    {
+      "id": "pull-3",
+      "group": "pull",
+      "kind": "strength",
+      "level": 3,
+      "title": "Спина, 3 подхода",
+      "rounds": 3,
+      "restSec": 20,
+      "roundRestSec": 60,
+      "moves": [
+        { "title": "Супермен", "sec": 40 },
+        { "title": "Птица-собака", "sec": 40 },
+        { "title": "Сведение лопаток", "sec": 35 },
+        { "title": "Ягодичный мост", "sec": 40 },
+        { "title": "Супермен руки вперёд", "sec": 35 }
+      ]
+    },
+    {
+      "id": "pull-4",
+      "group": "pull",
+      "kind": "strength",
+      "level": 4,
+      "title": "Спина и лопатки",
+      "rounds": 3,
+      "restSec": 15,
+      "roundRestSec": 45,
+      "moves": [
+        { "title": "Супермен", "sec": 40 },
+        { "title": "Супермен руки вперёд", "sec": 35 },
+        { "title": "Птица-собака", "sec": 40 },
+        { "title": "Сведение лопаток", "sec": 35 },
+        { "title": "Ягодичный мост", "sec": 40 }
+      ]
+    },
+    {
+      "id": "pull-5",
+      "group": "pull",
+      "kind": "strength",
+      "level": 5,
+      "title": "Спина полностью",
+      "rounds": 3,
+      "restSec": 12,
+      "roundRestSec": 40,
+      "moves": [
+        { "title": "Супермен", "sec": 45 },
+        { "title": "Супермен руки вперёд", "sec": 40 },
+        { "title": "Птица-собака", "sec": 40 },
+        { "title": "Сведение лопаток", "sec": 35 },
+        { "title": "Ягодичный мост", "sec": 40 },
+        { "title": "Кошка-корова", "sec": 30 }
+      ]
+    },
+    {
+      "id": "legs-1",
+      "group": "legs",
+      "kind": "strength",
+      "level": 1,
+      "title": "Приседания до стула",
+      "restSec": 15,
+      "moves": [
+        { "title": "Приседания до стула", "sec": 40 },
+        { "title": "Ягодичный мост", "sec": 40 },
+        { "title": "Подъём на носки", "sec": 30 },
+        { "title": "Марш на месте", "sec": 30 }
+      ]
+    },
+    {
+      "id": "legs-2",
+      "group": "legs",
+      "kind": "strength",
+      "level": 2,
+      "title": "Приседания и мост",
+      "rounds": 2,
+      "restSec": 15,
+      "roundRestSec": 45,
+      "moves": [
+        { "title": "Приседания", "sec": 40 },
+        { "title": "Выпады назад", "sec": 35 },
+        { "title": "Ягодичный мост", "sec": 35 },
+        { "title": "Подъём на носки", "sec": 30 }
+      ]
+    },
+    {
+      "id": "legs-3",
+      "group": "legs",
+      "kind": "strength",
+      "level": 3,
+      "title": "Ноги, 3 подхода",
+      "rounds": 3,
+      "restSec": 20,
+      "roundRestSec": 60,
+      "moves": [
+        { "title": "Приседания", "sec": 40 },
+        { "title": "Выпады назад", "sec": 40 },
+        { "title": "Ягодичный мост", "sec": 35 },
+        { "title": "Подъём на носки", "sec": 30 },
+        { "title": "Стена-стул", "sec": 30 }
+      ]
+    },
+    {
+      "id": "legs-4",
+      "group": "legs",
+      "kind": "strength",
+      "level": 4,
+      "title": "Приседания и выпады",
+      "rounds": 3,
+      "restSec": 15,
+      "roundRestSec": 45,
+      "moves": [
+        { "title": "Приседания", "sec": 45 },
+        { "title": "Выпады на месте", "sec": 40 },
+        { "title": "Выпады назад", "sec": 40 },
+        { "title": "Ягодичный мост", "sec": 40 },
+        { "title": "Подъём на носки", "sec": 35 },
+        { "title": "Стена-стул", "sec": 30 }
+      ]
+    },
+    {
+      "id": "legs-5",
+      "group": "legs",
+      "kind": "strength",
+      "level": 5,
+      "title": "Ноги полностью",
+      "rounds": 3,
+      "restSec": 12,
+      "roundRestSec": 45,
+      "moves": [
+        { "title": "Приседания", "sec": 45 },
+        { "title": "Выпады назад", "sec": 40 },
+        { "title": "Ягодичный мост", "sec": 40 },
+        { "title": "Ягодичный мост на одной", "sec": 35 },
+        { "title": "Подъём на носки", "sec": 35 },
+        { "title": "Стена-стул", "sec": 30 },
+        { "title": "Марш высоким коленом", "sec": 30 }
+      ]
+    },
+    {
+      "id": "core-1",
+      "group": "core",
+      "kind": "strength",
+      "level": 1,
+      "title": "Пресс лёжа",
+      "restSec": 12,
+      "moves": [
+        { "title": "Мёртвый жук", "sec": 30 },
+        { "title": "Планка на коленях", "sec": 20 },
+        { "title": "Птица-собака", "sec": 30 }
+      ]
+    },
+    {
+      "id": "core-2",
+      "group": "core",
+      "kind": "strength",
+      "level": 2,
+      "title": "Планка",
+      "rounds": 2,
+      "restSec": 12,
+      "roundRestSec": 30,
+      "moves": [
+        { "title": "Планка", "sec": 20 },
+        { "title": "Боковая планка слева", "sec": 15 },
+        { "title": "Боковая планка справа", "sec": 15 },
+        { "title": "Мёртвый жук", "sec": 30 }
+      ]
+    },
+    {
+      "id": "core-3",
+      "group": "core",
+      "kind": "strength",
+      "level": 3,
+      "title": "Пресс, 3 подхода",
+      "rounds": 3,
+      "restSec": 15,
+      "roundRestSec": 40,
+      "moves": [
+        { "title": "Планка", "sec": 25 },
+        { "title": "Мёртвый жук", "sec": 35 },
+        { "title": "Боковая планка слева", "sec": 20 },
+        { "title": "Боковая планка справа", "sec": 20 },
+        { "title": "Птица-собака", "sec": 35 }
+      ]
+    },
+    {
+      "id": "core-4",
+      "group": "core",
+      "kind": "strength",
+      "level": 4,
+      "title": "Планка и скручивания",
+      "rounds": 3,
+      "restSec": 12,
+      "roundRestSec": 35,
+      "moves": [
+        { "title": "Планка", "sec": 30 },
+        { "title": "Мёртвый жук", "sec": 35 },
+        { "title": "Велосипед лёжа", "sec": 30 },
+        { "title": "Боковая планка слева", "sec": 20 },
+        { "title": "Боковая планка справа", "sec": 20 },
+        { "title": "Птица-собака", "sec": 35 }
+      ]
+    },
+    {
+      "id": "core-5",
+      "group": "core",
+      "kind": "strength",
+      "level": 5,
+      "title": "Пресс полностью",
+      "rounds": 3,
+      "restSec": 12,
+      "roundRestSec": 30,
+      "moves": [
+        { "title": "Планка", "sec": 30 },
+        { "title": "Скручивания", "sec": 30 },
+        { "title": "Мёртвый жук", "sec": 35 },
+        { "title": "Велосипед лёжа", "sec": 30 },
+        { "title": "Боковая планка слева", "sec": 25 },
+        { "title": "Боковая планка справа", "sec": 25 },
+        { "title": "Птица-собака", "sec": 35 }
+      ]
+    },
+    {
+      "id": "cardio-1",
       "group": "cardio",
       "kind": "walk",
-      "title": "Тихая прогулка",
+      "level": 1,
+      "title": "Ходьба на месте",
+      "restSec": 10,
       "moves": [
-        {
-          "title": "Марш на месте",
-          "sec": 45
-        },
-        {
-          "title": "Круги руками",
-          "sec": 30
-        },
-        {
-          "title": "Марш на месте",
-          "sec": 45
-        }
+        { "title": "Марш на месте", "sec": 70 },
+        { "title": "Круги руками", "sec": 30 },
+        { "title": "Марш на месте", "sec": 70 },
+        { "title": "Круги руками", "sec": 30 },
+        { "title": "Марш на месте", "sec": 70 }
       ]
     },
     {
-      "id": "cardio-run",
+      "id": "cardio-2",
       "group": "cardio",
       "kind": "run",
+      "level": 2,
       "title": "Лёгкий бег",
+      "restSec": 10,
       "moves": [
-        {
-          "title": "Марш высоким коленом",
-          "sec": 40
-        },
-        {
-          "title": "Марш на месте",
-          "sec": 30
-        },
-        {
-          "title": "Марш высоким коленом",
-          "sec": 40
-        },
-        {
-          "title": "Марш на месте",
-          "sec": 30
-        }
+        { "title": "Марш высоким коленом", "sec": 25 },
+        { "title": "Марш на месте", "sec": 40 },
+        { "title": "Марш высоким коленом", "sec": 25 },
+        { "title": "Марш на месте", "sec": 40 },
+        { "title": "Марш высоким коленом", "sec": 25 },
+        { "title": "Марш на месте", "sec": 40 },
+        { "title": "Марш высоким коленом", "sec": 25 },
+        { "title": "Марш на месте", "sec": 40 }
       ]
     },
     {
-      "id": "cardio-bike",
-      "group": "cardio",
-      "kind": "bike",
-      "title": "Велосессия",
-      "moves": [
-        {
-          "title": "Марш на месте",
-          "sec": 40
-        },
-        {
-          "title": "Подъём на носки",
-          "sec": 30
-        },
-        {
-          "title": "Марш высоким коленом",
-          "sec": 40
-        },
-        {
-          "title": "Марш на месте",
-          "sec": 30
-        }
-      ]
-    },
-    {
-      "id": "cardio-rounds",
+      "id": "cardio-3",
       "group": "cardio",
       "kind": "run",
-      "title": "Кардио три круга",
+      "level": 3,
+      "title": "Кардио, 3 круга",
       "rounds": 3,
       "restSec": 15,
-      "roundRestSec": 30,
-      "moves": [
-        {
-          "title": "Марш высоким коленом",
-          "sec": 40
-        },
-        {
-          "title": "Прыжки ноги врозь",
-          "sec": 40
-        },
-        {
-          "title": "Приседания",
-          "sec": 40
-        },
-        {
-          "title": "Марш на месте",
-          "sec": 40
-        }
-      ]
-    },
-    {
-      "id": "cardio-full",
-      "group": "cardio",
-      "kind": "run",
-      "title": "Кардио полностью",
-      "rounds": 4,
-      "restSec": 20,
       "roundRestSec": 40,
       "moves": [
-        {
-          "title": "Марш на месте",
-          "sec": 50
-        },
-        {
-          "title": "Марш высоким коленом",
-          "sec": 40
-        },
-        {
-          "title": "Прыжки ноги врозь",
-          "sec": 35
-        },
-        {
-          "title": "Приседания",
-          "sec": 40
-        },
-        {
-          "title": "Марш на месте",
-          "sec": 50
-        },
-        {
-          "title": "Марш высоким коленом",
-          "sec": 40
-        },
-        {
-          "title": "Подъём на носки",
-          "sec": 40
-        },
-        {
-          "title": "Круги руками",
-          "sec": 40
-        }
+        { "title": "Марш высоким коленом", "sec": 35 },
+        { "title": "Прыжки ноги врозь", "sec": 25 },
+        { "title": "Приседания", "sec": 35 },
+        { "title": "Марш на месте", "sec": 40 }
       ]
     },
     {
-      "id": "stretch-morning",
-      "group": "stretch",
-      "kind": "stretch",
+      "id": "cardio-4",
+      "group": "cardio",
+      "kind": "bike",
+      "level": 4,
+      "title": "Велосипед",
       "restSec": 10,
-      "title": "Утренняя мобилити",
       "moves": [
-        {
-          "title": "Кошка-корова",
-          "sec": 40
-        },
-        {
-          "title": "Птица-собака",
-          "sec": 35
-        },
-        {
-          "title": "Поза ребёнка",
-          "sec": 35
-        },
-        {
-          "title": "Наклон к ногам стоя",
-          "sec": 30
-        }
+        { "title": "Марш на месте", "sec": 50 },
+        { "title": "Подъём на носки", "sec": 25 },
+        { "title": "Марш на месте", "sec": 50 },
+        { "title": "Подъём на носки", "sec": 25 },
+        { "title": "Марш на месте", "sec": 50 },
+        { "title": "Подъём на носки", "sec": 25 },
+        { "title": "Марш на месте", "sec": 50 },
+        { "title": "Подъём на носки", "sec": 25 }
       ]
     },
     {
-      "id": "stretch-sleep",
-      "group": "stretch",
-      "kind": "stretch",
+      "id": "cardio-5",
+      "group": "cardio",
+      "kind": "run",
+      "level": 5,
+      "title": "Табата",
       "restSec": 10,
-      "title": "Перед сном",
       "moves": [
-        {
-          "title": "Поза ребёнка",
-          "sec": 40
-        },
-        {
-          "title": "Скрутка лёжа",
-          "sec": 35
-        },
-        {
-          "title": "Наклон к ногам сидя",
-          "sec": 40
-        },
-        {
-          "title": "Дыхание лёжа",
-          "sec": 40
-        }
+        { "title": "Прыжки ноги врозь", "sec": 20 },
+        { "title": "Прыжки ноги врозь", "sec": 20 },
+        { "title": "Прыжки ноги врозь", "sec": 20 },
+        { "title": "Прыжки ноги врозь", "sec": 20 },
+        { "title": "Прыжки ноги врозь", "sec": 20 },
+        { "title": "Прыжки ноги врозь", "sec": 20 },
+        { "title": "Прыжки ноги врозь", "sec": 20 },
+        { "title": "Прыжки ноги врозь", "sec": 20 }
       ]
     },
     {
-      "id": "stretch-rounds",
+      "id": "stretch-1",
       "group": "stretch",
       "kind": "stretch",
-      "title": "Растяжка два подхода",
+      "level": 1,
+      "title": "Короткая растяжка",
+      "restSec": 8,
+      "moves": [
+        { "title": "Кошка-корова", "sec": 40 },
+        { "title": "Растяжка груди у стены", "sec": 30 },
+        { "title": "Поза ребёнка", "sec": 35 }
+      ]
+    },
+    {
+      "id": "stretch-2",
+      "group": "stretch",
+      "kind": "stretch",
+      "level": 2,
+      "title": "Бёдра и спина",
+      "restSec": 8,
+      "moves": [
+        { "title": "Кошка-корова", "sec": 35 },
+        { "title": "Наклон к ногам сидя", "sec": 35 },
+        { "title": "Растяжка сгибателей бедра", "sec": 35 },
+        { "title": "Скрутка лёжа", "sec": 35 },
+        { "title": "Поза ребёнка", "sec": 35 }
+      ]
+    },
+    {
+      "id": "stretch-3",
+      "group": "stretch",
+      "kind": "stretch",
+      "level": 3,
+      "title": "Растяжка, 2 подхода",
       "rounds": 2,
       "restSec": 10,
-      "roundRestSec": 25,
+      "roundRestSec": 20,
       "moves": [
-        {
-          "title": "Наклон к ногам сидя",
-          "sec": 40
-        },
-        {
-          "title": "Растяжка сгибателей бедра",
-          "sec": 40
-        },
-        {
-          "title": "Поза голубя упрощённая",
-          "sec": 40
-        },
-        {
-          "title": "Скрутка лёжа",
-          "sec": 40
-        },
-        {
-          "title": "Поза ребёнка",
-          "sec": 40
-        }
+        { "title": "Наклон к ногам сидя", "sec": 40 },
+        { "title": "Растяжка сгибателей бедра", "sec": 35 },
+        { "title": "Поза голубя упрощённая", "sec": 35 },
+        { "title": "Скрутка лёжа", "sec": 35 },
+        { "title": "Поза ребёнка", "sec": 35 }
       ]
     },
     {
-      "id": "stretch-full",
+      "id": "stretch-4",
       "group": "stretch",
       "kind": "stretch",
-      "title": "Растяжка полностью",
-      "rounds": 4,
-      "restSec": 10,
-      "roundRestSec": 30,
+      "level": 4,
+      "title": "Растяжка стоя и сидя",
+      "rounds": 2,
+      "restSec": 8,
+      "roundRestSec": 20,
       "moves": [
-        {
-          "title": "Наклон к ногам сидя",
-          "sec": 50
-        },
-        {
-          "title": "Наклон к ногам стоя",
-          "sec": 45
-        },
-        {
-          "title": "Растяжка сгибателей бедра",
-          "sec": 45
-        },
-        {
-          "title": "Поза голубя упрощённая",
-          "sec": 45
-        },
-        {
-          "title": "Скрутка лёжа",
-          "sec": 45
-        },
-        {
-          "title": "Кошка-корова",
-          "sec": 40
-        },
-        {
-          "title": "Растяжка груди у стены",
-          "sec": 40
-        },
-        {
-          "title": "Поза ребёнка",
-          "sec": 50
-        }
+        { "title": "Наклон к ногам стоя", "sec": 40 },
+        { "title": "Наклон к ногам сидя", "sec": 40 },
+        { "title": "Растяжка сгибателей бедра", "sec": 40 },
+        { "title": "Поза голубя упрощённая", "sec": 40 },
+        { "title": "Скрутка лёжа", "sec": 35 },
+        { "title": "Растяжка груди у стены", "sec": 30 }
+      ]
+    },
+    {
+      "id": "stretch-5",
+      "group": "stretch",
+      "kind": "stretch",
+      "level": 5,
+      "title": "Полная растяжка",
+      "rounds": 3,
+      "restSec": 8,
+      "roundRestSec": 20,
+      "moves": [
+        { "title": "Наклон к ногам сидя", "sec": 40 },
+        { "title": "Наклон к ногам стоя", "sec": 35 },
+        { "title": "Растяжка сгибателей бедра", "sec": 40 },
+        { "title": "Поза голубя упрощённая", "sec": 40 },
+        { "title": "Скрутка лёжа", "sec": 35 },
+        { "title": "Кошка-корова", "sec": 30 },
+        { "title": "Поза ребёнка", "sec": 40 }
+      ]
+    },
+    {
+      "id": "warmup-morning",
+      "group": "stretch",
+      "kind": "stretch",
+      "warmup": true,
+      "title": "Утренняя разминка",
+      "restSec": 0,
+      "moves": [
+        { "title": "Марш на месте", "sec": 20 },
+        { "title": "Круги плечами", "sec": 20 },
+        { "title": "Кошка-корова", "sec": 20 }
+      ]
+    },
+    {
+      "id": "warmup-evening",
+      "group": "stretch",
+      "kind": "stretch",
+      "warmup": true,
+      "title": "Вечерняя разминка",
+      "restSec": 0,
+      "moves": [
+        { "title": "Наклон к ногам сидя", "sec": 20 },
+        { "title": "Скрутка лёжа", "sec": 20 },
+        { "title": "Поза ребёнка", "sec": 20 }
       ]
     },
     {
       "id": "meal-quiet",
       "group": "meal",
       "kind": "nutrition",
+      "level": 1,
+      "title": "Приём пищи",
       "restSec": 10,
-      "title": "Спокойный приём пищи",
       "moves": [
-        {
-          "title": "Приём пищи",
-          "sec": 45
-        },
-        {
-          "title": "Дыхание лёжа",
-          "sec": 30
-        }
+        { "title": "Приём пищи", "sec": 90 },
+        { "title": "Дыхание лёжа", "sec": 30 }
       ]
     },
     {
@@ -911,15 +656,10 @@
       "kind": "strength",
       "daily": true,
       "title": "Двадцать приседаний",
+      "restSec": 15,
       "moves": [
-        {
-          "title": "Приседания",
-          "sec": 40
-        },
-        {
-          "title": "Приседания уже",
-          "sec": 35
-        }
+        { "title": "Приседания", "sec": 30 },
+        { "title": "Приседания", "sec": 30 }
       ]
     },
     {
@@ -928,15 +668,10 @@
       "kind": "strength",
       "daily": true,
       "title": "Отжимания у стены",
+      "restSec": 12,
       "moves": [
-        {
-          "title": "Отжимания от стены",
-          "sec": 40
-        },
-        {
-          "title": "Отжимания с колен",
-          "sec": 35
-        }
+        { "title": "Отжимания от стены", "sec": 30 },
+        { "title": "Отжимания с колен", "sec": 30 }
       ]
     },
     {
@@ -945,23 +680,12 @@
       "kind": "strength",
       "daily": true,
       "title": "Короткая планка",
+      "restSec": 10,
       "moves": [
-        {
-          "title": "Планка",
-          "sec": 30
-        },
-        {
-          "title": "Планка на коленях",
-          "sec": 25
-        },
-        {
-          "title": "Боковая планка слева",
-          "sec": 20
-        },
-        {
-          "title": "Боковая планка справа",
-          "sec": 20
-        }
+        { "title": "Скручивания", "sec": 20 },
+        { "title": "Боковая планка слева", "sec": 15 },
+        { "title": "Боковая планка справа", "sec": 15 },
+        { "title": "Птица-собака", "sec": 25 }
       ]
     },
     {
@@ -970,15 +694,10 @@
       "kind": "walk",
       "daily": true,
       "title": "Марш на месте",
+      "restSec": 10,
       "moves": [
-        {
-          "title": "Марш на месте",
-          "sec": 45
-        },
-        {
-          "title": "Марш высоким коленом",
-          "sec": 35
-        }
+        { "title": "Марш на месте", "sec": 60 },
+        { "title": "Марш высоким коленом", "sec": 30 }
       ]
     },
     {
@@ -987,15 +706,10 @@
       "kind": "strength",
       "daily": true,
       "title": "Ягодичный мост",
+      "restSec": 15,
       "moves": [
-        {
-          "title": "Ягодичный мост",
-          "sec": 40
-        },
-        {
-          "title": "Ягодичный мост на одной",
-          "sec": 35
-        }
+        { "title": "Ягодичный мост", "sec": 35 },
+        { "title": "Ягодичный мост", "sec": 35 }
       ]
     },
     {
@@ -1004,19 +718,11 @@
       "kind": "strength",
       "daily": true,
       "title": "Кор за две минуты",
+      "restSec": 10,
       "moves": [
-        {
-          "title": "Скручивания",
-          "sec": 30
-        },
-        {
-          "title": "Мёртвый жук",
-          "sec": 35
-        },
-        {
-          "title": "Велосипед лёжа",
-          "sec": 30
-        }
+        { "title": "Мёртвый жук", "sec": 30 },
+        { "title": "Планка", "sec": 25 },
+        { "title": "Скручивания", "sec": 25 }
       ]
     },
     {
@@ -1025,21 +731,12 @@
       "kind": "stretch",
       "daily": true,
       "title": "Плечи и спина",
+      "restSec": 8,
       "moves": [
-        {
-          "title": "Кошка-корова",
-          "sec": 35
-        },
-        {
-          "title": "Растяжка груди у стены",
-          "sec": 30
-        },
-        {
-          "title": "Поза ребёнка",
-          "sec": 30
-        }
-      ],
-      "restSec": 10
+        { "title": "Кошка-корова", "sec": 30 },
+        { "title": "Растяжка груди у стены", "sec": 30 },
+        { "title": "Поза ребёнка", "sec": 30 }
+      ]
     },
     {
       "id": "daily-lunges",
@@ -1047,15 +744,10 @@
       "kind": "strength",
       "daily": true,
       "title": "Выпады",
+      "restSec": 15,
       "moves": [
-        {
-          "title": "Выпады на месте",
-          "sec": 40
-        },
-        {
-          "title": "Выпады назад",
-          "sec": 35
-        }
+        { "title": "Выпады назад", "sec": 40 },
+        { "title": "Выпады на месте", "sec": 30 }
       ]
     },
     {
@@ -1064,19 +756,11 @@
       "kind": "run",
       "daily": true,
       "title": "Лёгкий марш",
+      "restSec": 8,
       "moves": [
-        {
-          "title": "Марш высоким коленом",
-          "sec": 40
-        },
-        {
-          "title": "Прыжки ноги врозь",
-          "sec": 30
-        },
-        {
-          "title": "Марш на месте",
-          "sec": 30
-        }
+        { "title": "Марш высоким коленом", "sec": 30 },
+        { "title": "Марш на месте", "sec": 40 },
+        { "title": "Прыжки ноги врозь", "sec": 25 }
       ]
     },
     {
@@ -1084,16 +768,11 @@
       "group": "cardio",
       "kind": "bike",
       "daily": true,
-      "title": "Крутим на месте",
+      "title": "Короткий велосипед",
+      "restSec": 10,
       "moves": [
-        {
-          "title": "Марш на месте",
-          "sec": 40
-        },
-        {
-          "title": "Подъём на носки",
-          "sec": 35
-        }
+        { "title": "Марш на месте", "sec": 45 },
+        { "title": "Подъём на носки", "sec": 30 }
       ]
     }
   ]

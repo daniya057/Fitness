@@ -5,7 +5,7 @@ function daysWord(count) {
   const mod10 = n % 10;
   const mod100 = n % 100;
   if (n === 0) {
-    return "ещё впереди";
+    return "дней";
   }
   if (mod100 >= 11 && mod100 <= 14) {
     return "дней подряд";
@@ -30,7 +30,6 @@ const STAGES = {
     Icon: Flame,
     fillIcon: false,
     radius: 32,
-    lines: ["Любое движение считается", "Без давления. Можно начать"],
   },
   1: {
     card: "#C9EBD6",
@@ -42,7 +41,6 @@ const STAGES = {
     Icon: Flame,
     fillIcon: true,
     radius: 32,
-    lines: ["Старт есть", "День засчитан", "Поехали мягко"],
   },
   3: {
     card: "#A5D6A7",
@@ -54,7 +52,6 @@ const STAGES = {
     Icon: Zap,
     fillIcon: false,
     radius: 28,
-    lines: ["Ритм цепляется", "Три дня. Живое", "Привычка дышит"],
   },
   10: {
     card: "#2E7D32",
@@ -66,7 +63,6 @@ const STAGES = {
     Icon: Star,
     fillIcon: true,
     radius: 28,
-    lines: ["Десять. Красиво", "Серия держится", "Ты в потоке"],
   },
   20: {
     card: "#FFE082",
@@ -78,7 +74,6 @@ const STAGES = {
     Icon: Trophy,
     fillIcon: false,
     radius: 36,
-    lines: ["Двадцать. Это твоё", "Огонь ровный", "Серия взрослая"],
   },
   100: {
     card: "#1B5E20",
@@ -90,7 +85,6 @@ const STAGES = {
     Icon: Sparkles,
     fillIcon: true,
     radius: 40,
-    lines: ["Сотня. Вау", "Легенда тихо", "Сто дней движения"],
   },
 };
 
@@ -98,12 +92,10 @@ export function lookOfStreak(raw) {
   const days = Math.max(0, Math.round(Number(raw) || 0));
   const key = days >= 100 ? 100 : days >= 20 ? 20 : days >= 10 ? 10 : days >= 3 ? 3 : days >= 1 ? 1 : 0;
   const pack = STAGES[key];
-  const line = pack.lines[days % pack.lines.length];
   return {
     days,
     stage: key,
     unit: daysWord(days),
-    line,
     ...pack,
   };
 }

@@ -3,7 +3,8 @@ import { ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PillButton, PrimaryButton, ScreenHeader, SectionLabel } from "../../ui/kit";
 import { SoftPress } from "../../ui/SoftPress";
-import { ValueSlider } from "../onboarding/ValueSlider";
+import { glassStyle } from "../../ui/Glass";
+import { getPalette } from "../../ui/theme";
 import { useAuth } from "../auth/AuthContext";
 import { BarcodeScan } from "./BarcodeScan";
 import {
@@ -22,8 +23,8 @@ import { dailyKcalTarget, targetHint } from "./target";
 function MacroCell({ label, value, unit }) {
   return (
     <View className="flex-1 items-center">
-      <Text className="text-[22px] font-semibold text-ink">{value}</Text>
-      <Text className="mt-1 text-[11px] text-mute">
+      <Text className="text-[22px] font-semibold text-white">{value}</Text>
+      <Text className="mt-1 text-[11px] text-white/55">
         {label}
         {unit ? `, ${unit}` : ""}
       </Text>
@@ -33,7 +34,6 @@ function MacroCell({ label, value, unit }) {
 
 function GramCounter({ value, onChange }) {
   const [draft, setDraft] = useState(String(value));
-  const [room, setRoom] = useState(300);
 
   useEffect(() => {
     setDraft(String(value));
@@ -55,19 +55,18 @@ function GramCounter({ value, onChange }) {
     onChange(Math.max(1, value + delta));
   };
 
-  const trackMax = Math.max(room, value);
-
   return (
     <View className="mb-5">
-      <Text className="mb-2 text-[13px] font-medium text-mute">Вес порции</Text>
+      <Text className="mb-2 text-[13px] font-medium text-white/55">Вес порции</Text>
       <View className="flex-row items-center justify-between">
         <SoftPress
           onPress={() => bump(-10)}
-          className="h-14 w-14 shrink-0 items-center justify-center rounded-full bg-canvas"
+          className="h-14 w-14 shrink-0 items-center justify-center rounded-full"
+          style={glassStyle({ variant: "fill", borderRadius: 999 })}
         >
-          <Text className="text-[28px] leading-8 text-ink">−</Text>
+          <Text className="text-[28px] leading-8 text-white">−</Text>
         </SoftPress>
-        <View className="mx-3 h-14 flex-1 flex-row items-center justify-center rounded-2xl bg-canvas px-3">
+        <View className="mx-3 h-14 flex-1 flex-row items-center justify-center rounded-2xl px-3" style={glassStyle({ variant: "fill", borderRadius: 16 })}>
           <TextInput
             value={draft}
             onChangeText={applyText}
@@ -77,32 +76,18 @@ function GramCounter({ value, onChange }) {
               }
             }}
             keyboardType="number-pad"
-            className="text-center text-[32px] font-semibold text-ink"
+            className="text-center text-[32px] font-semibold text-white"
             style={{ width: Math.max(72, String(draft || value).length * 22), flexGrow: 0 }}
           />
-          <Text className="text-[16px] font-medium text-mute">г</Text>
+          <Text className="text-[16px] font-medium text-white/55">г</Text>
         </View>
         <SoftPress
           onPress={() => bump(10)}
-          className="h-14 w-14 shrink-0 items-center justify-center rounded-full bg-canvas"
+          className="h-14 w-14 shrink-0 items-center justify-center rounded-full"
+          style={glassStyle({ variant: "fill", borderRadius: 999 })}
         >
-          <Text className="text-[28px] leading-8 text-ink">+</Text>
+          <Text className="text-[28px] leading-8 text-white">+</Text>
         </SoftPress>
-      </View>
-      <View className="mt-4">
-        <ValueSlider
-          bare
-          value={value}
-          min={1}
-          max={trackMax}
-          step={1}
-          onChange={(next) => {
-            onChange(next);
-            if (next >= trackMax) {
-              setRoom(trackMax + 500);
-            }
-          }}
-        />
       </View>
     </View>
   );
@@ -167,7 +152,6 @@ export default function CaloriesScreen() {
   const portion = picked ? macrosForGrams(picked, grams) : null;
   const target = useMemo(() => dailyKcalTarget(user), [user]);
   const fill = Math.max(4, Math.min(100, (totals.kcal / (target.kcal || 1)) * 100));
-  const over = totals.kcal > target.kcal;
 
   const saveItems = async (nextItems) => {
     setBusy(true);
@@ -225,7 +209,7 @@ export default function CaloriesScreen() {
   };
 
   return (
-    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
+    <View className="flex-1" style={{ paddingTop: insets.top, backgroundColor: "transparent" }}>
       <ScrollView
         ref={scrollRef}
         className="flex-1"
@@ -233,24 +217,22 @@ export default function CaloriesScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <ScreenHeader title="Топливо" subtitle={targetHint(target)} />
+        <ScreenHeader glass title="Калории" subtitle={targetHint(target)} />
 
-        <View className="rounded-[28px] bg-card px-5 py-7">
-          <Text className="text-[13px] font-medium text-mute">Сегодня</Text>
+        <View className="rounded-[28px] px-5 py-7" style={glassStyle({ borderRadius: 28 })}>
+          <Text className="text-[13px] font-medium text-white/55">Сегодня</Text>
           <View className="mt-1 flex-row items-end">
-            <Text className="text-[42px] font-semibold leading-[46px] text-ink">{totals.kcal}</Text>
-            <Text className="mb-1.5 ml-2 text-[16px] text-mute">/ {target.kcal} ккал</Text>
+            <Text className="text-[42px] font-semibold leading-[46px] text-white">{totals.kcal}</Text>
+            <Text className="mb-1.5 ml-2 text-[16px] text-white/55">/ {target.kcal} ккал</Text>
           </View>
-          <View className="mt-4 h-[10px] overflow-hidden rounded-full bg-canvas">
-            <View className="h-full rounded-full bg-mint" style={{ width: `${fill}%`, backgroundColor: "#A8E6CF" }} />
+          <View className="mt-4 h-[10px] overflow-hidden rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.12)" }}>
+            <View className="h-full rounded-full" style={{ width: `${fill}%`, backgroundColor: getPalette().bar }} />
           </View>
-          <Text className="mt-3 text-[13px] leading-5 text-mute">
-            {over
-              ? "Сегодня плотнее ориентира — ок. День ещё не оценка."
-              : target.guessedSex
-                ? "Укажи пол в профиле — ориентир станет точнее."
-                : "Ориентир, не суд."}
-          </Text>
+          {target.guessedSex ? (
+            <Text className="mt-3 text-[13px] leading-5 text-white/55">
+              Укажи пол в профиле — ориентир станет точнее.
+            </Text>
+          ) : null}
           <View className="mt-5 flex-row">
             <MacroCell label="Белки" value={totals.protein} unit="г" />
             <MacroCell label="Жиры" value={totals.fat} unit="г" />
@@ -259,16 +241,17 @@ export default function CaloriesScreen() {
         </View>
 
         <View className="mt-10">
-          <SectionLabel>Дневник</SectionLabel>
+          <SectionLabel glass>Дневник</SectionLabel>
           <View className="flex-row items-center">
             <TextInput
               value={query}
               onChangeText={setQuery}
               placeholder="Яблоко, гречка, курица…"
-              placeholderTextColor="#9E9E9E"
-              className="mr-2 flex-1 rounded-2xl bg-card px-4 py-3.5 text-[16px] text-ink"
+              placeholderTextColor="#8A8A8A"
+              className="mr-2 flex-1 rounded-2xl px-4 py-3.5 text-[16px] text-white"
+              style={glassStyle({ borderRadius: 16 })}
             />
-            <PillButton label="Сканер" tone="mint" onPress={() => setScanOpen(true)} />
+            <PillButton label="Сканер" tone="glassOn" onPress={() => setScanOpen(true)} />
           </View>
           <ScrollView
             horizontal
@@ -278,23 +261,23 @@ export default function CaloriesScreen() {
           >
             <PillButton
               label="Все"
-              tone={category === "all" ? "mint" : "canvas"}
+              tone={category === "all" ? "glassOn" : "glass"}
               onPress={() => setCategory("all")}
             />
             {FOOD_CATEGORIES.map((item) => (
               <PillButton
                 key={item.id}
                 label={item.title}
-                tone={category === item.id ? "mint" : "canvas"}
+                tone={category === item.id ? "glassOn" : "glass"}
                 onPress={() => setCategory(item.id)}
               />
             ))}
           </ScrollView>
 
           {picked && portion ? (
-            <View ref={portionRef} className="mt-4 rounded-[28px] bg-mint px-5 py-6">
-              <Text className="text-[18px] font-semibold text-ink">{picked.name}</Text>
-              <Text className="mt-1 text-[13px] text-mute">
+            <View ref={portionRef} className="mt-4 rounded-[28px] px-5 py-6" style={glassStyle({ borderRadius: 28, backgroundColor: "rgba(125,255,179,0.1)" })}>
+              <Text className="text-[18px] font-semibold text-white">{picked.name}</Text>
+              <Text className="mt-1 text-[13px] text-white/55">
                 На 100 г: {Math.round(picked.kcal)} ккал · Б {picked.protein} · Ж {picked.fat} · У {picked.carbs}
                 {picked.source === "guess" ? " · ориентир по названию пачки, не с этикетки" : ""}
                 {picked.source === "list" ? " · название с Barcode List, КБЖУ на этикетке не нашли" : ""}
@@ -305,9 +288,10 @@ export default function CaloriesScreen() {
               {picked.packGrams ? (
                 <SoftPress
                   onPress={() => setGrams(Math.round(Number(picked.packGrams)))}
-                  className="mb-5 items-center rounded-full bg-canvas py-3"
+                  className="mb-5 items-center rounded-full py-3"
+                  style={glassStyle({ variant: "fill", borderRadius: 999 })}
                 >
-                  <Text className="text-[15px] font-semibold text-ink">
+                  <Text className="text-[15px] font-semibold text-white">
                     Вся пачка · {picked.packGrams} {picked.packUnit === "ml" ? "мл" : "г"}
                   </Text>
                 </SoftPress>
@@ -331,18 +315,19 @@ export default function CaloriesScreen() {
           ) : null}
 
           {found.length > 0 ? (
-            <View className="mt-4 overflow-hidden rounded-[24px] bg-card">
+            <View className="mt-4 overflow-hidden rounded-[24px]" style={glassStyle({ borderRadius: 24 })}>
               {found.map((food, index) => (
                 <SoftPress
                   key={`${food.id}-${index}`}
                   onPress={() => revealPortion(food)}
-                  className={`px-4 py-3.5 ${index < found.length - 1 ? "border-b border-ink/5" : ""}`}
+                  className="px-4 py-3.5"
+                  style={index < found.length - 1 ? { borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.08)" } : undefined}
                 >
                   <View className="flex-row items-center justify-between">
-                    <Text className="mr-3 flex-1 text-[15px] text-ink">{food.name}</Text>
-                    <Text className="text-[13px] font-medium text-mute">{Math.round(food.kcal)} ккал</Text>
+                    <Text className="mr-3 flex-1 text-[15px] text-white">{food.name}</Text>
+                    <Text className="text-[13px] font-medium text-white/55">{Math.round(food.kcal)} ккал</Text>
                   </View>
-                  <Text className="mt-1 text-[12px] text-mute">
+                  <Text className="mt-1 text-[12px] text-white/45">
                     на 100 г · Б {food.protein} · Ж {food.fat} · У {food.carbs}
                     {sourceLabel(food) ? ` · ${sourceLabel(food)}` : ""}
                   </Text>
@@ -350,7 +335,7 @@ export default function CaloriesScreen() {
               ))}
             </View>
           ) : (
-            <Text className="mt-4 text-[13px] leading-5 text-mute">
+            <Text className="mt-4 text-[13px] leading-5 text-white/55">
               {searching
                 ? "Ищем в таблицах и магазинах…"
                 : query.trim() || category !== "all"
@@ -361,26 +346,25 @@ export default function CaloriesScreen() {
         </View>
 
         <View className="mt-8">
-          <SectionLabel>За сегодня</SectionLabel>
+          <SectionLabel glass>За сегодня</SectionLabel>
           {items.length === 0 ? (
-            <Text className="text-[14px] leading-5 text-mute">Пока пусто. Это нормально — день ещё идёт.</Text>
+            <Text className="text-[14px] leading-5 text-white/55">Пока пусто. Это нормально — день ещё идёт.</Text>
           ) : (
-            <View className="overflow-hidden rounded-[24px] bg-card">
+            <View className="overflow-hidden rounded-[24px]" style={glassStyle({ borderRadius: 24 })}>
               {items.map((item, index) => (
                 <View
                   key={item.id || `${item.foodId}-${index}`}
-                  className={`flex-row items-center justify-between px-4 py-3.5 ${
-                    index < items.length - 1 ? "border-b border-ink/5" : ""
-                  }`}
+                  className="flex-row items-center justify-between px-4 py-3.5"
+                  style={index < items.length - 1 ? { borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.08)" } : undefined}
                 >
                   <View className="mr-3 flex-1">
-                    <Text className="text-[15px] text-ink">{item.label}</Text>
-                    <Text className="mt-1 text-[12px] text-mute">
+                    <Text className="text-[15px] text-white">{item.label}</Text>
+                    <Text className="mt-1 text-[12px] text-white/50">
                       {item.grams} г · {Math.round(item.kcal)} ккал
                     </Text>
                   </View>
-                  <SoftPress onPress={() => removeItem(item.id)} className="rounded-full bg-canvas px-3 py-2">
-                    <Text className="text-[12px] font-medium text-mute">Убрать</Text>
+                  <SoftPress onPress={() => removeItem(item.id)} className="rounded-full px-3 py-2" style={glassStyle({ variant: "fill", borderRadius: 999 })}>
+                    <Text className="text-[12px] font-medium text-white/70">Убрать</Text>
                   </SoftPress>
                 </View>
               ))}

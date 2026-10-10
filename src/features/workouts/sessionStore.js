@@ -52,9 +52,20 @@ export const useSession = create((set, get) => ({
     set({ running: false });
   },
 
+  skipPrep() {
+    if (get().prep <= 0 || get().finished) {
+      return;
+    }
+    set({ prep: 0, running: true });
+  },
+
   skip() {
-    const { steps, index, finished } = get();
+    const { steps, index, finished, prep } = get();
     if (!steps.length || finished) {
+      return;
+    }
+    if (prep > 0) {
+      set({ prep: 0, running: true });
       return;
     }
     const next = index + 1;

@@ -1,61 +1,62 @@
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ScreenHeader, SectionLabel } from "../../ui/kit";
+import { ScreenHeader } from "../../ui/kit";
+import { glassStyle } from "../../ui/Glass";
+import { getPalette } from "../../ui/theme";
 import { useAuth } from "../auth/AuthContext";
-import { earnedSet, iconOf, isHidden, progressValue, shownAchievements } from "../achievements/catalog";
+import { ACHIEVEMENTS, earnedSet, iconOf, isHidden, progressValue, shownAchievements } from "../achievements/catalog";
+import { Medal } from "../achievements/Medal";
+
+function rowsOf(list, size) {
+  const rows = [];
+  for (let i = 0; i < list.length; i += size) {
+    rows.push(list.slice(i, i + size));
+  }
+  return rows;
+}
 
 function AchievementCard({ item, user, open }) {
   const hidden = isHidden(user, item);
   const Icon = iconOf(item.id);
   const need = Math.max(1, Number(item.need) || 1);
   const current = Math.min(progressValue(user, item), need);
-  const fill = Math.max(0, Math.min(100, (current / need) * 100));
-
-  if (hidden) {
-    return (
-      <View className="mb-3 justify-between rounded-[24px] bg-card px-4 py-5" style={{ width: "48%", height: 210 }}>
-        <View>
-          <View className="h-12 w-12 items-center justify-center rounded-2xl bg-canvas">
-            <Text className="text-[22px] font-semibold text-mute">?</Text>
-          </View>
-          <Text className="mt-4 text-[16px] font-semibold leading-5 text-ink" numberOfLines={2}>
-            ?
-          </Text>
-          <Text className="mt-1 text-[12px] leading-4 text-mute" numberOfLines={2}>
-            Скрытое достижение
-          </Text>
-        </View>
-      </View>
-    );
-  }
+  const fill = Math.max(0, Math.min(1, current / need));
 
   return (
     <View
-      className={`mb-3 justify-between rounded-[24px] px-4 py-5 ${open ? "bg-mint" : "bg-card"}`}
-      style={{ width: "48%", height: 210 }}
+      className="rounded-[28px] px-3 py-4"
+      style={{
+        flex: 1,
+        height: 206,
+        overflow: "hidden",
+        ...glassStyle({
+          borderRadius: 28,
+          backgroundColor: open ? "rgba(125,255,179,0.1)" : hidden ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.06)",
+          borderColor: open ? "rgba(155,255,200,0.4)" : undefined,
+        }),
+      }}
     >
-      <View>
-        <View className="h-12 w-12 items-center justify-center rounded-2xl bg-canvas">
-          <Icon size={22} color={open ? "#2E7D32" : "#C8C8C8"} strokeWidth={1.6} />
-        </View>
-        <Text className="mt-4 text-[16px] font-semibold leading-5 text-ink" numberOfLines={2}>
-          {item.title}
+      <View className="flex-1 items-center">
+        <Medal Icon={Icon} open={open} hidden={hidden} progress={fill} size={58} />
+        <Text className="mt-3 h-10 text-center text-[15px] font-semibold leading-5 text-white" numberOfLines={2}>
+          {hidden ? "?" : item.title}
         </Text>
-        <Text className="mt-1 text-[12px] leading-4 text-mute" numberOfLines={2}>
-          {item.hint}
+        <Text className="mt-1 h-8 text-center text-[12px] leading-4 text-white/50" numberOfLines={2}>
+          {hidden ? "Скрытое достижение" : item.hint}
         </Text>
       </View>
-      {open ? (
-        <Text className="text-[12px] font-semibold text-accent">Есть</Text>
-      ) : (
-        <View>
-          <View className="h-[6px] overflow-hidden rounded-full bg-canvas">
-            <View className="h-full rounded-full bg-accent" style={{ width: `${fill}%` }} />
-          </View>
-          <Text className="mt-2 text-[12px] font-medium text-mute">
-            {current} / {need}
+      {hidden ? (
+        <View className="h-7" />
+      ) : open ? (
+        <View className="h-7 self-center justify-center rounded-full px-3" style={{ backgroundColor: "rgba(125,255,179,0.22)" }}>
+          <Text className="text-[12px] font-semibold" style={{ color: getPalette().accent }}>
+            Есть
           </Text>
         </View>
+      ) : (
+        <Text className="h-7 text-center text-[12px] font-semibold leading-7 tabular-nums text-white/55">
+          {current} / {need}
+        </Text>
       )}
     </View>
   );
@@ -66,22 +67,26 @@ export default function RewardsScreen() {
   const { user } = useAuth();
   const earned = earnedSet(user);
   const items = shownAchievements(user);
+  const have = earned.size;
+  const total = ACHIEVEMENTS.length;
 
   return (
-    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top }}>
+    <View className="flex-1" style={{ paddingTop: insets.top, backgroundColor: "transparent" }}>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingHorizontal: 22, paddingBottom: 28 }}
         showsVerticalScrollIndicator={false}
       >
-        <ScreenHeader title="Награды" subtitle="Открытые цветом, остальные ещё впереди" />
+        <ScreenHeader glass title="Награды" subtitle={`${have} / ${total}`} />
 
-        <SectionLabel>Достижения</SectionLabel>
-        <View className="flex-row flex-wrap justify-between">
-          {items.map((item) => (
-            <AchievementCard key={item.id} item={item} user={user} open={earned.has(item.id)} />
-          ))}
-        </View>
+        {rowsOf(items, 2).map((row) => (
+          <View key={row[0].id} className="mb-3 flex-row" style={{ gap: 12 }}>
+            {row.map((item) => (
+              <AchievementCard key={item.id} item={item} user={user} open={earned.has(item.id)} />
+            ))}
+            {row.length === 1 ? <View style={{ flex: 1 }} /> : null}
+          </View>
+        ))}
       </ScrollView>
     </View>
   );

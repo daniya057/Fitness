@@ -30,7 +30,7 @@
 | Файл | О чём |
 |---|---|
 | [mechanics/streaks.md](mechanics/streaks.md) | Прощающая серия, щиты, Edge Function |
-| [mechanics/fuel.md](mechanics/fuel.md) | Дневник калорий на вкладке Топливо |
+| [mechanics/fuel.md](mechanics/fuel.md) | Дневник на вкладке Калории |
 | [mechanics/quick-start.md](mechanics/quick-start.md) | 10 секунд, «Засчитать разминку» |
 | [mechanics/daily.md](mechanics/daily.md) | Ежедневные челленджи |
 | [mechanics/avatar.md](mechanics/avatar.md) | Аватар и бейджи |

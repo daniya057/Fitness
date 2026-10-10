@@ -4,6 +4,8 @@ const http = require("http");
 const path = require("path");
 const { LINKS, loadEnv } = require("./env");
 const { lookupBarcode, searchNutrition } = require("./nutrition");
+const { noteProgramProgress, openProgramLevel } = require("./program-level");
+const { settleStreak, shieldNoticeOpen, utcDay } = require("./streak");
 
 loadEnv();
 
@@ -85,6 +87,7 @@ function userPath(id) {
 
 const ALLOWED_GOALS = ["strength", "run", "nutrition", "walk", "stretch", "bike"];
 const ALLOWED_SEX = ["male", "female"];
+const ALLOWED_EXPERIENCE = ["none", "m1_3", "m3_6", "m6_12", "y1"];
 
 function ageFromBirthDate(iso) {
   const birth = new Date(`${iso}T00:00:00`);
@@ -133,6 +136,10 @@ function applyQuizFields(record, body, { keepStart }) {
   if (!Number.isFinite(daysPerWeek) || daysPerWeek < 1 || daysPerWeek > 7) {
     return "Дни недели — от 1 до 7";
   }
+  const experience = String(body.experience || "");
+  if (!ALLOWED_EXPERIENCE.includes(experience)) {
+    return "Выбери, как давно занимаешься";
+  }
 
   const sex = String(body.sex || "").trim();
   if (ALLOWED_SEX.includes(sex)) {
@@ -151,16 +158,13 @@ function applyQuizFields(record, body, { keepStart }) {
   record.age = age;
   record.goals = goals;
   record.daysPerWeek = daysPerWeek;
+  record.experience = experience;
   record.weight = {
     start: clamp(start, 40, 160),
     current: clamp(current, 40, 160),
     goal: clamp(goal, 40, 160),
   };
   return null;
-}
-
-function utcDay() {
-  return new Date().toISOString().slice(0, 10);
 }
 
 function emptyFuelLog() {
@@ -213,6 +217,14 @@ function ensureDayLogs(record) {
   return ensureFuelLog(record);
 }
 
+function ensureStatus(record) {
+  if (record.status === "Двигаюсь мягко") {
+    record.status = "";
+    return true;
+  }
+  return false;
+}
+
 const START_FREEZES = 1;
 
 function ensureFreezes(record) {
@@ -241,21 +253,6 @@ function dayGap(from, to) {
 const ACTIVITY_KINDS = ["strength", "run", "nutrition", "walk", "stretch", "bike"];
 const MIN_ACTIVITY_SEC = 60;
 const FUEL_GAP_MS = 20000;
-
-function noteShieldSave(record) {
-  const today = utcDay();
-  if (!record.lastActivityDate || record.lastActivityDate === today || record.shieldSavedDate === today) {
-    return false;
-  }
-  const gap = dayGap(record.lastActivityDate, today);
-  if (gap !== 2 || (Number(record.freezesLeft) || 0) < 1) {
-    return false;
-  }
-  record.freezesLeft = clamp((Number(record.freezesLeft) || 0) - 1, 0, 20);
-  record.shieldUsed = true;
-  record.shieldSavedDate = today;
-  return true;
-}
 
 function applyActivity(record) {
   const today = utcDay();
@@ -299,6 +296,12 @@ function rememberActivity(record, body) {
     if (!record.todaySessions.includes(sessionId)) {
       record.todaySessions.push(sessionId);
     }
+    if (!Array.isArray(record.sessionsDone)) {
+      record.sessionsDone = [];
+    }
+    if (!record.sessionsDone.includes(sessionId) && record.sessionsDone.length < 80) {
+      record.sessionsDone.push(sessionId);
+    }
   }
   const hour = Number(body?.activityHour);
   if (Number.isInteger(hour) && hour >= 0 && hour <= 23) {
@@ -317,6 +320,14 @@ function rememberActivity(record, body) {
 
 function kindsDoneSet(record) {
   return new Set(Array.isArray(record.kindsDone) ? record.kindsDone : []);
+}
+
+function loadWorkoutsFile() {
+  try {
+    return JSON.parse(fs.readFileSync(WORKOUTS_PATH, "utf8"));
+  } catch {
+    return { sessions: [], experienceRank: {}, unlockEvery: 3 };
+  }
 }
 
 function loadDailyPool() {
@@ -490,6 +501,14 @@ function achievementMet(record, item) {
   if (item.rule === "dailyClear") {
     return (Number(record.dailyClearDays) || 0) >= need;
   }
+  if (item.rule === "session") {
+    return Array.isArray(record.sessionsDone) && record.sessionsDone.includes(item.sessionId);
+  }
+  if (item.rule === "sessionsToday") {
+    const needIds = Array.isArray(item.sessionIds) ? item.sessionIds : [];
+    const today = Array.isArray(record.todaySessions) ? record.todaySessions : [];
+    return needIds.length > 0 && needIds.every((id) => today.includes(id));
+  }
   return false;
 }
 
@@ -516,7 +535,11 @@ function ensureAchievements(record) {
     record.kindsDone = [];
     seeded = true;
   }
-  if (noteShieldSave(record)) {
+  if (!Array.isArray(record.sessionsDone)) {
+    record.sessionsDone = [];
+    seeded = true;
+  }
+  if (settleStreak(record).changed) {
     seeded = true;
   }
   if (scoreDaily(record)) {
@@ -605,11 +628,12 @@ function sanitizeFuelLog(incoming, previous) {
 function publicUser(record) {
   ensureDayLogs(record);
   ensureFreezes(record);
+  ensureStatus(record);
   return {
     id: record.id,
     name: record.name,
     email: record.email,
-    status: record.status,
+    status: record.status || "",
     weight: record.weight,
     streak: record.streak || 0,
     freezesLeft: record.freezesLeft,
@@ -618,8 +642,11 @@ function publicUser(record) {
     cleanStreak: record.cleanStreak || 0,
     returned: Boolean(record.returned),
     kindsDone: Array.isArray(record.kindsDone) ? record.kindsDone : [],
+    sessionsDone: Array.isArray(record.sessionsDone) ? record.sessionsDone : [],
+    todaySessions: Array.isArray(record.todaySessions) ? record.todaySessions : [],
     dailyDoneCount: record.dailyDoneCount || 0,
     dailyClearDays: record.dailyClearDays || 0,
+    shieldNotice: shieldNoticeOpen(record),
     daily: record.daily
       ? {
           date: record.daily.date,
@@ -636,6 +663,10 @@ function publicUser(record) {
     sex: ALLOWED_SEX.includes(record.sex) ? record.sex : null,
     goals: Array.isArray(record.goals) ? record.goals : [],
     daysPerWeek: record.daysPerWeek || null,
+    experience: ALLOWED_EXPERIENCE.includes(record.experience) ? record.experience : null,
+    programLevel: openProgramLevel(record, loadWorkoutsFile().experienceRank),
+    levelProgress: Math.max(0, Math.round(Number(record.levelProgress) || 0)),
+    progressLevel: Math.round(Number(record.progressLevel)) || 0,
     fuelLog: record.fuelLog,
     createdAt: record.createdAt,
   };
@@ -721,7 +752,7 @@ const server = http.createServer(async (req, res) => {
         name,
         email,
         passwordHash: hashPassword(password),
-        status: "Двигаюсь мягко",
+        status: "",
         streak: 0,
         activityCount: 0,
         achievements: [],
@@ -734,6 +765,7 @@ const server = http.createServer(async (req, res) => {
         age: null,
         goals: [],
         daysPerWeek: null,
+        experience: null,
         weight: {
           start: 70,
           current: 70,
@@ -762,6 +794,7 @@ const server = http.createServer(async (req, res) => {
       const token = crypto.randomBytes(24).toString("hex");
       record.tokens = [...(record.tokens || []), token].slice(-8);
       ensureAchievements(record);
+      ensureStatus(record);
       record.updatedAt = new Date().toISOString();
       saveUser(record);
       send(res, 200, { token, user: publicUser(record) });
@@ -787,7 +820,7 @@ const server = http.createServer(async (req, res) => {
         send(res, 401, { error: "Нужно войти" });
         return;
       }
-      if (ensureDayLogs(record) || ensureFreezes(record) || ensureAchievements(record)) {
+      if (ensureDayLogs(record) || ensureFreezes(record) || ensureAchievements(record) || ensureStatus(record)) {
         record.updatedAt = new Date().toISOString();
         saveUser(record);
       }
@@ -811,12 +844,7 @@ const server = http.createServer(async (req, res) => {
         record.name = name;
       }
       if (typeof body.status === "string") {
-        const status = body.status.trim();
-        if (!status) {
-          send(res, 400, { error: "Укажи статус" });
-          return;
-        }
-        record.status = status;
+        record.status = body.status.trim();
       }
 
       if (body.onboardingDone === true || body.updateProfile === true) {
@@ -836,11 +864,21 @@ const server = http.createServer(async (req, res) => {
       delete record.stepLog;
       delete record.stepGoal;
       ensureFreezes(record);
+      settleStreak(record);
       ensureDaily(record);
+      if (body.shieldNoticeSeen === true && record.shieldSavedDate) {
+        record.shieldNoticeSeen = record.shieldSavedDate;
+      }
       if (body.activityDone === true && Number(body.elapsedSec) >= MIN_ACTIVITY_SEC) {
-        noteShieldSave(record);
         applyActivity(record);
         rememberActivity(record, body);
+        const workouts = loadWorkoutsFile();
+        const sessionId = String(body.activitySession || "").trim();
+        const session = (Array.isArray(workouts.sessions) ? workouts.sessions : []).find((item) => item && item.id === sessionId);
+        noteProgramProgress(record, session, {
+          unlockEvery: workouts.unlockEvery,
+          experienceRank: workouts.experienceRank,
+        });
       }
       ensureAchievements(record);
 
@@ -954,6 +992,28 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+function sweepStreaks() {
+  for (const record of listUsers()) {
+    try {
+      if (ensureDayLogs(record) || ensureFreezes(record) || ensureAchievements(record) || ensureStatus(record)) {
+        record.updatedAt = new Date().toISOString();
+        saveUser(record);
+      }
+    } catch (error) {
+      console.error("серия:", record && record.id, error && error.message);
+    }
+  }
+}
+
+server.on("error", (error) => {
+  if (error && error.code === "EADDRINUSE") {
+    console.error(`Порт ${PORT} уже занят. API уже запущен: http://localhost:${PORT}`);
+    process.exit(0);
+  }
+  console.error(error);
+  process.exit(1);
+});
+
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`Пользователи: ${USERS_DIR}`);
   console.log(`Auth API: http://localhost:${PORT}`);
@@ -962,4 +1022,6 @@ server.listen(PORT, "0.0.0.0", () => {
       ? "Админка: пароль из keys/.env"
       : "Админка: пароль в keys/admin/BOOTSTRAP.txt"
   );
+  sweepStreaks();
+  setInterval(sweepStreaks, 15 * 60 * 1000);
 });

@@ -211,5 +211,32 @@
     "rule": "kind",
     "kind": "stretch",
     "need": 1
+  },
+  {
+    "id": "warmupMorning",
+    "title": "Утро",
+    "hint": "Закрой утреннюю разминку",
+    "secret": false,
+    "rule": "session",
+    "sessionId": "warmup-morning",
+    "need": 1
+  },
+  {
+    "id": "warmupEvening",
+    "title": "Вечер",
+    "hint": "Закрой вечернюю разминку",
+    "secret": false,
+    "rule": "session",
+    "sessionId": "warmup-evening",
+    "need": 1
+  },
+  {
+    "id": "warmupDay",
+    "title": "Утро и вечер",
+    "hint": "Обе разминки в один день",
+    "secret": true,
+    "rule": "sessionsToday",
+    "sessionIds": ["warmup-morning", "warmup-evening"],
+    "need": 1
   }
 ]

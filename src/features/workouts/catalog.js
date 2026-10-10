@@ -2,9 +2,77 @@ import data from "../../../data/content/workouts.json";
 
 export const WORKOUT_GROUPS = data.groups;
 export const WORKOUT_SESSIONS = data.sessions;
+export const WORKOUT_LEVELS = Array.isArray(data.levels) ? data.levels : [];
+export const UNLOCK_EVERY = Math.max(1, Math.round(Number(data.unlockEvery) || 3));
 
 export function sessionsInGroup(groupId) {
-  return WORKOUT_SESSIONS.filter((item) => item.group === groupId && !item.daily);
+  return WORKOUT_SESSIONS.filter((item) => item.group === groupId && !item.daily && !item.warmup).sort(
+    (a, b) => (Number(a.level) || 1) - (Number(b.level) || 1)
+  );
+}
+
+export function warmupSessions() {
+  return WORKOUT_SESSIONS.filter((item) => item.warmup);
+}
+
+export function experienceRank(experience) {
+  const rank = Number(data.experienceRank?.[experience]);
+  if (!Number.isInteger(rank) || rank < 1 || rank > 5) {
+    return 1;
+  }
+  return rank;
+}
+
+export function openLevel(user) {
+  const played = Math.round(Number(user?.programLevel));
+  const earned = played >= 1 && played <= 5 ? played : 1;
+  return Math.max(earned, experienceRank(user?.experience));
+}
+
+export function levelProgressCount(user) {
+  const open = openLevel(user);
+  if (open >= 5) {
+    return 0;
+  }
+  if (Math.round(Number(user?.progressLevel)) !== open) {
+    return 0;
+  }
+  return Math.max(0, Math.round(Number(user?.levelProgress) || 0));
+}
+
+export function levelById(level) {
+  return WORKOUT_LEVELS.find((item) => item.id === Number(level)) || null;
+}
+
+export function levelLabel(level) {
+  const item = levelById(level);
+  if (!item) {
+    return "";
+  }
+  return `Уровень ${item.id} · ${item.title}`;
+}
+
+export function workoutsLeftPhrase(done) {
+  const left = Math.max(0, UNLOCK_EVERY - (Number(done) || 0));
+  const mod10 = left % 10;
+  const mod100 = left % 100;
+  const word =
+    mod10 === 1 && mod100 !== 11
+      ? "тренировка"
+      : mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)
+        ? "тренировки"
+        : "тренировок";
+  return `Ещё ${left} ${word}`;
+}
+
+export function openSessions(groupId, user) {
+  const open = openLevel(user);
+  return sessionsInGroup(groupId).filter((item) => (Number(item.level) || 1) <= open);
+}
+
+export function nextLockedSession(groupId, user) {
+  const open = openLevel(user);
+  return sessionsInGroup(groupId).find((item) => Number(item.level) === open + 1) || null;
 }
 
 export function sessionById(id) {
@@ -16,7 +84,8 @@ export function sessionRounds(session) {
 }
 
 export function buildPlaylist(session) {
-  const rest = Math.max(8, Math.min(25, Math.round(Number(session?.restSec) || 15)));
+  const restRaw = Number(session?.restSec);
+  const rest = Number.isFinite(restRaw) ? Math.max(0, Math.min(25, Math.round(restRaw))) : 15;
   const roundRest = Math.max(20, Math.min(90, Math.round(Number(session?.roundRestSec) || 40)));
   const rounds = sessionRounds(session);
   const moves = Array.isArray(session?.moves) ? session.moves : [];
@@ -28,7 +97,7 @@ export function buildPlaylist(session) {
       steps.push({ kind: "work", title, sec, round, rounds });
       const lastMove = index === moves.length - 1;
       const lastRound = round === rounds;
-      if (!lastMove) {
+      if (!lastMove && rest > 0) {
         steps.push({ kind: "rest", title: "Отдых", sec: rest, round, rounds });
       } else if (!lastRound) {
         steps.push({ kind: "rest", title: "Между подходами", sec: roundRest, round, rounds });
@@ -78,6 +147,7 @@ const SECONDS_PER_REP = {
   "Птица-собака": 4,
   "Сведение лопаток": 3,
   "Круги руками": 2,
+  "Круги плечами": 2,
   "Подъёмы рук в стороны": 3,
   "Кошка-корова": 4,
 };
