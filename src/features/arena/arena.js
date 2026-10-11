@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { Shield, Sun, Sunset, User } from "lucide-react-native";
+import { Shield, Sun, Sunset } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,6 +15,7 @@ import { sumLog, utcDay } from "../calories/foods";
 import { dailyKcalTarget } from "../calories/target";
 import { lookOfStreak } from "../streaks/look";
 import { AchievementPlaque } from "../achievements/plaque";
+import { ProfileChip } from "../avatar/ProfileChip";
 import { sessionById, warmupSessions } from "../workouts/catalog";
 import { useSession } from "../workouts/sessionStore";
 
@@ -96,11 +97,6 @@ export default function ArenaScreen() {
   }, [user, today]);
   const target = useMemo(() => dailyKcalTarget(user), [user]);
 
-  const openProfile = async () => {
-    await lightTap();
-    router.replace("/profile");
-  };
-
   const openTask = async (task) => {
     await lightTap();
     const session = sessionById(task?.sessionId);
@@ -150,13 +146,7 @@ export default function ArenaScreen() {
       >
         <View className="mb-5 flex-row items-center justify-between pt-2">
           <Text className="text-[34px] font-semibold text-white">Серия</Text>
-          <Pressable
-            onPress={openProfile}
-            className="h-11 w-11 items-center justify-center rounded-full"
-            style={glassStyle({ variant: "fill", borderRadius: 999 })}
-          >
-            <User size={20} color={getPalette().ink} strokeWidth={1.8} />
-          </Pressable>
+          <ProfileChip />
         </View>
 
         <GlassPanel delay={40} style={{ borderRadius: 32, paddingHorizontal: 24, paddingVertical: 28 }}>

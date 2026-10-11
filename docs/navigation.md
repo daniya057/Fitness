@@ -14,13 +14,16 @@
 | Тренинг | `src/features/workouts/workouts.js` | Группы, уровень сложности, таймер-плейлист |
 | Награды | `src/features/rewards/rewards.js` | Сетка медалей-достижений |
 | Калории | `src/features/calories/calories.js` | Дневник КБЖУ, плашка нормы, счётчик порции, сканер |
-| Профиль | `src/features/profile/profile.js` | Карточка и правка данных |
+| Профиль | `src/features/profile/profile.js` | Карточка, значок, правка данных |
 
 Маршруты: `app/(tabs)/`.
 
 ## Стек поверх вкладок
 
 - Опросник после регистрации (2 экрана: тело, затем цели, стаж и дни) — `src/features/onboarding/OnboardingScreen.js`
+- «Забыл пароль» на экране входа — `src/features/auth/AuthScreen.js`
+- Подтверждение почты после регистрации — `src/features/auth/EmailVerifyScreen.js`
+- Значок профиля справа сверху на Арене, Тренинге, Наградах и Калориях — `src/features/avatar/ProfileChip.js`
 - Админка `/admin` — не в табах, отдельный пароль
 - Модалка «серия спасена щитом» — один раз после списания щита (`src/features/streaks/ShieldNotice.js`)
 - Paywall (фаза 4)

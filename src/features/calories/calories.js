@@ -5,6 +5,7 @@ import { PillButton, PrimaryButton, ScreenHeader, SectionLabel } from "../../ui/
 import { SoftPress } from "../../ui/SoftPress";
 import { glassStyle } from "../../ui/Glass";
 import { getPalette } from "../../ui/theme";
+import { ProfileChip } from "../avatar/ProfileChip";
 import { useAuth } from "../auth/AuthContext";
 import { BarcodeScan } from "./BarcodeScan";
 import {
@@ -217,7 +218,7 @@ export default function CaloriesScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <ScreenHeader glass title="Калории" subtitle={targetHint(target)} />
+        <ScreenHeader glass title="Калории" subtitle={targetHint(target)} right={<ProfileChip />} />
 
         <View className="rounded-[28px] px-5 py-7" style={glassStyle({ borderRadius: 28 })}>
           <Text className="text-[13px] font-medium text-white/55">Сегодня</Text>

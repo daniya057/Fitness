@@ -7,6 +7,8 @@ import { Field, PillButton, PrimaryButton, SectionLabel, StatRow } from "../../u
 import { glassStyle } from "../../ui/Glass";
 import { getPalette } from "../../ui/theme";
 import { AchievementPlaque } from "../achievements/plaque";
+import { AvatarBadge } from "../avatar/AvatarBadge";
+import { AvatarPicker } from "../avatar/AvatarPicker";
 import { useAuth } from "../auth/AuthContext";
 import { BirthdayCalendar } from "../onboarding/BirthdayCalendar";
 import { GOALS, GOAL_LABELS, EXPERIENCE_LABELS, SEX_LABELS, SEX_OPTIONS } from "../onboarding/catalog";
@@ -43,6 +45,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { user, logout, patch } = useAuth();
   const [editing, setEditing] = useState(false);
+  const [lookOpen, setLookOpen] = useState(false);
   const [form, setForm] = useState(() => seedForm(user));
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -126,9 +129,23 @@ export default function ProfileScreen() {
           <Text className="text-[12px] font-medium tracking-[1.2px]" style={{ color: getPalette().accent }}>
             Профиль
           </Text>
-          <Text className="mt-2 text-[28px] font-semibold text-white">{name}</Text>
-          {status ? <Text className="mt-1 text-[14px] text-white/60">{status}</Text> : null}
-          <Text className="mt-2 text-[13px] text-white/45">{user?.email}</Text>
+          <View className="mt-4 flex-row items-center">
+            <Pressable
+              onPress={async () => {
+                await lightTap();
+                if (!editing) {
+                  setLookOpen((value) => !value);
+                }
+              }}
+            >
+              <AvatarBadge user={user} size="lg" />
+            </Pressable>
+            <View className="ml-4 flex-1">
+              <Text className="text-[28px] font-semibold text-white">{name}</Text>
+              {status ? <Text className="mt-1 text-[14px] text-white/60">{status}</Text> : null}
+              <Text className="mt-2 text-[13px] text-white/45">{user?.email}</Text>
+            </View>
+          </View>
           <View className="mt-6 flex-row flex-wrap gap-2">
             {editing ? (
               <PillButton label="Отмена" onPress={cancelEdit} tone="fill" />
@@ -247,6 +264,7 @@ export default function ProfileScreen() {
           </View>
         ) : (
           <>
+            <AvatarPicker open={lookOpen} onToggle={() => setLookOpen((value) => !value)} />
             <AchievementPlaque
               tone="glass"
               user={user}

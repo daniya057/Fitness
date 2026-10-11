@@ -18,6 +18,8 @@
 
 `USDA_API_KEY` — необязательно. Без него поиск КБЖУ ходит в USDA с `DEMO_KEY` (общий лимит). Свой ключ: https://fdc.nal.usda.gov/api-key-signup
 
+`RESEND_API_KEY` — письма с кодом. `MAIL_FROM` по умолчанию `Fitness <onboarding@resend.dev>`. Пока нет своего домена, Resend принимает только почту аккаунта Resend.
+
 `admin/` — сессии и хеш пароля админа. В git не попадает.
 
 Приложение на вебе берёт хост API из адреса страницы (телефон в Wi-Fi стучится в IP компа, не в свой localhost). Явно задать адрес можно через `EXPO_PUBLIC_API_URL`. Сервер читает `.env` отсюда при старте.

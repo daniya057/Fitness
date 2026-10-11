@@ -17,6 +17,6 @@
 
 ## Именование
 
-`snake_case`, глагол: `onboarding_skipped`, `activity_logged`, `streak_shield_used`.
+`snake_case`, глагол: `onboarding_skipped`, `activity_logged`, `streak_shield_used`, `password_reset_requested`, `password_reset_done`, `email_verified`.
 
 Свойства: `activity_type`, `duration_sec`, `streak_count`, `source_screen`.

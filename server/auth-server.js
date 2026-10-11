@@ -5,6 +5,8 @@ const path = require("path");
 const { LINKS, loadEnv } = require("./env");
 const { lookupBarcode, searchNutrition } = require("./nutrition");
 const { noteProgramProgress, openProgramLevel } = require("./program-level");
+const { publicAvatar, setAvatarPhoto, wearAvatar } = require("./avatar");
+const { mailConfigured, sendCodeEmail } = require("./mail");
 const { settleStreak, shieldNoticeOpen, utcDay } = require("./streak");
 
 loadEnv();
@@ -22,6 +24,7 @@ const {
   verifyAdminLogin,
 } = require("./admin-lib");
 
+const RESET_MS = 15 * 60 * 1000;
 const PORT = Number(process.env.AUTH_PORT) || LINKS.apiPort;
 const USERS_DIR = path.join(__dirname, "..", "data", "users");
 const ACHIEVEMENTS_PATH = path.join(__dirname, "..", "data", "content", "achievements.json");
@@ -668,6 +671,8 @@ function publicUser(record) {
     levelProgress: Math.max(0, Math.round(Number(record.levelProgress) || 0)),
     progressLevel: Math.round(Number(record.progressLevel)) || 0,
     fuelLog: record.fuelLog,
+    emailVerified: record.emailVerified !== false,
+    ...publicAvatar(record),
     createdAt: record.createdAt,
   };
 }
@@ -690,6 +695,27 @@ function saveUser(record) {
 function findByEmail(email) {
   const needle = String(email || "").trim().toLowerCase();
   return listUsers().find((user) => user.email === needle) || null;
+}
+
+function makeResetCode() {
+  return String(crypto.randomInt(100000, 1000000));
+}
+
+function resetStillValid(record) {
+  const until = Date.parse(record?.resetExpires);
+  return Boolean(record?.resetCodeHash) && Number.isFinite(until) && until > Date.now();
+}
+
+function verifyStillValid(record) {
+  const until = Date.parse(record?.verifyExpires);
+  return Boolean(record?.verifyCodeHash) && Number.isFinite(until) && until > Date.now();
+}
+
+function stampVerifyCode(record) {
+  const code = makeResetCode();
+  record.verifyCodeHash = hashPassword(code);
+  record.verifyExpires = new Date(Date.now() + RESET_MS).toISOString();
+  return code;
 }
 
 function findByToken(token) {
@@ -773,12 +799,23 @@ const server = http.createServer(async (req, res) => {
         },
         fuelLog: { date: now.slice(0, 10), items: [] },
         tokens: [token],
+        emailVerified: false,
+        avatarFace: "user",
+        avatarRing: "mint",
+        avatarPhoto: "",
         createdAt: now,
         updatedAt: now,
       };
+      const code = stampVerifyCode(record);
       ensureAchievements(record);
       saveUser(record);
-      send(res, 201, { token, user: publicUser(record) });
+      const mailed = await sendCodeEmail({ to: email, code, kind: "verify" });
+      send(res, 201, {
+        token,
+        user: publicUser(record),
+        mailed: mailed.sent,
+        ...(mailed.sent || mailConfigured() ? {} : { code }),
+      });
       return;
     }
 
@@ -793,6 +830,142 @@ const server = http.createServer(async (req, res) => {
       }
       const token = crypto.randomBytes(24).toString("hex");
       record.tokens = [...(record.tokens || []), token].slice(-8);
+      ensureAchievements(record);
+      ensureStatus(record);
+      record.updatedAt = new Date().toISOString();
+      saveUser(record);
+      send(res, 200, { token, user: publicUser(record) });
+      return;
+    }
+
+    if (route === "POST /password/forgot") {
+      const body = await readBody(req);
+      const ip = clientIp(req);
+      if (tooManyLogins(ip)) {
+        send(res, 429, { error: "Слишком много попыток, подожди" });
+        return;
+      }
+      const email = String(body.email || "").trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        send(res, 400, { error: "Нужна нормальная почта" });
+        return;
+      }
+      const record = findByEmail(email);
+      if (!record) {
+        send(res, 200, { ok: true });
+        return;
+      }
+      const code = makeResetCode();
+      record.resetCodeHash = hashPassword(code);
+      record.resetExpires = new Date(Date.now() + RESET_MS).toISOString();
+      record.updatedAt = new Date().toISOString();
+      saveUser(record);
+      const mailed = await sendCodeEmail({ to: email, code, kind: "reset" });
+      if (mailConfigured() && !mailed.sent) {
+        send(res, 502, { error: "Письмо не ушло" });
+        return;
+      }
+      send(res, 200, {
+        ok: true,
+        mailed: mailed.sent,
+        ...(mailed.sent ? {} : { code }),
+      });
+      return;
+    }
+
+    if (route === "POST /email/verify") {
+      const body = await readBody(req);
+      const record = findByToken(bearer(req, body.token));
+      if (!record) {
+        send(res, 401, { error: "Нужно войти" });
+        return;
+      }
+      const ip = clientIp(req);
+      if (tooManyLogins(ip)) {
+        send(res, 429, { error: "Слишком много попыток, подожди" });
+        return;
+      }
+      if (record.emailVerified !== false) {
+        send(res, 200, { user: publicUser(record) });
+        return;
+      }
+      const code = String(body.code || "").replace(/\D/g, "");
+      if (code.length !== 6 || !verifyStillValid(record) || !checkPassword(code, record.verifyCodeHash)) {
+        send(res, 401, { error: "Код не подошёл или устарел" });
+        return;
+      }
+      record.emailVerified = true;
+      record.verifyCodeHash = "";
+      record.verifyExpires = null;
+      record.updatedAt = new Date().toISOString();
+      saveUser(record);
+      send(res, 200, { user: publicUser(record) });
+      return;
+    }
+
+    if (route === "POST /email/resend") {
+      const body = await readBody(req);
+      const record = findByToken(bearer(req, body.token));
+      if (!record) {
+        send(res, 401, { error: "Нужно войти" });
+        return;
+      }
+      const ip = clientIp(req);
+      if (tooManyLogins(ip)) {
+        send(res, 429, { error: "Слишком много попыток, подожди" });
+        return;
+      }
+      if (record.emailVerified !== false) {
+        send(res, 200, { ok: true });
+        return;
+      }
+      const code = stampVerifyCode(record);
+      record.updatedAt = new Date().toISOString();
+      saveUser(record);
+      const mailed = await sendCodeEmail({ to: record.email, code, kind: "verify" });
+      if (!mailed.sent) {
+        send(res, 502, {
+          error: "Письмо не ушло",
+          ...(mailConfigured() ? {} : { code }),
+        });
+        return;
+      }
+      send(res, 200, { ok: true, mailed: true });
+      return;
+    }
+
+    if (route === "POST /password/reset") {
+      const body = await readBody(req);
+      const ip = clientIp(req);
+      if (tooManyLogins(ip)) {
+        send(res, 429, { error: "Слишком много попыток, подожди" });
+        return;
+      }
+      const email = String(body.email || "").trim().toLowerCase();
+      const code = String(body.code || "").replace(/\D/g, "");
+      const password = String(body.password || "");
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        send(res, 400, { error: "Нужна нормальная почта" });
+        return;
+      }
+      if (code.length !== 6) {
+        send(res, 400, { error: "Код — шесть цифр" });
+        return;
+      }
+      if (password.length < 6) {
+        send(res, 400, { error: "Пароль от 6 символов" });
+        return;
+      }
+      const record = findByEmail(email);
+      if (!record || !resetStillValid(record) || !checkPassword(code, record.resetCodeHash)) {
+        send(res, 401, { error: "Код не подошёл или устарел" });
+        return;
+      }
+      const token = crypto.randomBytes(24).toString("hex");
+      record.passwordHash = hashPassword(password);
+      record.resetCodeHash = "";
+      record.resetExpires = null;
+      record.tokens = [token];
       ensureAchievements(record);
       ensureStatus(record);
       record.updatedAt = new Date().toISOString();
@@ -845,6 +1018,31 @@ const server = http.createServer(async (req, res) => {
       }
       if (typeof body.status === "string") {
         record.status = body.status.trim();
+      }
+
+      if (Object.prototype.hasOwnProperty.call(body, "avatarPhoto")) {
+        const photoError = setAvatarPhoto(record, body.avatarPhoto);
+        if (photoError) {
+          send(res, 400, { error: photoError });
+          return;
+        }
+      }
+
+      if (body.avatarFace != null || body.avatarRing != null) {
+        const error = wearAvatar(
+          record,
+          body.avatarFace != null ? body.avatarFace : record.avatarFace,
+          body.avatarRing != null ? body.avatarRing : record.avatarRing
+        );
+        if (error) {
+          send(res, 400, { error });
+          return;
+        }
+      }
+
+      if (body.onboardingDone === true && record.emailVerified === false) {
+        send(res, 403, { error: "Сначала подтверди почту" });
+        return;
       }
 
       if (body.onboardingDone === true || body.updateProfile === true) {

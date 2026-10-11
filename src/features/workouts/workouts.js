@@ -18,6 +18,7 @@ import {
   warmupSessions,
   workoutsLeftPhrase,
 } from "./catalog";
+import { ProfileChip } from "../avatar/ProfileChip";
 import { useAuth } from "../auth/AuthContext";
 import { lookOfGroup } from "./look";
 import { useSession } from "./sessionStore";
@@ -49,7 +50,7 @@ export default function WorkoutsScreen() {
         contentContainerStyle={{ paddingHorizontal: 22, paddingBottom: 28 }}
         showsVerticalScrollIndicator={false}
       >
-        <ScreenHeader glass title="Тренинг" subtitle="Следующий уровень — после трёх тренировок" />
+        <ScreenHeader glass title="Тренинг" subtitle="Следующий уровень — после трёх тренировок" right={<ProfileChip />} />
         <Text className="mb-4 text-[15px] font-medium text-white">
           {levelLabel(current)}. {leftPhrase}.
         </Text>

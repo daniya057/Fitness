@@ -75,6 +75,24 @@ export function AuthProvider({ children }) {
         setUser(data.user);
         return data.user;
       },
+      async requestPasswordReset(email) {
+        return api("/password/forgot", { method: "POST", body: { email } });
+      },
+      async resetPassword(payload) {
+        const data = await api("/password/reset", { method: "POST", body: payload });
+        await writeToken(data.token);
+        setToken(data.token);
+        setUser(data.user);
+        return data.user;
+      },
+      async verifyEmail(code) {
+        const data = await api("/email/verify", { method: "POST", token, body: { token, code } });
+        setUser(data.user);
+        return data.user;
+      },
+      async resendEmailCode() {
+        return api("/email/resend", { method: "POST", token, body: { token } });
+      },
       async logout() {
         try {
           await api("/logout", { method: "POST", token, body: { token } });

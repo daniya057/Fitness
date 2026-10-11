@@ -27,7 +27,13 @@
           "initialOrientation": "PORTRAIT_UP"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Чтобы поставить фото в профиль"
+        }
+      ]
     ]
   }
 }

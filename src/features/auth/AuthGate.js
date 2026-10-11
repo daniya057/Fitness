@@ -4,6 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import { getPalette } from "../../ui/theme";
 import { useAuth } from "./AuthContext";
 import AuthScreen from "./AuthScreen";
+import EmailVerifyScreen from "./EmailVerifyScreen";
 import OnboardingScreen from "../onboarding/OnboardingScreen";
 
 function isAdminPath(pathname) {
@@ -35,6 +36,10 @@ export function AuthGate({ children }) {
 
   if (!user) {
     return <AuthScreen />;
+  }
+
+  if (user.emailVerified === false) {
+    return <EmailVerifyScreen />;
   }
 
   if (!user.onboardingDone) {

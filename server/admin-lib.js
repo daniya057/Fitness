@@ -224,6 +224,7 @@ function adminUserView(record) {
     daysPerWeek: record.daysPerWeek || null,
     experience: ["none", "m1_3", "m3_6", "m6_12", "y1"].includes(record.experience) ? record.experience : null,
     weight: record.weight || null,
+    emailVerified: record.emailVerified !== false,
     createdAt: record.createdAt,
     updatedAt: record.updatedAt || null,
   };

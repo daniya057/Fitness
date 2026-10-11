@@ -3,6 +3,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenHeader } from "../../ui/kit";
 import { glassStyle } from "../../ui/Glass";
 import { getPalette } from "../../ui/theme";
+import { ProfileChip } from "../avatar/ProfileChip";
 import { useAuth } from "../auth/AuthContext";
 import { ACHIEVEMENTS, earnedSet, iconOf, isHidden, progressValue, shownAchievements } from "../achievements/catalog";
 import { Medal } from "../achievements/Medal";
@@ -77,7 +78,7 @@ export default function RewardsScreen() {
         contentContainerStyle={{ paddingHorizontal: 22, paddingBottom: 28 }}
         showsVerticalScrollIndicator={false}
       >
-        <ScreenHeader glass title="Награды" subtitle={`${have} / ${total}`} />
+        <ScreenHeader glass title="Награды" subtitle={`${have} / ${total}`} right={<ProfileChip />} />
 
         {rowsOf(items, 2).map((row) => (
           <View key={row[0].id} className="mb-3 flex-row" style={{ gap: 12 }}>
