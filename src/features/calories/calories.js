@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ScanLine } from "lucide-react-native";
 import { PillButton, PrimaryButton, ScreenHeader, SectionLabel } from "../../ui/kit";
 import { SoftPress } from "../../ui/SoftPress";
 import { glassStyle } from "../../ui/Glass";
@@ -8,8 +9,10 @@ import { getPalette } from "../../ui/theme";
 import { ProfileChip } from "../avatar/ProfileChip";
 import { useAuth } from "../auth/AuthContext";
 import { BarcodeScan } from "./BarcodeScan";
+import { FoodCard, MacroBadges } from "./FoodCard";
 import {
   FOOD_CATEGORIES,
+  foodById,
   makeLogItem,
   macrosForGrams,
   mergeFoodLists,
@@ -21,14 +24,21 @@ import {
 } from "./foods";
 import { dailyKcalTarget, targetHint } from "./target";
 
-function MacroCell({ label, value, unit }) {
+function DayTotals({ totals, target, fill, guessedSex }) {
   return (
-    <View className="flex-1 items-center">
-      <Text className="text-[22px] font-semibold text-white">{value}</Text>
-      <Text className="mt-1 text-[11px] text-white/55">
-        {label}
-        {unit ? `, ${unit}` : ""}
-      </Text>
+    <View className="rounded-[24px] px-5 py-5" style={glassStyle({ borderRadius: 24 })}>
+      <Text className="text-[13px] font-medium text-white/55">Итого за день</Text>
+      <View className="mt-1 flex-row items-end">
+        <Text className="text-[42px] font-semibold leading-[46px] text-white">{totals.kcal}</Text>
+        <Text className="mb-1.5 ml-2 text-[16px] text-white/55">/ {target.kcal} ккал</Text>
+      </View>
+      <View className="mt-4 h-[10px] overflow-hidden rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.12)" }}>
+        <View className="h-full rounded-full" style={{ width: `${fill}%`, backgroundColor: getPalette().bar }} />
+      </View>
+      {guessedSex ? (
+        <Text className="mt-3 text-[13px] leading-5 text-white/55">Укажи пол в профиле — ориентир станет точнее.</Text>
+      ) : null}
+      <MacroBadges protein={totals.protein} fat={totals.fat} carbs={totals.carbs} />
     </View>
   );
 }
@@ -220,26 +230,7 @@ export default function CaloriesScreen() {
       >
         <ScreenHeader glass title="Калории" subtitle={targetHint(target)} right={<ProfileChip />} />
 
-        <View className="rounded-[28px] px-5 py-7" style={glassStyle({ borderRadius: 28 })}>
-          <Text className="text-[13px] font-medium text-white/55">Сегодня</Text>
-          <View className="mt-1 flex-row items-end">
-            <Text className="text-[42px] font-semibold leading-[46px] text-white">{totals.kcal}</Text>
-            <Text className="mb-1.5 ml-2 text-[16px] text-white/55">/ {target.kcal} ккал</Text>
-          </View>
-          <View className="mt-4 h-[10px] overflow-hidden rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.12)" }}>
-            <View className="h-full rounded-full" style={{ width: `${fill}%`, backgroundColor: getPalette().bar }} />
-          </View>
-          {target.guessedSex ? (
-            <Text className="mt-3 text-[13px] leading-5 text-white/55">
-              Укажи пол в профиле — ориентир станет точнее.
-            </Text>
-          ) : null}
-          <View className="mt-5 flex-row">
-            <MacroCell label="Белки" value={totals.protein} unit="г" />
-            <MacroCell label="Жиры" value={totals.fat} unit="г" />
-            <MacroCell label="Углеводы" value={totals.carbs} unit="г" />
-          </View>
-        </View>
+        <DayTotals totals={totals} target={target} fill={fill} guessedSex={target.guessedSex} />
 
         <View className="mt-10">
           <SectionLabel glass>Дневник</SectionLabel>
@@ -249,10 +240,21 @@ export default function CaloriesScreen() {
               onChangeText={setQuery}
               placeholder="Яблоко, гречка, курица…"
               placeholderTextColor="#8A8A8A"
-              className="mr-2 flex-1 rounded-2xl px-4 py-3.5 text-[16px] text-white"
-              style={glassStyle({ borderRadius: 16 })}
+              className="mr-2 flex-1 rounded-2xl px-4 text-[16px] text-white"
+              style={[glassStyle({ borderRadius: 16 }), { minHeight: 48 }]}
             />
-            <PillButton label="Сканер" tone="glassOn" onPress={() => setScanOpen(true)} />
+            <SoftPress
+              onPress={() => setScanOpen(true)}
+              className="items-center justify-center rounded-2xl"
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 16,
+                backgroundColor: getPalette().accent,
+              }}
+            >
+              <ScanLine size={22} color="#07140F" strokeWidth={2.2} />
+            </SoftPress>
           </View>
           <ScrollView
             horizontal
@@ -276,13 +278,14 @@ export default function CaloriesScreen() {
           </ScrollView>
 
           {picked && portion ? (
-            <View ref={portionRef} className="mt-4 rounded-[28px] px-5 py-6" style={glassStyle({ borderRadius: 28, backgroundColor: "rgba(125,255,179,0.1)" })}>
+            <View ref={portionRef} className="mt-4 rounded-[24px] px-5 py-6" style={glassStyle({ borderRadius: 24, backgroundColor: "rgba(125,255,179,0.1)" })}>
               <Text className="text-[18px] font-semibold text-white">{picked.name}</Text>
               <Text className="mt-1 text-[13px] text-white/55">
-                На 100 г: {Math.round(picked.kcal)} ккал · Б {picked.protein} · Ж {picked.fat} · У {picked.carbs}
+                На 100 г: {Math.round(picked.kcal)} ккал
                 {picked.source === "guess" ? " · ориентир по названию пачки, не с этикетки" : ""}
                 {picked.source === "list" ? " · название с Barcode List, КБЖУ на этикетке не нашли" : ""}
               </Text>
+              <MacroBadges protein={picked.protein} fat={picked.fat} carbs={picked.carbs} />
               <View className="mt-5">
                 <GramCounter key={picked.id || picked.name} value={grams} onChange={setGrams} />
               </View>
@@ -297,11 +300,9 @@ export default function CaloriesScreen() {
                   </Text>
                 </SoftPress>
               ) : null}
-              <View className="mb-5 flex-row">
-                <MacroCell label="ккал" value={portion.kcal} />
-                <MacroCell label="Б" value={portion.protein} />
-                <MacroCell label="Ж" value={portion.fat} />
-                <MacroCell label="У" value={portion.carbs} />
+              <View className="mb-5">
+                <Text className="mb-2 text-[13px] text-white/55">{portion.kcal} ккал в порции</Text>
+                <MacroBadges protein={portion.protein} fat={portion.fat} carbs={portion.carbs} />
               </View>
               <PrimaryButton
                 label="В дневник"
@@ -316,23 +317,17 @@ export default function CaloriesScreen() {
           ) : null}
 
           {found.length > 0 ? (
-            <View className="mt-4 overflow-hidden rounded-[24px]" style={glassStyle({ borderRadius: 24 })}>
+            <View className="mt-4">
               {found.map((food, index) => (
-                <SoftPress
+                <FoodCard
                   key={`${food.id}-${index}`}
+                  food={food}
+                  hint={`${Math.round(food.kcal)} ккал / 100 г${sourceLabel(food) ? ` · ${sourceLabel(food)}` : ""}`}
+                  action="add"
+                  disabled={busy}
                   onPress={() => revealPortion(food)}
-                  className="px-4 py-3.5"
-                  style={index < found.length - 1 ? { borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.08)" } : undefined}
-                >
-                  <View className="flex-row items-center justify-between">
-                    <Text className="mr-3 flex-1 text-[15px] text-white">{food.name}</Text>
-                    <Text className="text-[13px] font-medium text-white/55">{Math.round(food.kcal)} ккал</Text>
-                  </View>
-                  <Text className="mt-1 text-[12px] text-white/45">
-                    на 100 г · Б {food.protein} · Ж {food.fat} · У {food.carbs}
-                    {sourceLabel(food) ? ` · ${sourceLabel(food)}` : ""}
-                  </Text>
-                </SoftPress>
+                  onAction={() => addFood(food, 100)}
+                />
               ))}
             </View>
           ) : (
@@ -351,26 +346,32 @@ export default function CaloriesScreen() {
           {items.length === 0 ? (
             <Text className="text-[14px] leading-5 text-white/55">Пока пусто. Это нормально — день ещё идёт.</Text>
           ) : (
-            <View className="overflow-hidden rounded-[24px]" style={glassStyle({ borderRadius: 24 })}>
-              {items.map((item, index) => (
-                <View
+            items.map((item, index) => {
+              const catalog = foodById(item.foodId);
+              return (
+                <FoodCard
                   key={item.id || `${item.foodId}-${index}`}
-                  className="flex-row items-center justify-between px-4 py-3.5"
-                  style={index < items.length - 1 ? { borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.08)" } : undefined}
-                >
-                  <View className="mr-3 flex-1">
-                    <Text className="text-[15px] text-white">{item.label}</Text>
-                    <Text className="mt-1 text-[12px] text-white/50">
-                      {item.grams} г · {Math.round(item.kcal)} ккал
-                    </Text>
-                  </View>
-                  <SoftPress onPress={() => removeItem(item.id)} className="rounded-full px-3 py-2" style={glassStyle({ variant: "fill", borderRadius: 999 })}>
-                    <Text className="text-[12px] font-medium text-white/70">Убрать</Text>
-                  </SoftPress>
-                </View>
-              ))}
-            </View>
+                  food={{
+                    name: item.label,
+                    category: item.category || catalog?.category,
+                    protein: item.protein,
+                    fat: item.fat,
+                    carbs: item.carbs,
+                    kcal: item.kcal,
+                  }}
+                  hint={`${item.grams} г · ${Math.round(item.kcal)} ккал`}
+                  action="remove"
+                  disabled={busy}
+                  onAction={() => removeItem(item.id)}
+                />
+              );
+            })
           )}
+          {items.length ? (
+            <View className="mt-2">
+              <DayTotals totals={totals} target={target} fill={fill} guessedSex={false} />
+            </View>
+          ) : null}
         </View>
 
         {error ? <Text className="mt-4 text-[13px] text-accent">{error}</Text> : null}

@@ -211,6 +211,7 @@ export function makeLogItem(food, grams) {
   return {
     id: `log-${Date.now().toString(36)}-${Math.random().toString(16).slice(2, 8)}`,
     foodId: food.id,
+    category: food.category || "",
     grams: Math.round(Number(grams) || 0),
     label: food.name,
     kcal: macros.kcal,

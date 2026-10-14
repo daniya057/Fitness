@@ -8,7 +8,7 @@
 
 Папка **`data/users/`**. Один человек — один файл `{id}.json`.
 
-Поля опросника в том же файле: `heightCm`, `birthDate`, `age`, `sex` (`male`/`female`), `weight`, `goals`, `daysPerWeek`, `experience` (`none` / `m1_3` / `m3_6` / `m6_12` / `y1`), `programLevel`, `levelProgress`, `progressLevel`, `onboardingDone`. Уровень программы растит сервер после засчитанной тренировки, клиент его не присылает. Дневник калорий — `fuelLog` (дата UTC и список порций). Серия — `streak`, щиты — `freezesLeft` (старт 1), последняя активность — `lastActivityDate`.
+Поля опросника в том же файле: `heightCm`, `birthDate`, `age`, `sex` (`male`/`female`), `weight`, `goals`, `daysPerWeek`, `experience` (`none` / `m1_3` / `m3_6` / `m6_12` / `y1`), `programLevel`, `levelProgress`, `progressLevel`, `onboardingDone`. Уровень программы растит сервер после засчитанной тренировки, клиент его не присылает. Дневник калорий — `fuelLog` (дата UTC и список порций). Серия — `streak`, щиты — `freezesLeft` (старт 1), последняя активность — `lastActivityDate`. Друзья — `friends` (id), пинки — `nudges`.
 
 ## API
 
@@ -21,7 +21,13 @@
 - `POST /password/forgot` — если аккаунт есть, код на почту на 15 минут
 - `POST /password/reset` — почта, код, новый пароль. Старые сессии сбрасываются, сразу вход
 - `GET /me`
-- `PATCH /me` — имя, статус (можно пустой); опрос (`onboardingDone: true`); правки профиля (`updateProfile: true`, стартовый вес не сбрасывается); дневник `fuelLog`; `activityDone: true` — сначала сверка пропусков, потом серия +1 раз за UTC-день; `shieldNoticeSeen: true` — закрыть модалку щита; `avatarFace` / `avatarRing` — только открытые скины; `avatarPhoto` — своё фото
+- `PATCH /me` — имя, статус (можно пустой); опрос (`onboardingDone: true`); правки профиля (`updateProfile: true`, стартовый вес не сбрасывается); дневник `fuelLog`; `activityDone: true` — сначала сверка пропусков, потом серия +1 раз за UTC-день; `shieldNoticeSeen: true` — закрыть модалку щита; `avatarFace` / `avatarRing` — только открытые скины; `avatarPhoto` — своё фото; `nudgeSeen: true` — прочитать пинки
+- `GET /people?q=` — поиск людей по имени, сессия обязательна
+- `GET /people/:id` — открытый профиль: серия, щиты, тренировки, типы, медали. Без почты, веса и еды
+- `GET /friends` — карточки подписок
+- `POST /friends` — `{ id }`, не себя
+- `DELETE /friends/:id`
+- `POST /friends/:id/nudge` — пинк, 4 часа на пару, только из подписок
 - `POST /logout`
 - `GET /catalog` — тексты заданий дня (публично)
 - `GET /barcode/:code` — штрихкод: локальный справочник, затем Open Food Facts ru/world и USDA. Если КБЖУ нет — Barcode List за названием (кэш в `data/cache`). Ориентир из обычной таблицы, если цифр нет (публично)

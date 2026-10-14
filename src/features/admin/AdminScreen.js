@@ -173,7 +173,7 @@ export default function AdminScreen() {
               inputName="fitness-admin-password"
             />
             {error ? <Text className="mb-4 text-[14px] font-medium text-accent">{error}</Text> : null}
-            <PrimaryButton label="Войти" onPress={signIn} busy={busy} />
+            <PrimaryButton glass={false} label="Войти" onPress={signIn} busy={busy} />
           </View>
         </ScrollView>
       </View>

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SoftPress } from "../../ui/SoftPress";
+import { ctaFill } from "../../ui/cta";
+import { GhostButton } from "../../ui/kit";
 import { glassStyle } from "../../ui/Glass";
 import { getPalette } from "../../ui/theme";
 import { lightTap } from "../../lib/haptics";
@@ -105,8 +107,12 @@ export function SessionPlayer() {
     <View className="flex-1" style={{ paddingTop: insets.top, backgroundColor: "transparent" }}>
       <View className="flex-1 px-6 pb-8">
         <View className="flex-row items-center justify-between pt-2">
-          <SoftPress onPress={close} className="rounded-full px-4 py-2" style={glassStyle({ borderRadius: 999 })}>
-            <Text className="text-[14px] font-medium text-white">Назад</Text>
+          <SoftPress
+            onPress={close}
+            className="rounded-full px-5"
+            style={{ ...glassStyle({ variant: "fill", borderRadius: 999 }), minHeight: 44 }}
+          >
+            <Text className="text-[14px] font-semibold text-white">Назад</Text>
           </SoftPress>
           <Text className="text-[13px] text-white/55">
             {prep > 0
@@ -184,16 +190,14 @@ export function SessionPlayer() {
 
         {prep > 0 ? (
           <View className="mt-6">
-            <SoftPress onPress={skipPrep} className="items-center rounded-full py-4" style={glassStyle({ borderRadius: 999 })}>
-              <Text className="text-[15px] font-medium text-white">Пропустить подготовку</Text>
-            </SoftPress>
+            <GhostButton glass label="Пропустить подготовку" onPress={skipPrep} />
           </View>
         ) : finished ? (
           <View className="mt-6">
             <Text className="mb-4 text-center text-[18px] font-semibold text-white">
               {elapsed >= MIN_ACTIVITY_SEC ? "Готово" : "Меньше минуты — не засчитано"}
             </Text>
-            <SoftPress onPress={close} className="items-center rounded-full py-4" style={{ backgroundColor: look.accent }}>
+            <SoftPress onPress={close} className="w-full items-center rounded-full" style={ctaFill(look.accent)}>
               <Text className="text-[15px] font-semibold text-white">К списку</Text>
             </SoftPress>
           </View>
@@ -201,13 +205,17 @@ export function SessionPlayer() {
           <View className="mt-6 flex-row gap-3">
             <SoftPress
               onPress={running ? pause : play}
-              className="flex-1 items-center rounded-full py-4"
-              style={{ backgroundColor: look.accent }}
+              className="flex-1 items-center rounded-full"
+              style={ctaFill(look.accent)}
             >
               <Text className="text-[15px] font-semibold text-white">{running ? "Пауза" : "Старт"}</Text>
             </SoftPress>
-            <SoftPress onPress={skip} className="items-center rounded-full px-6 py-4" style={glassStyle({ borderRadius: 999 })}>
-              <Text className="text-[15px] font-medium text-white">Дальше</Text>
+            <SoftPress
+              onPress={skip}
+              className="items-center rounded-full px-6"
+              style={{ ...glassStyle({ variant: "fill", borderRadius: 999 }), minHeight: 52 }}
+            >
+              <Text className="text-[15px] font-semibold text-white">Дальше</Text>
             </SoftPress>
           </View>
         )}

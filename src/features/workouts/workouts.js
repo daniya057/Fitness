@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Play, Sun, Sunset } from "lucide-react-native";
 import { SoftPress } from "../../ui/SoftPress";
 import { ScreenHeader } from "../../ui/kit";
 import { glassStyle } from "../../ui/Glass";
@@ -22,7 +23,6 @@ import { ProfileChip } from "../avatar/ProfileChip";
 import { useAuth } from "../auth/AuthContext";
 import { lookOfGroup } from "./look";
 import { useSession } from "./sessionStore";
-import { Sun, Sunset } from "lucide-react-native";
 
 export default function WorkoutsScreen() {
   const insets = useSafeAreaInsets();
@@ -50,7 +50,7 @@ export default function WorkoutsScreen() {
         contentContainerStyle={{ paddingHorizontal: 22, paddingBottom: 28 }}
         showsVerticalScrollIndicator={false}
       >
-        <ScreenHeader glass title="Тренинг" subtitle="Следующий уровень — после трёх тренировок" right={<ProfileChip />} />
+        <ScreenHeader glass title="Тренировки" subtitle="Следующий уровень — после трёх тренировок" right={<ProfileChip />} />
         <Text className="mb-4 text-[15px] font-medium text-white">
           {levelLabel(current)}. {leftPhrase}.
         </Text>
@@ -86,12 +86,16 @@ export default function WorkoutsScreen() {
               <Pressable
                 key={group.id}
                 onPress={() => setGroupId(group.id)}
-                className="rounded-full px-4 py-2.5"
-                style={glassStyle({
-                  borderRadius: 999,
-                  backgroundColor: on ? getPalette().pill : getPalette().fill,
-                  borderColor: on ? chip.accent : getPalette().line,
-                })}
+                className="rounded-full px-4"
+                style={{
+                  ...glassStyle({
+                    borderRadius: 999,
+                    backgroundColor: on ? getPalette().pill : getPalette().fill,
+                    borderColor: on ? chip.accent : getPalette().line,
+                  }),
+                  minHeight: 44,
+                  justifyContent: "center",
+                }}
               >
                 <Text className="text-[13px] font-medium" style={{ color: on ? getPalette().ink : getPalette().mute }}>
                   {group.title}
@@ -102,30 +106,28 @@ export default function WorkoutsScreen() {
         </View>
 
         {list.map((item) => {
-          const Icon = look.Icon;
           return (
-            <View key={item.id} className="mb-3 rounded-[28px] px-5 py-6" style={glassStyle({ borderRadius: 28 })}>
-              <View className="mb-3 h-10 w-10 items-center justify-center rounded-full" style={glassStyle({ variant: "fill", borderRadius: 999 })}>
-                <Icon size={20} color={getPalette().ink} strokeWidth={2.2} />
-              </View>
-              <Text className="text-[13px] font-medium" style={{ color: look.accent }}>
+            <View key={item.id} className="mb-3 rounded-[24px] px-4 py-4" style={glassStyle({ borderRadius: 24 })}>
+              <Text className="text-[12px] font-medium" style={{ color: look.accent }}>
                 {levelLabel(item.level)}
               </Text>
-              <Text className="mt-1 text-[22px] font-semibold leading-7 text-white">{item.title}</Text>
-              <Text className="mt-2 text-[13px] text-white/55">{sessionDetail(item)}</Text>
+              <View className="mt-0.5 flex-row items-center">
+                <Text className="mr-3 flex-1 text-[18px] font-semibold leading-6 text-white">{item.title}</Text>
+                <SoftPress
+                  onPress={() => open(item)}
+                  className="h-11 w-11 items-center justify-center rounded-full"
+                  style={{ backgroundColor: look.accent, width: 44, height: 44, borderRadius: 999 }}
+                >
+                  <Play size={18} color="#FFFFFF" fill="#FFFFFF" strokeWidth={1.8} />
+                </SoftPress>
+              </View>
+              <Text className="mt-1 text-[13px] text-white/55">{sessionDetail(item)}</Text>
               <MoveList session={item} onHint={setHintTitle} />
-              <SoftPress
-                onPress={() => open(item)}
-                className="mt-5 items-center rounded-full py-3.5"
-                style={{ backgroundColor: look.accent }}
-              >
-                <Text className="text-[14px] font-semibold text-white">Старт</Text>
-              </SoftPress>
             </View>
           );
         })}
         {locked ? (
-          <View className="mb-3 rounded-[28px] px-5 py-6 opacity-70" style={glassStyle({ borderRadius: 28 })}>
+          <View className="mb-3 rounded-[24px] px-4 py-4 opacity-70" style={glassStyle({ borderRadius: 24 })}>
             <Text className="text-[13px] font-medium text-white/55">{levelLabel(locked.level)}</Text>
             <Text className="mt-1 text-[22px] font-semibold leading-7 text-white">{locked.title}</Text>
             <Text className="mt-2 text-[13px] text-white/55">

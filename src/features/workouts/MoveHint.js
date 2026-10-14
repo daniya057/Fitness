@@ -25,8 +25,8 @@ export function MoveHintButton({ title, onPress }) {
         await lightTap();
         onPress(title);
       }}
-      className="mt-3 self-center rounded-full px-4 py-2.5"
-      style={[glassStyle({ variant: "fill", borderRadius: 999 }), { flexDirection: "row", alignItems: "center" }]}
+      className="mt-3 self-center rounded-full px-4"
+      style={[glassStyle({ variant: "fill", borderRadius: 999 }), { flexDirection: "row", alignItems: "center", minHeight: 44 }]}
     >
       <CircleHelp size={16} color={getPalette().accent} strokeWidth={1.8} />
       <Text className="ml-2 text-[13px] font-medium text-white">Справка</Text>
@@ -41,8 +41,8 @@ export function MoveHintRow({ title, onPress }) {
         await lightTap();
         onPress(title);
       }}
-      className="mt-2 rounded-[16px] px-3 py-2"
-      style={[glassStyle({ variant: "fill", borderRadius: 16 }), { flexDirection: "row", alignItems: "center" }]}
+      className="mt-1 flex-row items-center px-1"
+      style={{ minHeight: 44 }}
     >
       <Text className="mr-3 flex-1 text-[13px] leading-5 text-white" numberOfLines={1}>
         {title}
@@ -66,13 +66,15 @@ export function MoveList({ session, onHint }) {
           await lightTap();
           setOpen((prev) => !prev);
         }}
-        className="rounded-full px-4 py-2.5"
-        style={[glassStyle({ variant: "fill", borderRadius: 999 }), { flexDirection: "row", alignItems: "center", alignSelf: "flex-start" }]}
+        className="flex-row items-center self-start"
+        style={{ minHeight: 44 }}
       >
-        <Text className="mr-2 text-[13px] font-medium text-white">{open ? "Скрыть" : "Упражнения"}</Text>
+        <Text className="mr-1 text-[14px] font-medium" style={{ color: getPalette().accent }}>
+          {open ? "Скрыть список" : "Список упражнений"}
+        </Text>
         <ChevronDown
-          size={16}
-          color={getPalette().ink}
+          size={18}
+          color={getPalette().accent}
           strokeWidth={1.8}
           style={{ transform: [{ rotate: open ? "180deg" : "0deg" }] }}
         />

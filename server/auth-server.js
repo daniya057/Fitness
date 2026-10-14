@@ -6,6 +6,18 @@ const { LINKS, loadEnv } = require("./env");
 const { lookupBarcode, searchNutrition } = require("./nutrition");
 const { noteProgramProgress, openProgramLevel } = require("./program-level");
 const { publicAvatar, setAvatarPhoto, wearAvatar } = require("./avatar");
+const {
+  addFriend,
+  ensureFriends,
+  ensureNudges,
+  listFriendCards,
+  markNudgesSeen,
+  nudgeFriend,
+  publicCard,
+  removeFriend,
+  searchPeople,
+  unreadNudges,
+} = require("./friends");
 const { mailConfigured, sendCodeEmail } = require("./mail");
 const { settleStreak, shieldNoticeOpen, utcDay } = require("./streak");
 
@@ -39,7 +51,7 @@ function send(res, status, body) {
     "Content-Length": Buffer.byteLength(json),
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "Access-Control-Allow-Methods": "GET, POST, PATCH, PUT, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
   });
   res.end(json);
 }
@@ -673,6 +685,7 @@ function publicUser(record) {
     fuelLog: record.fuelLog,
     emailVerified: record.emailVerified !== false,
     ...publicAvatar(record),
+    incomingNudges: unreadNudges(record, usersById(listUsers())),
     createdAt: record.createdAt,
   };
 }
@@ -695,6 +708,27 @@ function saveUser(record) {
 function findByEmail(email) {
   const needle = String(email || "").trim().toLowerCase();
   return listUsers().find((user) => user.email === needle) || null;
+}
+
+function findById(id) {
+  const needle = String(id || "");
+  return listUsers().find((user) => user.id === needle) || null;
+}
+
+function usersById(list) {
+  return new Map((list || []).map((user) => [user.id, user]));
+}
+
+function saveDirty(records) {
+  const seen = new Set();
+  for (const record of records || []) {
+    if (!record?.id || seen.has(record.id)) {
+      continue;
+    }
+    seen.add(record.id);
+    record.updatedAt = new Date().toISOString();
+    saveUser(record);
+  }
 }
 
 function makeResetCode() {
@@ -738,7 +772,7 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(204, {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Access-Control-Allow-Methods": "GET, POST, PATCH, PUT, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, PATCH, PUT, DELETE, OPTIONS",
     });
     res.end();
     return;
@@ -803,6 +837,8 @@ const server = http.createServer(async (req, res) => {
         avatarFace: "user",
         avatarRing: "mint",
         avatarPhoto: "",
+        friends: [],
+        nudges: [],
         createdAt: now,
         updatedAt: now,
       };
@@ -993,7 +1029,14 @@ const server = http.createServer(async (req, res) => {
         send(res, 401, { error: "Нужно войти" });
         return;
       }
-      if (ensureDayLogs(record) || ensureFreezes(record) || ensureAchievements(record) || ensureStatus(record)) {
+      if (
+        ensureDayLogs(record) ||
+        ensureFreezes(record) ||
+        ensureAchievements(record) ||
+        ensureStatus(record) ||
+        ensureFriends(record) ||
+        ensureNudges(record)
+      ) {
         record.updatedAt = new Date().toISOString();
         saveUser(record);
       }
@@ -1067,6 +1110,9 @@ const server = http.createServer(async (req, res) => {
       if (body.shieldNoticeSeen === true && record.shieldSavedDate) {
         record.shieldNoticeSeen = record.shieldSavedDate;
       }
+      if (body.nudgeSeen === true) {
+        markNudgesSeen(record);
+      }
       if (body.activityDone === true && Number(body.elapsedSec) >= MIN_ACTIVITY_SEC) {
         applyActivity(record);
         rememberActivity(record, body);
@@ -1083,6 +1129,113 @@ const server = http.createServer(async (req, res) => {
       record.updatedAt = new Date().toISOString();
       saveUser(record);
       send(res, 200, { user: publicUser(record) });
+      return;
+    }
+
+    const personGet = url.pathname.match(/^\/people\/([a-f0-9]{16})$/);
+    if (req.method === "GET" && personGet) {
+      const viewer = findByToken(bearer(req, url.searchParams.get("token")));
+      if (!viewer) {
+        send(res, 401, { error: "Нужно войти" });
+        return;
+      }
+      const target = findById(personGet[1]);
+      if (!target) {
+        send(res, 404, { error: "Нет такого человека" });
+        return;
+      }
+      const shown = publicCard(target);
+      saveDirty(shown.changed ? [target] : []);
+      send(res, 200, { person: shown.card });
+      return;
+    }
+
+    if (route === "GET /people") {
+      const record = findByToken(bearer(req, url.searchParams.get("token")));
+      if (!record) {
+        send(res, 401, { error: "Нужно войти" });
+        return;
+      }
+      const found = searchPeople(listUsers(), url.searchParams.get("q"), record.id);
+      if (found.error) {
+        send(res, 400, { error: found.error });
+        return;
+      }
+      saveDirty(found.dirty);
+      send(res, 200, { people: found.people });
+      return;
+    }
+
+    if (route === "GET /friends") {
+      const record = findByToken(bearer(req, url.searchParams.get("token")));
+      if (!record) {
+        send(res, 401, { error: "Нужно войти" });
+        return;
+      }
+      const listed = listFriendCards(record, usersById(listUsers()));
+      saveDirty(listed.dirty);
+      send(res, 200, { friends: listed.friends });
+      return;
+    }
+
+    if (route === "POST /friends") {
+      const body = await readBody(req);
+      const record = findByToken(bearer(req, body.token));
+      if (!record) {
+        send(res, 401, { error: "Нужно войти" });
+        return;
+      }
+      const error = addFriend(record, findById(body.id));
+      if (error) {
+        send(res, 400, { error });
+        return;
+      }
+      record.updatedAt = new Date().toISOString();
+      saveUser(record);
+      const listed = listFriendCards(record, usersById(listUsers()));
+      saveDirty(listed.dirty);
+      send(res, 200, { friends: listed.friends, user: publicUser(record) });
+      return;
+    }
+
+    const friendDelete = url.pathname.match(/^\/friends\/([a-f0-9]{16})$/);
+    if (req.method === "DELETE" && friendDelete) {
+      const body = await readBody(req).catch(() => ({}));
+      const record = findByToken(bearer(req, body.token));
+      if (!record) {
+        send(res, 401, { error: "Нужно войти" });
+        return;
+      }
+      const error = removeFriend(record, friendDelete[1]);
+      if (error) {
+        send(res, 400, { error });
+        return;
+      }
+      record.updatedAt = new Date().toISOString();
+      saveUser(record);
+      const listed = listFriendCards(record, usersById(listUsers()));
+      saveDirty(listed.dirty);
+      send(res, 200, { friends: listed.friends, user: publicUser(record) });
+      return;
+    }
+
+    const friendNudge = url.pathname.match(/^\/friends\/([a-f0-9]{16})\/nudge$/);
+    if (req.method === "POST" && friendNudge) {
+      const body = await readBody(req);
+      const record = findByToken(bearer(req, body.token));
+      if (!record) {
+        send(res, 401, { error: "Нужно войти" });
+        return;
+      }
+      const target = findById(friendNudge[1]);
+      const error = nudgeFriend(record, target);
+      if (error) {
+        send(res, 400, { error });
+        return;
+      }
+      target.updatedAt = new Date().toISOString();
+      saveUser(target);
+      send(res, 200, { ok: true });
       return;
     }
 

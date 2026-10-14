@@ -153,8 +153,21 @@ export default function AuthScreen() {
             />
           ) : null}
           {mode === "login" ? (
-            <Pressable onPress={() => { setError(""); setPassword(""); setCode(""); setAwaitingCode(false); setMode("reset"); }} className="mb-4 self-start py-1">
-              <Text className="text-[14px] text-white/55">Забыл пароль</Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => {
+                setError("");
+                setPassword("");
+                setCode("");
+                setAwaitingCode(false);
+                setMode("reset");
+              }}
+              className="mb-4 self-start rounded-full px-1 py-3"
+              hitSlop={8}
+            >
+              <Text className="text-[15px] font-medium" style={{ color: getPalette().accent }}>
+                Забыл пароль
+              </Text>
             </Pressable>
           ) : null}
           {error ? <Text className="mb-4 text-[14px] font-medium text-accent">{error}</Text> : null}

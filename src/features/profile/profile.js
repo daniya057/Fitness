@@ -1,19 +1,37 @@
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { lightTap } from "../../lib/haptics";
-import { Field, PillButton, PrimaryButton, SectionLabel, StatRow } from "../../ui/kit";
+import { Calendar, CircleDashed, Goal, History, Repeat, Ruler, Scale } from "lucide-react-native";
+import { Field, PrimaryButton, SectionLabel, TextLink } from "../../ui/kit";
 import { glassStyle } from "../../ui/Glass";
 import { getPalette } from "../../ui/theme";
-import { AchievementPlaque } from "../achievements/plaque";
 import { AvatarBadge } from "../avatar/AvatarBadge";
 import { AvatarPicker } from "../avatar/AvatarPicker";
+import { PublicProfile } from "../friends/PublicProfile";
+import { utcDay } from "../calories/foods";
 import { useAuth } from "../auth/AuthContext";
 import { BirthdayCalendar } from "../onboarding/BirthdayCalendar";
 import { GOALS, GOAL_LABELS, EXPERIENCE_LABELS, SEX_LABELS, SEX_OPTIONS } from "../onboarding/catalog";
 import { ExperiencePicker } from "../onboarding/ExperiencePicker";
 import { ValueSlider } from "../onboarding/ValueSlider";
+
+function FactRow({ Icon, label, value }) {
+  return (
+    <View className="mb-3 flex-row items-center rounded-[20px] px-4 py-4" style={glassStyle({ borderRadius: 20 })}>
+      <View
+        className="mr-3 h-10 w-10 items-center justify-center rounded-full"
+        style={{ backgroundColor: "rgba(125,255,179,0.14)" }}
+      >
+        <Icon size={18} color={getPalette().accent} strokeWidth={1.8} />
+      </View>
+      <View className="flex-1">
+        <Text className="text-[12px] text-white/45">{label}</Text>
+        <Text className="mt-0.5 text-[16px] font-semibold text-white">{value}</Text>
+      </View>
+    </View>
+  );
+}
 
 function weekLabel(count) {
   if (count === 1) {
@@ -42,7 +60,6 @@ function seedForm(user) {
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
-  const router = useRouter();
   const { user, logout, patch } = useAuth();
   const [editing, setEditing] = useState(false);
   const [lookOpen, setLookOpen] = useState(false);
@@ -125,7 +142,7 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="mt-2 rounded-[28px] px-6 py-7" style={glassStyle({ borderRadius: 28 })}>
+        <View className="mt-2 rounded-[24px] px-6 py-7" style={glassStyle({ borderRadius: 24 })}>
           <Text className="text-[12px] font-medium tracking-[1.2px]" style={{ color: getPalette().accent }}>
             Профиль
           </Text>
@@ -146,13 +163,13 @@ export default function ProfileScreen() {
               <Text className="mt-2 text-[13px] text-white/45">{user?.email}</Text>
             </View>
           </View>
-          <View className="mt-6 flex-row flex-wrap gap-2">
+          <View className="mt-4 flex-row items-center" style={{ gap: 8 }}>
             {editing ? (
-              <PillButton label="Отмена" onPress={cancelEdit} tone="fill" />
+              <TextLink label="Отмена" onPress={cancelEdit} />
             ) : (
-              <PillButton label="Изменить" onPress={startEdit} tone="fill" />
+              <TextLink label="Изменить" onPress={startEdit} />
             )}
-            <PillButton label="Выйти" onPress={logout} tone="fill" />
+            <TextLink label="Выйти" danger onPress={logout} />
           </View>
         </View>
 
@@ -265,30 +282,64 @@ export default function ProfileScreen() {
         ) : (
           <>
             <AvatarPicker open={lookOpen} onToggle={() => setLookOpen((value) => !value)} />
-            <AchievementPlaque
-              tone="glass"
-              user={user}
-              onPress={async () => {
-                await lightTap();
-                router.replace("/rewards");
-              }}
-            />
+            <View className="mt-8">
+              <PublicProfile
+                mine
+                person={{
+                  ...user,
+                  activityToday: user?.lastActivityDate === utcDay(),
+                }}
+              />
+            </View>
 
             <View className="mt-8">
               <SectionLabel glass>Из опросника</SectionLabel>
-              <View className="rounded-[28px] px-5 py-1" style={glassStyle({ borderRadius: 28 })}>
-                <StatRow glass label="Возраст" value={user?.age ? `${user.age}` : "—"} />
-                <StatRow glass label="Рост" value={user?.heightCm ? `${user.heightCm} см` : "—"} />
-                <StatRow glass label="Пол" value={SEX_LABELS[user?.sex] || "—"} />
-                <StatRow
-                  glass
-                  label="Вес"
-                  value={weight ? `${Number(weight.current).toFixed(1)} → ${Number(weight.goal).toFixed(1)} кг` : "—"}
-                />
-                <StatRow glass label="Цели" value={goalNames.length ? goalNames.join(", ") : "—"} />
-                <StatRow glass label="В неделю" value={user?.daysPerWeek ? `${user.daysPerWeek} ${weekLabel(user.daysPerWeek)}` : "—"} />
-                <StatRow glass last label="Как давно" value={EXPERIENCE_LABELS[user?.experience] || "—"} />
+              <FactRow Icon={Calendar} label="Возраст" value={user?.age ? `${user.age}` : "—"} />
+              <FactRow Icon={Ruler} label="Рост" value={user?.heightCm ? `${user.heightCm} см` : "—"} />
+              <FactRow Icon={CircleDashed} label="Пол" value={SEX_LABELS[user?.sex] || "—"} />
+              <FactRow
+                Icon={Scale}
+                label="Вес"
+                value={
+                  weight
+                    ? `Текущий ${Number(weight.current).toFixed(1)} кг · цель ${Number(weight.goal).toFixed(1)} кг`
+                    : "—"
+                }
+              />
+              <View className="mb-3 rounded-[20px] px-4 py-4" style={glassStyle({ borderRadius: 20 })}>
+                <View className="flex-row items-center">
+                  <View
+                    className="mr-3 h-10 w-10 items-center justify-center rounded-full"
+                    style={{ backgroundColor: "rgba(125,255,179,0.14)" }}
+                  >
+                    <Goal size={18} color={getPalette().accent} strokeWidth={1.8} />
+                  </View>
+                  <Text className="text-[12px] text-white/45">Цели</Text>
+                </View>
+                <View className="mt-3 flex-row flex-wrap" style={{ gap: 8 }}>
+                  {goalNames.length ? (
+                    goalNames.map((item) => (
+                      <View
+                        key={item}
+                        className="rounded-full px-3 py-2"
+                        style={{ backgroundColor: "rgba(125,255,179,0.16)" }}
+                      >
+                        <Text className="text-[13px] font-medium" style={{ color: getPalette().accent }}>
+                          {item}
+                        </Text>
+                      </View>
+                    ))
+                  ) : (
+                    <Text className="text-[15px] text-white/55">—</Text>
+                  )}
+                </View>
               </View>
+              <FactRow
+                Icon={Repeat}
+                label="В неделю"
+                value={user?.daysPerWeek ? `${user.daysPerWeek} ${weekLabel(user.daysPerWeek)}` : "—"}
+              />
+              <FactRow Icon={History} label="Как давно" value={EXPERIENCE_LABELS[user?.experience] || "—"} />
             </View>
           </>
         )}

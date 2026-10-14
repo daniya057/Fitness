@@ -15,8 +15,8 @@
 | [../keys/README.md](../keys/README.md) | Ссылки сайта/API и ключи |
 | [ios.md](ios.md) | Поставить на iPhone: Expo Go, EAS, лимит Safari |
 | [navigation.md](navigation.md) | Вкладки и экраны |
-| [screens/arena.md](screens/arena.md) | Экран Арена |
-| [screens/workouts.md](screens/workouts.md) | Тренинг: семь групп и таймер |
+| [screens/arena.md](screens/arena.md) | Главная |
+| [screens/workouts.md](screens/workouts.md) | Тренировки: семь групп и таймер |
 | [screens/tabs.md](screens/tabs.md) | Пять вкладок, портрет |
 | [roadmap.md](roadmap.md) | Фазы и спринты с чекбоксами |
 | [glossary.md](glossary.md) | Термины |

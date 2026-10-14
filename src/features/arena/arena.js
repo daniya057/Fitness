@@ -8,7 +8,6 @@ import Animated, { Easing, FadeInDown, useAnimatedStyle, useSharedValue, withTim
 import { lightTap } from "../../lib/haptics";
 import { AccentGlow, GlassPanel, glassStyle } from "../../ui/Glass";
 import { getPalette } from "../../ui/theme";
-import { CountdownRing } from "./CountdownRing";
 import { useDayCountdown } from "./useDayCountdown";
 import { useAuth } from "../auth/AuthContext";
 import { sumLog, utcDay } from "../calories/foods";
@@ -16,10 +15,9 @@ import { dailyKcalTarget } from "../calories/target";
 import { lookOfStreak } from "../streaks/look";
 import { AchievementPlaque } from "../achievements/plaque";
 import { ProfileChip } from "../avatar/ProfileChip";
+import { NudgeBanner } from "../friends/NudgeBanner";
 import { sessionById, warmupSessions } from "../workouts/catalog";
 import { useSession } from "../workouts/sessionStore";
-
-const RING = 80;
 
 function freezeWord(count) {
   const n = Math.abs(Math.round(Number(count) || 0));
@@ -46,11 +44,25 @@ function StatCell({ label, value }) {
   );
 }
 
+function weightProgress(weight) {
+  const start = Number(weight?.start);
+  const current = Number(weight?.current);
+  const goal = Number(weight?.goal);
+  if (![start, current, goal].every(Number.isFinite)) {
+    return 0;
+  }
+  const total = goal - start;
+  if (total === 0) {
+    return current === goal ? 1 : 0;
+  }
+  return Math.max(0, Math.min(1, (current - start) / total));
+}
+
 function WeightFill({ progress }) {
   const scale = useSharedValue(0);
 
   useEffect(() => {
-    scale.value = withTiming(Math.max(0.04, progress), { duration: 900, easing: Easing.out(Easing.cubic) });
+    scale.value = withTiming(Math.max(0, Math.min(1, progress)), { duration: 900, easing: Easing.out(Easing.cubic) });
   }, [progress, scale]);
 
   const style = useAnimatedStyle(() => ({
@@ -61,7 +73,7 @@ function WeightFill({ progress }) {
     <Animated.View
       style={[
         {
-          height: 6,
+          height: 12,
           width: "100%",
           borderRadius: 999,
           backgroundColor: getPalette().bar,
@@ -88,8 +100,9 @@ export default function ArenaScreen() {
   const dailyDone = new Set(Array.isArray(user?.daily?.done) ? user.daily.done : []);
   const todaySessions = new Set(Array.isArray(user?.todaySessions) ? user.todaySessions : []);
   const warmups = warmupSessions();
-  const span = weight.start - weight.goal;
-  const toGoal = span <= 0 ? 1 : Math.max(0.08, Math.min(1, (weight.start - weight.current) / span));
+  const toGoal = weightProgress(weight);
+  const taskTotal = dailyTasks.length || 3;
+  const taskFill = taskTotal ? dailyDone.size / taskTotal : 0;
   const today = utcDay();
   const eaten = useMemo(() => {
     const items = user?.fuelLog?.date === today ? user.fuelLog.items || [] : [];
@@ -145,16 +158,18 @@ export default function ArenaScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View className="mb-5 flex-row items-center justify-between pt-2">
-          <Text className="text-[34px] font-semibold text-white">Серия</Text>
+          <Text className="text-[34px] font-semibold text-white">Дней подряд</Text>
           <ProfileChip />
         </View>
+
+        <NudgeBanner />
 
         <GlassPanel delay={40} style={{ borderRadius: 32, paddingHorizontal: 24, paddingVertical: 28 }}>
           <View className="items-center">
             <View className="h-[88px] w-[88px] items-center justify-center">
-              <AccentGlow size={148} pulse color="rgba(125,255,179,0.38)" />
-              <View className="h-[88px] w-[88px] items-center justify-center rounded-full" style={glassStyle({ variant: "fill", borderRadius: 999 })}>
-                <StreakIcon size={44} color={getPalette().accent} strokeWidth={1.8} fill={look.fillIcon ? getPalette().accent : "none"} />
+              <AccentGlow size={148} pulse color={look.glow} />
+              <View className="h-[88px] w-[88px] items-center justify-center rounded-full" style={glassStyle({ variant: "fill", borderRadius: 999, backgroundColor: "rgba(255, 92, 26, 0.16)" })}>
+                <StreakIcon size={48} color={look.flame} strokeWidth={2.4} fill={look.flame} />
               </View>
             </View>
             <View className="mt-4 items-center">
@@ -172,8 +187,7 @@ export default function ArenaScreen() {
         </GlassPanel>
 
         {warmups.length ? (
-          <View className="mt-3">
-          <GlassPanel delay={80} style={{ borderRadius: 28, paddingHorizontal: 16, paddingVertical: 16 }}>
+          <View className="mt-8">
             <Text className="text-[11px] font-medium tracking-[1px]" style={{ color: getPalette().accent }}>
               1 МИНУТА
             </Text>
@@ -187,11 +201,10 @@ export default function ArenaScreen() {
                   <Pressable
                     key={item.id}
                     onPress={() => openWarmup(item)}
-                    className="flex-1 rounded-[20px] px-3 py-3"
+                    className="flex-1 rounded-[20px] px-3 py-4"
                     style={glassStyle({
-                      variant: "fill",
                       borderRadius: 20,
-                      backgroundColor: on ? "rgba(125,255,179,0.16)" : getPalette().fill,
+                      backgroundColor: on ? "rgba(125,255,179,0.16)" : undefined,
                     })}
                   >
                     <Icon size={18} color={on ? getPalette().accent : getPalette().ink} strokeWidth={1.8} />
@@ -201,77 +214,74 @@ export default function ArenaScreen() {
                 );
               })}
             </View>
-          </GlassPanel>
           </View>
         ) : null}
 
-        <Pressable onPress={openCalories} className="mt-3">
-          <GlassPanel delay={110} style={{ borderRadius: 28, paddingHorizontal: 16, paddingVertical: 20 }}>
-            <View className="flex-row">
-              <StatCell label="Цель" value={target.kcal} />
-              <View style={{ width: 1, backgroundColor: "rgba(255,255,255,0.12)" }} />
-              <StatCell label="Съедено" value={eaten} />
-            </View>
-            <Text className="mt-3 text-center text-[11px] text-white/45">ккал · тап — дневник</Text>
-          </GlassPanel>
+        <Pressable onPress={openCalories} className="mt-8 rounded-[24px] px-4 py-5" style={glassStyle({ borderRadius: 24 })}>
+          <View className="flex-row">
+            <StatCell label="Цель, ккал" value={target.kcal} />
+            <StatCell label="Съедено" value={eaten} />
+          </View>
         </Pressable>
 
-        <View className="mt-3">
-          <GlassPanel delay={170} style={{ borderRadius: 28, paddingHorizontal: 16, paddingVertical: 16 }}>
-            <View className="flex-row items-center">
-              <View className="mr-3 flex-1">
-                <Text className="text-[11px] font-medium tracking-[1px]" style={{ color: getPalette().accent }}>
-                  СЕГОДНЯ
-                </Text>
-                <Text className="mt-0.5 text-[16px] font-semibold text-white">Задания дня</Text>
-                <Text className="mt-0.5 text-[12px] leading-4 text-white/55">
-                  {dailyDone.size} / {dailyTasks.length || 3}
-                  {user?.daily?.shieldGranted ? " · щит получен" : " · все три — щит"}
-                </Text>
-              </View>
-              <View className="items-center justify-center">
-                <CountdownRing progress={day.progress} size={RING} track={getPalette().track} stroke={getPalette().bar} />
-                <View className="absolute items-center justify-center" style={{ width: RING, height: RING }}>
-                  <Text className="text-[13px] font-semibold tabular-nums text-white">{day.label}</Text>
-                </View>
-              </View>
+        <View className="mt-8">
+          <View className="mb-3 flex-row items-end justify-between">
+            <View className="mr-3 flex-1">
+              <Text className="text-[11px] font-medium tracking-[1px]" style={{ color: getPalette().accent }}>
+                СЕГОДНЯ
+              </Text>
+              <Text className="mt-0.5 text-[16px] font-semibold text-white">Задания дня</Text>
+              <Text className="mt-0.5 text-[12px] leading-4 text-white/55">
+                {dailyDone.size} / {dailyTasks.length || 3}
+                {user?.daily?.shieldGranted ? " · щит получен" : " · все три — щит"}
+                {" · "}
+                {day.label}
+              </Text>
             </View>
-            {dailyTasks.map((task) => {
-              const on = dailyDone.has(task.id);
-              return (
-                <Pressable key={task.id} onPress={() => openTask(task)} className="mt-3 flex-row items-center">
-                  <View
-                    className="mr-3 h-5 w-5 items-center justify-center rounded-full"
-                    style={{
-                      borderWidth: 1.5,
-                      borderColor: on ? getPalette().bar : getPalette().faint,
-                      backgroundColor: on ? getPalette().bar : "transparent",
-                    }}
-                  />
-                  <View className="flex-1">
-                    <Text className={`text-[15px] font-semibold ${on ? "text-[#9BFFC8]" : "text-white"}`}>{task.title}</Text>
-                    <Text className="text-[12px] leading-4 text-white/45">{task.hint}</Text>
-                  </View>
-                </Pressable>
-              );
-            })}
-          </GlassPanel>
+          </View>
+          <View className="mb-3 h-2.5 overflow-hidden rounded-full" style={{ backgroundColor: getPalette().track }}>
+            <View style={{ width: `${Math.round(taskFill * 100)}%`, height: "100%", backgroundColor: getPalette().bar, borderRadius: 999 }} />
+          </View>
+          {dailyTasks.map((task) => {
+            const on = dailyDone.has(task.id);
+            return (
+              <Pressable
+                key={task.id}
+                onPress={() => openTask(task)}
+                className="mb-2 flex-row items-center rounded-[20px] px-3"
+                style={{ ...glassStyle({ borderRadius: 20 }), minHeight: 64 }}
+              >
+                <View
+                  className="mr-3 h-10 w-10 items-center justify-center rounded-full"
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderWidth: 2.5,
+                    borderColor: on ? getPalette().bar : getPalette().faint,
+                    backgroundColor: on ? getPalette().bar : "transparent",
+                  }}
+                />
+                <View className="flex-1 py-3">
+                  <Text className={`text-[15px] font-semibold ${on ? "text-[#9BFFC8]" : "text-white"}`}>{task.title}</Text>
+                  <Text className="text-[12px] leading-4 text-white/45">{task.hint}</Text>
+                </View>
+              </Pressable>
+            );
+          })}
         </View>
 
-        <View className="mt-3">
-          <GlassPanel delay={230} style={{ borderRadius: 28, paddingHorizontal: 20, paddingVertical: 16 }}>
-            <View className="mb-3 flex-row items-center justify-between">
-              <Text className="text-[13px] text-white/60">
-                Вес: <Text className="font-semibold text-white">{Number(weight.current).toFixed(1)} кг</Text>
-              </Text>
-              <Text className="text-[13px] text-white/60">
-                Цель: <Text className="font-semibold text-white">{Number(weight.goal).toFixed(1)} кг</Text>
-              </Text>
-            </View>
-            <View className="h-[6px] overflow-hidden rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.12)" }}>
-              <WeightFill progress={toGoal} />
-            </View>
-          </GlassPanel>
+        <View className="mt-8 rounded-[24px] px-5 py-5" style={glassStyle({ borderRadius: 24 })}>
+          <View className="mb-4 flex-row items-center justify-between">
+            <Text className="text-[13px] text-white/60">
+              Текущий: <Text className="font-semibold text-white">{Number(weight.current).toFixed(1)} кг</Text>
+            </Text>
+            <Text className="text-[13px] text-white/60">
+              Цель: <Text className="font-semibold text-white">{Number(weight.goal).toFixed(1)} кг</Text>
+            </Text>
+          </View>
+          <View className="h-3 overflow-hidden rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.12)" }}>
+            <WeightFill progress={toGoal} />
+          </View>
         </View>
 
         <Animated.View entering={FadeInDown.duration(560).delay(290).springify().damping(18)}>

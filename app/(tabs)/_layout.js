@@ -1,7 +1,7 @@
 import { Pressable, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Slot, usePathname, useRouter } from "expo-router";
-import { Dumbbell, Home, Trophy, User, Utensils } from "lucide-react-native";
+import { Dumbbell, Home, User, Users, Utensils } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useEffect, useState } from "react";
 import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
@@ -12,9 +12,9 @@ import { lockPortrait, unlockPortrait } from "../../src/ui/orientationLock";
 import { ShieldNotice } from "../../src/features/streaks/ShieldNotice";
 
 const TABS = [
-  { href: "/", label: "Арена", Icon: Home, match: (path) => path === "/" },
-  { href: "/workouts", label: "Тренинг", Icon: Dumbbell, match: (path) => path.startsWith("/workouts") },
-  { href: "/rewards", label: "Награды", Icon: Trophy, match: (path) => path.startsWith("/rewards") },
+  { href: "/", label: "Главная", Icon: Home, match: (path) => path === "/" },
+  { href: "/workouts", label: "Тренировки", Icon: Dumbbell, match: (path) => path.startsWith("/workouts") },
+  { href: "/friends", label: "Друзья", Icon: Users, match: (path) => path.startsWith("/friends") },
   { href: "/calories", label: "Калории", Icon: Utensils, match: (path) => path.startsWith("/calories") },
   { href: "/profile", label: "Профиль", Icon: User, match: (path) => path.startsWith("/profile") },
 ];
@@ -25,7 +25,8 @@ export default function TabsLayout() {
   const insets = useSafeAreaInsets();
   const [barWidth, setBarWidth] = useState(0);
   const pillX = useSharedValue(0);
-  const activeIndex = Math.max(0, TABS.findIndex((tab) => tab.match(pathname)));
+  const foundIndex = TABS.findIndex((tab) => tab.match(pathname));
+  const activeIndex = foundIndex < 0 ? 0 : foundIndex;
 
   useEffect(() => {
     lockPortrait()?.catch?.(() => {});
@@ -71,7 +72,7 @@ export default function TabsLayout() {
       </View>
       <View className="px-3 pt-1" style={{ paddingBottom: Math.max(insets.bottom, 10) }}>
         <View
-          className="flex-row rounded-[28px] px-1 py-2"
+          className="flex-row rounded-[28px] px-1 py-1.5"
           style={glassStyle({ borderRadius: 28 })}
           onLayout={(event) => setBarWidth(event.nativeEvent.layout.width)}
         >
@@ -99,19 +100,22 @@ export default function TabsLayout() {
             return (
               <Pressable
                 key={tab.href}
-                className="flex-1 items-center rounded-[22px] py-2"
+                accessibilityRole="tab"
+                accessibilityState={{ selected: active }}
+                className="flex-1 items-center justify-center rounded-[22px] py-2.5"
+                style={{ minHeight: 52 }}
                 onPress={() => {
                   lightTap();
                   router.replace(tab.href);
                 }}
               >
                 <tab.Icon
-                  size={20}
+                  size={22}
                   color={color}
                   strokeWidth={active ? 2.2 : 1.7}
                   fill={active && tab.href === "/" ? color : "none"}
                 />
-                <Text className="mt-1 text-[10px] font-medium" style={{ color }}>
+                <Text className="mt-1 text-[10px] font-medium" numberOfLines={1} style={{ color }}>
                   {tab.label}
                 </Text>
               </Pressable>

@@ -125,6 +125,40 @@ export function AuthProvider({ children }) {
         setUser(data.user);
         return data.user;
       },
+      async searchPeople(query) {
+        const data = await api(`/people?q=${encodeURIComponent(query)}`, { token });
+        return data.people || [];
+      },
+      async getPerson(id) {
+        const data = await api(`/people/${id}`, { token });
+        return data.person || null;
+      },
+      async listFriends() {
+        const data = await api("/friends", { token });
+        return data.friends || [];
+      },
+      async addFriend(id) {
+        const data = await api("/friends", { method: "POST", token, body: { token, id } });
+        if (data.user) {
+          setUser(data.user);
+        }
+        return data.friends || [];
+      },
+      async removeFriend(id) {
+        const data = await api(`/friends/${id}`, { method: "DELETE", token, body: { token } });
+        if (data.user) {
+          setUser(data.user);
+        }
+        return data.friends || [];
+      },
+      async nudgeFriend(id) {
+        await api(`/friends/${id}/nudge`, { method: "POST", token, body: { token } });
+      },
+      async ackNudges() {
+        const data = await api("/me", { method: "PATCH", token, body: { token, nudgeSeen: true } });
+        setUser(data.user);
+        return data.user;
+      },
     }),
     [token, user, booting]
   );

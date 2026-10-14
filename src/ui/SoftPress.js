@@ -33,12 +33,12 @@ export function SoftPress({ children, onPress, className, disabled, style, sheen
     }
     await lightTap();
     scale.value = withSequence(
-      withTiming(0.98, { duration: 90, easing: Easing.out(Easing.quad) }),
-      withSpring(1, { damping: 14, stiffness: 240 })
+      withTiming(0.97, { duration: 80, easing: Easing.out(Easing.quad) }),
+      withSpring(1, { damping: 16, stiffness: 260 })
     );
     if (sheen) {
       sweep.value = -1.2;
-      sweep.value = withTiming(1.45, { duration: 520, easing: Easing.out(Easing.cubic) });
+      sweep.value = withTiming(1.45, { duration: 480, easing: Easing.out(Easing.cubic) });
     }
     if (onPress) {
       onPress();
@@ -48,12 +48,25 @@ export function SoftPress({ children, onPress, className, disabled, style, sheen
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityState={{ disabled: Boolean(disabled) }}
       onPress={handlePress}
       disabled={disabled}
       className={className}
-      style={[style, sheen && !phoneWeb ? { overflow: "hidden" } : null]}
+      style={[
+        {
+          position: "relative",
+          overflow: "hidden",
+          justifyContent: "center",
+          alignItems: "center",
+          opacity: disabled ? 0.5 : 1,
+        },
+        style,
+        sheen && !phoneWeb ? { overflow: "hidden" } : null,
+      ]}
     >
-      <Animated.View style={animated}>{children}</Animated.View>
+      <Animated.View style={[animated, { alignItems: "center", justifyContent: "center", width: "100%" }]}>
+        {children}
+      </Animated.View>
       {sheen ? (
         <Animated.View
           pointerEvents="none"

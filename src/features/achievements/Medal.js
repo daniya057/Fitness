@@ -4,7 +4,7 @@ import { getPalette } from "../../ui/theme";
 
 export function Medal({ Icon, open, hidden, progress = 0, size = 64 }) {
   const palette = getPalette();
-  const stroke = size >= 64 ? 4 : 3;
+  const stroke = size >= 64 ? 4 : size >= 36 ? 3 : 1.75;
   const radius = (size - stroke) / 2;
   const circle = 2 * Math.PI * radius;
   const fill = open ? 1 : Math.max(0, Math.min(1, Number(progress) || 0));

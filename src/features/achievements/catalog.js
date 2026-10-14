@@ -81,6 +81,42 @@ export function isHidden(user, item) {
   return Boolean(item?.secret) && !earnedSet(user).has(item.id);
 }
 
+function dayWord(count) {
+  const n = Math.abs(Math.round(Number(count) || 0));
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod100 >= 11 && mod100 <= 14) {
+    return "дней";
+  }
+  if (mod10 === 1) {
+    return "день";
+  }
+  if (mod10 >= 2 && mod10 <= 4) {
+    return "дня";
+  }
+  return "дней";
+}
+
+export function conditionOf(item) {
+  const need = Math.max(1, Number(item?.need) || 1);
+  if (item?.rule === "streak" || item?.rule === "clean" || (item?.rule === "dailyClear" && need > 1)) {
+    return `${need} ${dayWord(need)}`;
+  }
+  if (item?.rule === "activity") {
+    return need === 1 ? "1 тренировка" : `${need} тренировок`;
+  }
+  if (item?.rule === "fuel") {
+    return need === 1 ? "1 запись" : `${need} записи`;
+  }
+  if (item?.rule === "dailyCount") {
+    return need === 1 ? "1 задание" : `${need} заданий`;
+  }
+  if (item?.rule === "kinds") {
+    return `${need} типов`;
+  }
+  return item?.hint || "";
+}
+
 export function progressValue(user, item) {
   if (item.rule === "streak") {
     return Number(user?.streak) || 0;

@@ -5,7 +5,7 @@ import { glassStyle } from "../../ui/Glass";
 import { getPalette } from "../../ui/theme";
 import { ProfileChip } from "../avatar/ProfileChip";
 import { useAuth } from "../auth/AuthContext";
-import { ACHIEVEMENTS, earnedSet, iconOf, isHidden, progressValue, shownAchievements } from "../achievements/catalog";
+import { ACHIEVEMENTS, conditionOf, earnedSet, iconOf, isHidden, progressValue, shownAchievements } from "../achievements/catalog";
 import { Medal } from "../achievements/Medal";
 
 function rowsOf(list, size) {
@@ -43,17 +43,15 @@ function AchievementCard({ item, user, open }) {
           {hidden ? "?" : item.title}
         </Text>
         <Text className="mt-1 h-8 text-center text-[12px] leading-4 text-white/50" numberOfLines={2}>
-          {hidden ? "Скрытое достижение" : item.hint}
+          {hidden ? "Скрытое достижение" : conditionOf(item)}
         </Text>
       </View>
       {hidden ? (
         <View className="h-7" />
       ) : open ? (
-        <View className="h-7 self-center justify-center rounded-full px-3" style={{ backgroundColor: "rgba(125,255,179,0.22)" }}>
-          <Text className="text-[12px] font-semibold" style={{ color: getPalette().accent }}>
-            Есть
-          </Text>
-        </View>
+        <Text className="h-7 text-center text-[12px] font-semibold leading-7" style={{ color: getPalette().accent }}>
+          ✓ Получено
+        </Text>
       ) : (
         <Text className="h-7 text-center text-[12px] font-semibold leading-7 tabular-nums text-white/55">
           {current} / {need}

@@ -2,6 +2,10 @@ import { Text, TextInput, View } from "react-native";
 import { SoftPress } from "./SoftPress";
 import { glassStyle } from "./Glass";
 import { getPalette } from "./theme";
+import { ctaFill } from "./cta";
+
+const INK = "#07140F";
+const LIGHT_ACCENT = "#2E7D32";
 
 export function ScreenHeader({ title, subtitle, right, glass = false }) {
   return (
@@ -25,15 +29,25 @@ export function SectionLabel({ children, glass = false }) {
   );
 }
 
-export function PrimaryButton({ label, onPress, busy, disabled }) {
+export function PrimaryButton({ label, onPress, busy, disabled, glass = true }) {
+  const idle = !(disabled || busy);
+  const backgroundColor = glass
+    ? idle
+      ? getPalette().accent
+      : "rgba(155,255,200,0.45)"
+    : idle
+      ? LIGHT_ACCENT
+      : "#66BB6A";
   return (
     <SoftPress
       onPress={onPress}
       disabled={disabled || busy}
-      className={`w-full items-center rounded-full py-4 ${disabled || busy ? "bg-accent/70" : "bg-accent"}`}
-      style={{ backgroundColor: disabled || busy ? "#66BB6A" : "#2E7D32", borderRadius: 999, paddingVertical: 16 }}
+      className="w-full items-center justify-center rounded-full"
+      style={ctaFill(backgroundColor)}
     >
-      <Text className="text-[15px] font-semibold text-white">{busy ? "Секунду" : label}</Text>
+      <Text className="text-[15px] font-semibold" style={{ color: glass ? INK : "#FFFFFF" }}>
+        {busy ? "Секунду" : label}
+      </Text>
     </SoftPress>
   );
 }
@@ -42,41 +56,90 @@ export function GhostButton({ label, onPress, glass = false }) {
   return (
     <SoftPress
       onPress={onPress}
-      className={`items-center rounded-full px-5 py-3 ${glass ? "" : "bg-card"}`}
-      style={glass ? glassStyle({ borderRadius: 999 }) : undefined}
+      className={`w-full items-center justify-center rounded-full ${glass ? "" : "bg-card"}`}
+      style={
+        glass
+          ? {
+              ...glassStyle({ variant: "fill", borderRadius: 999 }),
+              minHeight: 48,
+              paddingHorizontal: 20,
+            }
+          : { minHeight: 48, borderRadius: 999, paddingHorizontal: 20 }
+      }
     >
-      <Text className={`text-[14px] font-medium ${glass ? "text-white" : "text-ink"}`}>{label}</Text>
+      <Text className={`text-[15px] font-medium ${glass ? "text-white" : "text-ink"}`}>{label}</Text>
     </SoftPress>
   );
 }
 
 export function MintButton({ label, onPress }) {
   return (
-    <SoftPress onPress={onPress} className="items-center rounded-full bg-mint px-5 py-3">
-      <Text className="text-[14px] font-medium text-ink">{label}</Text>
+    <SoftPress
+      onPress={onPress}
+      className="items-center justify-center rounded-full bg-mint"
+      style={{ minHeight: 48, paddingHorizontal: 20, borderRadius: 999 }}
+    >
+      <Text className="text-[15px] font-medium text-ink">{label}</Text>
     </SoftPress>
   );
 }
 
-export function PillButton({ label, onPress, tone = "ghost" }) {
-  const glass = tone === "glass" || tone === "glassOn" || tone === "fill";
-  const bg = tone === "mint" ? "bg-mint" : tone === "accent" ? "bg-accent" : tone === "canvas" ? "bg-canvas" : glass ? "" : "bg-card";
-  const color = tone === "accent" || tone === "glassOn" ? "text-white" : tone === "glass" || tone === "fill" ? "text-white/80" : "text-ink";
+export function TextLink({ label, onPress, danger = false }) {
+  return (
+    <SoftPress
+      sheen={false}
+      onPress={onPress}
+      className="items-center justify-center px-2"
+      style={{ minHeight: 48 }}
+    >
+      <Text className="text-[15px] font-semibold" style={{ color: danger ? "rgba(255,170,170,0.95)" : getPalette().accent }}>
+        {label}
+      </Text>
+    </SoftPress>
+  );
+}
+
+export function PillButton({ label, onPress, tone = "ghost", disabled, wide = false }) {
+  const on = tone === "glassOn";
+  const fill = tone === "fill" || tone === "glass";
+  const mint = tone === "mint";
+  const accent = tone === "accent";
+  const canvas = tone === "canvas";
   return (
     <SoftPress
       onPress={onPress}
-      className={`rounded-full px-4 py-2.5 ${bg} ${tone === "canvas" ? "border border-ink/10" : ""}`}
+      disabled={disabled}
+      className={`${wide ? "w-full " : ""}items-center justify-center rounded-full`}
+      sheen={on}
       style={
-        glass
-          ? glassStyle({
-              variant: tone === "fill" ? "fill" : "material",
+        on
+          ? {
+              minHeight: 48,
+              paddingHorizontal: 18,
               borderRadius: 999,
-              backgroundColor: tone === "glassOn" ? "rgba(125,255,179,0.16)" : "rgba(255,255,255,0.1)",
-            })
-          : undefined
+              backgroundColor: getPalette().accent,
+            }
+          : fill
+            ? {
+                ...glassStyle({ variant: "fill", borderRadius: 999 }),
+                minHeight: 48,
+                paddingHorizontal: 18,
+              }
+            : {
+                minHeight: 48,
+                paddingHorizontal: 18,
+                borderRadius: 999,
+                backgroundColor: mint ? "#C9EBD6" : accent ? LIGHT_ACCENT : canvas ? "#FFFFFF" : "#F8F9FA",
+                ...(canvas ? { borderWidth: 1, borderColor: "rgba(26,26,26,0.1)" } : null),
+              }
       }
     >
-      <Text className={`text-[13px] font-medium ${color}`} style={tone === "glassOn" ? { color: getPalette().accent } : undefined}>
+      <Text
+        className="text-[14px] font-semibold"
+        style={{
+          color: on || mint ? INK : accent ? "#FFFFFF" : fill ? "rgba(255,255,255,0.88)" : "#1A1A1A",
+        }}
+      >
         {label}
       </Text>
     </SoftPress>
@@ -88,9 +151,12 @@ export function Field({ label, inputName, glass = false, ...props }) {
     <View className="mb-4">
       <Text className={`mb-2 text-[12px] font-medium tracking-[0.8px] ${glass ? "text-white/55" : "text-mute"}`}>{label}</Text>
       <TextInput
-        className={`rounded-2xl px-4 py-3.5 text-[16px] ${glass ? "text-white" : "bg-card text-ink"}`}
+        className={`rounded-2xl px-4 text-[16px] ${glass ? "text-white" : "bg-card text-ink"}`}
         placeholderTextColor={glass ? "#8A8A8A" : "#9E9E9E"}
-        style={glass ? glassStyle({ borderRadius: 16 }) : undefined}
+        style={[
+          { minHeight: 48, paddingVertical: 12 },
+          glass ? glassStyle({ variant: "fill", borderRadius: 16 }) : null,
+        ]}
         nativeID={inputName}
         {...(inputName ? { name: inputName } : {})}
         {...props}

@@ -129,8 +129,8 @@ export function BarcodeScan({ onClose, onFood }) {
           keyboardType="number-pad"
           placeholder="Цифры с пачки"
           placeholderTextColor="#8A8A8A"
-          className="mt-4 rounded-2xl px-4 py-3.5 text-[16px] text-white"
-          style={glassStyle({ borderRadius: 16 })}
+          className="mt-4 rounded-2xl px-4 text-[16px] text-white"
+          style={[glassStyle({ variant: "fill", borderRadius: 16 }), { minHeight: 48 }]}
         />
         {error ? <Text className="mt-3 text-[13px] text-accent">{error}</Text> : null}
         <View className="mt-5">
