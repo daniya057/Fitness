@@ -9,10 +9,14 @@ import { getPalette } from "../../ui/theme";
 import { lightTap } from "../../lib/haptics";
 import { useAuth } from "../auth/AuthContext";
 import { CountdownRing } from "../arena/CountdownRing";
-import { levelLabel, repsLabel } from "./catalog";
+import { FEEL_OPTIONS } from "../onboarding/quiz";
+import { ChoiceRow } from "../onboarding/ChoiceGrid";
+import { todayCheckin } from "../checkins/recommend";
+import { levelLabel, minActivitySec, repsLabel } from "./catalog";
 import { lookOfGroup } from "./look";
+import { ACCENT_INK } from "../../ui/layout";
 import { MoveHintButton, MoveHintModal } from "./MoveHint";
-import { MIN_ACTIVITY_SEC, PREP_SEC, useSession } from "./sessionStore";
+import { PREP_SEC, useSession } from "./sessionStore";
 
 function clock(sec) {
   const n = Math.max(0, Math.round(Number(sec) || 0));
@@ -23,7 +27,7 @@ function clock(sec) {
 
 export function SessionPlayer() {
   const insets = useSafeAreaInsets();
-  const { patch } = useAuth();
+  const { user, patch } = useAuth();
   const session = useSession((s) => s.session);
   const steps = useSession((s) => s.steps);
   const index = useSession((s) => s.index);
@@ -38,7 +42,10 @@ export function SessionPlayer() {
   const skipPrep = useSession((s) => s.skipPrep);
   const close = useSession((s) => s.close);
   const tick = useSession((s) => s.tick);
+  const counted = finished && (Number(elapsed) || 0) >= minActivitySec(session);
+  const feelDone = Boolean(todayCheckin(user)?.feel);
   const [hintTitle, setHintTitle] = useState("");
+  const [feel, setFeel] = useState("");
   const logged = useRef(false);
   const prevIndex = useRef(index);
 
@@ -80,7 +87,7 @@ export function SessionPlayer() {
     }
     logged.current = true;
     lightTap();
-    if ((Number(elapsed) || 0) < MIN_ACTIVITY_SEC) {
+    if ((Number(elapsed) || 0) < minActivitySec(session)) {
       return;
     }
     const now = new Date();
@@ -195,10 +202,25 @@ export function SessionPlayer() {
         ) : finished ? (
           <View className="mt-6">
             <Text className="mb-4 text-center text-[18px] font-semibold text-white">
-              {elapsed >= MIN_ACTIVITY_SEC ? "Готово" : "Меньше минуты — не засчитано"}
+              {counted ? "Готово" : "Мало работы — не засчитано"}
             </Text>
+            {counted && user?.quizDone && !feelDone ? (
+              <View className="mb-4">
+                <Text className="mb-2 text-center text-[13px] text-white/55">Как зашло?</Text>
+                <ChoiceRow
+                  options={FEEL_OPTIONS}
+                  value={feel}
+                  onChange={(id) => {
+                    setFeel(id);
+                    patch({ checkinFeel: id }).catch(() => {});
+                  }}
+                />
+              </View>
+            ) : null}
             <SoftPress onPress={close} className="w-full items-center rounded-full" style={ctaFill(look.accent)}>
-              <Text className="text-[15px] font-semibold text-white">К списку</Text>
+              <Text className="text-[15px] font-semibold" style={{ color: ACCENT_INK }}>
+                К списку
+              </Text>
             </SoftPress>
           </View>
         ) : (
@@ -208,7 +230,9 @@ export function SessionPlayer() {
               className="flex-1 items-center rounded-full"
               style={ctaFill(look.accent)}
             >
-              <Text className="text-[15px] font-semibold text-white">{running ? "Пауза" : "Старт"}</Text>
+              <Text className="text-[15px] font-semibold" style={{ color: ACCENT_INK }}>
+                {running ? "Пауза" : "Старт"}
+              </Text>
             </SoftPress>
             <SoftPress
               onPress={skip}

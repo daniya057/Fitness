@@ -5,10 +5,33 @@ export const WORKOUT_SESSIONS = data.sessions;
 export const WORKOUT_LEVELS = Array.isArray(data.levels) ? data.levels : [];
 export const UNLOCK_EVERY = Math.max(1, Math.round(Number(data.unlockEvery) || 3));
 
+export function visibleGroups(user) {
+  const place = String(user?.quiz?.place || "");
+  const showGym = place === "gym" || place === "anywhere";
+  return WORKOUT_GROUPS.filter((item) => item.id !== "gym" || showGym);
+}
+
+export function defaultGroupId(user) {
+  return String(user?.quiz?.place || "") === "gym" ? "gym" : "full";
+}
+
 export function sessionsInGroup(groupId) {
   return WORKOUT_SESSIONS.filter((item) => item.group === groupId && !item.daily && !item.warmup).sort(
     (a, b) => (Number(a.level) || 1) - (Number(b.level) || 1)
   );
+}
+
+export function sessionsForPlan(groupId, user) {
+  const place = String(user?.quiz?.place || "");
+  const keepHome = groupId === "stretch" || groupId === "short" || groupId === "meal";
+  if (place === "gym" && !keepHome) {
+    if (groupId === "gym") {
+      return sessionsInGroup("gym");
+    }
+    const slotted = sessionsInGroup("gym").filter((item) => (item.slot || "full") === groupId);
+    return slotted.length ? slotted : sessionsInGroup("gym");
+  }
+  return sessionsInGroup(groupId);
 }
 
 export function warmupSessions() {
@@ -67,23 +90,93 @@ export function workoutsLeftPhrase(done) {
 
 export function openSessions(groupId, user) {
   const open = openLevel(user);
-  return sessionsInGroup(groupId).filter((item) => (Number(item.level) || 1) <= open);
+  return sessionsForPlan(groupId, user).filter((item) => (Number(item.level) || 1) <= open);
 }
 
 export function nextLockedSession(groupId, user) {
   const open = openLevel(user);
-  return sessionsInGroup(groupId).find((item) => Number(item.level) === open + 1) || null;
+  return sessionsForPlan(groupId, user).find((item) => Number(item.level) === open + 1) || null;
 }
 
-export function sessionById(id) {
-  return WORKOUT_SESSIONS.find((item) => item.id === id) || null;
+export function sessionById(id, user) {
+  const catalog = WORKOUT_SESSIONS.find((item) => item.id === id) || null;
+  if (catalog) {
+    return catalog;
+  }
+  const mine = Array.isArray(user?.customSessions) ? user.customSessions : [];
+  return mine.find((item) => item && item.id === id) || null;
+}
+
+function pushTitle(seen, list, raw) {
+  const title = String(raw || "").trim();
+  if (!title || seen.has(title) || title === "Отдых" || title === "Между подходами" || title === "Приём пищи") {
+    return;
+  }
+  seen.add(title);
+  list.push(title);
+}
+
+export function catalogMoveTitles() {
+  const seen = new Set();
+  const list = [];
+  for (const title of Array.isArray(data.extraMoves) ? data.extraMoves : []) {
+    pushTitle(seen, list, title);
+  }
+  for (const session of WORKOUT_SESSIONS) {
+    for (const move of session.moves || []) {
+      pushTitle(seen, list, move.title);
+    }
+  }
+  return list.sort((a, b) => a.localeCompare(b, "ru"));
+}
+
+export function isHoldMove(title) {
+  return HOLD_MOVES.has(String(title || "").trim());
+}
+
+export function secFromReps(title, reps) {
+  const count = Math.max(1, Math.min(40, Math.round(Number(reps) || 10)));
+  if (isHoldMove(title)) {
+    return Math.max(10, Math.min(90, count));
+  }
+  const tempo = SECONDS_PER_REP[String(title || "").trim()] || 3;
+  return Math.max(10, Math.min(90, count * tempo));
 }
 
 export function sessionRounds(session) {
-  return Math.max(1, Math.min(4, Math.round(Number(session?.rounds) || 1)));
+  return Math.max(1, Math.min(8, Math.round(Number(session?.rounds) || 1)));
+}
+
+function buildCustomPlaylist(session) {
+  const restRaw = Number(session?.restSec);
+  const rest = Number.isFinite(restRaw) ? Math.max(0, Math.min(25, Math.round(restRaw))) : 15;
+  const roundRest = Math.max(20, Math.min(90, Math.round(Number(session?.roundRestSec) || 40)));
+  const moves = Array.isArray(session?.moves) ? session.moves : [];
+  const steps = [];
+  moves.forEach((move, moveIndex) => {
+    const title = String(move.title || "Движение").trim();
+    const sets = Math.max(1, Math.min(6, Math.round(Number(move.sets) || 1)));
+    const reps = Math.max(1, Math.min(40, Math.round(Number(move.reps) || 10)));
+    const sec = Math.max(10, Math.min(90, Math.round(Number(move.sec) || secFromReps(title, reps))));
+    const counted = isHoldMove(title) ? 0 : reps;
+    for (let set = 1; set <= sets; set += 1) {
+      steps.push({ kind: "work", title, sec, reps: counted, round: set, rounds: sets });
+      const lastSet = set === sets;
+      const lastMove = moveIndex === moves.length - 1;
+      if (!lastSet) {
+        steps.push({ kind: "rest", title: "Между подходами", sec: roundRest, round: set, rounds: sets });
+      } else if (!lastMove && rest > 0) {
+        steps.push({ kind: "rest", title: "Отдых", sec: rest, round: set, rounds: sets });
+      }
+    }
+  });
+  return steps;
 }
 
 export function buildPlaylist(session) {
+  if (session?.custom) {
+    return buildCustomPlaylist(session);
+  }
   const restRaw = Number(session?.restSec);
   const rest = Number.isFinite(restRaw) ? Math.max(0, Math.min(25, Math.round(restRaw))) : 15;
   const roundRest = Math.max(20, Math.min(90, Math.round(Number(session?.roundRestSec) || 40)));
@@ -107,50 +200,129 @@ export function buildPlaylist(session) {
   return steps;
 }
 
+export function workSeconds(session) {
+  return buildPlaylist(session)
+    .filter((step) => step.kind !== "rest")
+    .reduce((sum, step) => sum + Math.max(0, Math.round(Number(step.sec) || 0)), 0);
+}
+
+export function minActivitySec(session) {
+  return Math.max(1, Math.round(workSeconds(session) / 2));
+}
+
 export function sessionMinutes(session) {
   const total = buildPlaylist(session).reduce((sum, step) => sum + step.sec, 0);
   return Math.max(1, Math.round(total / 60));
 }
 
+function movesWord(count) {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (mod10 === 1 && mod100 !== 11) {
+    return "упражнение";
+  }
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+    return "упражнения";
+  }
+  return "упражнений";
+}
+
 export function sessionDetail(session) {
   const minutes = sessionMinutes(session);
+  if (session?.custom) {
+    const blocks = Array.isArray(session.moves) ? session.moves.length : 0;
+    return `${minutes} мин · ${blocks} ${movesWord(blocks)}`;
+  }
   const rounds = sessionRounds(session);
   if (rounds > 1) {
     const word = rounds >= 5 ? "подходов" : "подхода";
     return `${minutes} мин · ${rounds} ${word}`;
   }
   const blocks = Array.isArray(session?.moves) ? session.moves.length : 0;
-  return `${minutes} мин · ${blocks} блоков`;
+  return `${minutes} мин · ${blocks} ${movesWord(blocks)}`;
 }
 
 const SECONDS_PER_REP = {
   "Приседания": 3,
   "Приседания уже": 3,
   "Приседания до стула": 3,
+  "Приседания сумо": 3,
+  "Приседания с выпрыгиванием": 2,
   "Прыжки ноги врозь": 2,
   "Марш на месте": 1,
   "Марш высоким коленом": 1,
+  "Бег на месте": 1,
   "Выпады на месте": 3,
   "Выпады назад": 3,
+  "Боковые выпады": 3,
+  "Болгарские выпады": 4,
   "Подъём на носки": 2,
+  "Отжимания": 3,
   "Отжимания с колен": 3,
   "Отжимания узко с колен": 3,
+  "Отжимания узкие": 3,
   "Отжимания от стены": 3,
+  "Отжимания в наклоне": 3,
+  "Обратные отжимания": 3,
   "Касания плеч в планке": 2,
   "Ягодичный мост": 3,
   "Ягодичный мост на одной": 4,
   "Скручивания": 2,
   "Велосипед лёжа": 2,
+  "Касания пяток": 2,
+  "Подъём ног лёжа": 3,
+  "Альпинист": 1,
+  "Берпи": 4,
   "Мёртвый жук": 4,
   "Супермен": 4,
   "Супермен руки вперёд": 4,
+  "Y-подъёмы лёжа": 3,
+  "Снежный ангел лёжа": 4,
   "Птица-собака": 4,
   "Сведение лопаток": 3,
+  "Наклон вперёд стоя": 3,
   "Круги руками": 2,
   "Круги плечами": 2,
   "Подъёмы рук в стороны": 3,
   "Кошка-корова": 4,
+  "Жим ногами": 4,
+  "Жим в тренажёре": 4,
+  "Жим от плеч в тренажёре": 4,
+  "Сведение рук в тренажёре": 4,
+  "Тяга верхнего блока": 4,
+  "Тяга нижнего блока": 4,
+  "Тяга к лицу на блоке": 4,
+  "Разгибание ног": 3,
+  "Сгибание ног": 3,
+  "Приседания с гантелей": 3,
+  "Выпады с гантелями": 3,
+  "Сгибание рук с гантелями": 3,
+  "Жим на трицепс на блоке": 3,
+  "Гиперэкстензия": 3,
+  "Велотренажёр": 1,
+  "Ходьба на дорожке": 1,
+  "Эллипс": 1,
 };
+
+const HOLD_MOVES = new Set([
+  "Планка",
+  "Планка на коленях",
+  "Планка на прямых руках",
+  "Боковая планка слева",
+  "Боковая планка справа",
+  "Стена-стул",
+  "Поза ребёнка",
+  "Растяжка груди у стены",
+  "Наклон к ногам сидя",
+  "Наклон к ногам стоя",
+  "Растяжка сгибателей бедра",
+  "Растяжка квадрицепса",
+  "Скрутка лёжа",
+  "Поза голубя упрощённая",
+  "Собака мордой вниз",
+  "Кобра",
+  "Дыхание лёжа",
+]);
 
 function repsWord(count) {
   const mod10 = count % 10;
@@ -167,6 +339,10 @@ function repsWord(count) {
 export function repsLabel(step) {
   if (!step || step.kind === "rest") {
     return "";
+  }
+  if (Number.isFinite(Number(step.reps)) && Number(step.reps) > 0) {
+    const count = Math.round(Number(step.reps));
+    return `${count} ${repsWord(count)}`;
   }
   const tempo = SECONDS_PER_REP[step.title];
   if (!tempo) {

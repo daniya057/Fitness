@@ -46,5 +46,9 @@ export function AuthGate({ children }) {
     return <OnboardingScreen />;
   }
 
+  if (!user.quizDone) {
+    return <OnboardingScreen extra />;
+  }
+
   return children;
 }

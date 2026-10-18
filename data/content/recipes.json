@@ -1,0 +1,3857 @@
+{
+  "slots": {
+    "breakfast": "Завтрак",
+    "lunch": "Обед",
+    "dinner": "Ужин",
+    "snack": "Перекус"
+  },
+  "split": {
+    "2": [
+      [
+        "breakfast",
+        0.45
+      ],
+      [
+        "dinner",
+        0.55
+      ]
+    ],
+    "3": [
+      [
+        "breakfast",
+        0.3
+      ],
+      [
+        "lunch",
+        0.4
+      ],
+      [
+        "dinner",
+        0.3
+      ]
+    ],
+    "4": [
+      [
+        "breakfast",
+        0.25
+      ],
+      [
+        "lunch",
+        0.35
+      ],
+      [
+        "snack",
+        0.15
+      ],
+      [
+        "dinner",
+        0.25
+      ]
+    ],
+    "5": [
+      [
+        "breakfast",
+        0.25
+      ],
+      [
+        "snack",
+        0.1
+      ],
+      [
+        "lunch",
+        0.3
+      ],
+      [
+        "snack",
+        0.1
+      ],
+      [
+        "dinner",
+        0.25
+      ]
+    ]
+  },
+  "prices": {
+    "yaytso-kurinoe": 170,
+    "yaytso-kurinoe-otvarnoe": 170,
+    "kurinaya-grudka": 450,
+    "kuritsa-2-kat": 300,
+    "kurinaya-pechen": 300,
+    "indeyka-grudka": 650,
+    "indeyka-farsh": 500,
+    "govyadina-2-kategorii": 700,
+    "govyadina-vyrezka": 1200,
+    "svinina-vyrezka": 550,
+    "gorbusha": 600,
+    "mintay": 300,
+    "treska-atlanticheskaya": 650,
+    "hek": 400,
+    "skumbriya": 450,
+    "krevetki": 1100,
+    "kalmar": 500,
+    "tvorog-5": 400,
+    "tvorog-nezhirnyy": 380,
+    "yogurt-grecheskiy": 450,
+    "kefir-1": 110,
+    "moloko-2-5": 90,
+    "smetana-10": 250,
+    "syr-rossiyskiy": 800,
+    "syr-feta": 900,
+    "maslo-slivochnoe": 900,
+    "maslo-olivkovoe": 1200,
+    "maslo-podsolnechnoe": 150,
+    "grechka-varenaya": 45,
+    "ris-belyy-shlifovannyy-varenyy": 40,
+    "ris-neshlifovannyy-varenyy": 60,
+    "ovsyanye-hlopya": 90,
+    "makaronnye-izdeliya-iz-muki-tverdyh-sortov-v-s-varenye": 45,
+    "kinoa-varenaya": 200,
+    "chechevitsa-varenaya": 60,
+    "nut-varenyy": 70,
+    "fasol-krasnaya-varenaya": 80,
+    "psheno-varenoe": 35,
+    "perlovaya-krupa-varenaya": 30,
+    "hleb-tselnozernovoy-iz-smesi-zlakov": 250,
+    "hleb-rzhanoy": 120,
+    "hlebtsy-dr-k-rner-sem-zlakov": 500,
+    "hlebtsy-dr-k-rner-grechnevye-s-vitaminami": 500,
+    "kartofel-otvarnoy": 50,
+    "batat-otvarnoy-bez-kozhury": 250,
+    "kapusta-belokochannaya": 40,
+    "kapusta-kvashenaya": 150,
+    "kapusta-brokkoli-zamorozhennaya-varenaya": 250,
+    "kapusta-tsvetnaya": 250,
+    "kapusta-pekinskaya": 120,
+    "morkov": 50,
+    "luk-repchatyy": 40,
+    "luk-repchatyy-krasnyy": 80,
+    "luk-zelenyy": 400,
+    "ogurtsy-gruntovye": 180,
+    "ogurtsy-solenye": 200,
+    "pomidory-gruntovye": 220,
+    "pomidory-cherri": 400,
+    "perets-sladkiy": 250,
+    "kabachki": 120,
+    "baklazhany": 200,
+    "shpinat": 600,
+    "salat-listovoy": 500,
+    "shampinony": 300,
+    "tykva-otvarnaya": 90,
+    "chesnok": 300,
+    "ukrop": 600,
+    "fasol-struchkovaya": 250,
+    "kukuruza-sladkaya": 250,
+    "limon": 200,
+    "avokado": 600,
+    "banan": 120,
+    "yabloki": 120,
+    "apelsiny": 150,
+    "kivi": 300,
+    "klubnika": 600,
+    "chernika": 1200,
+    "gretskie-orehi": 900,
+    "mindalnyy-oreh": 1300,
+    "arahis": 400,
+    "semena-lna": 300,
+    "semechki-tykvennye-yadra-sushenye": 900,
+    "kuraga": 600,
+    "izyum": 350,
+    "med-naturalnyy": 700,
+    "krolik": 700,
+    "losos": 1400,
+    "semga": 1500,
+    "tilapiya": 500,
+    "sudak": 550,
+    "tunets-polosatyy": 900,
+    "keta": 550,
+    "forel": 900,
+    "mash-varenyy": 80,
+    "goroh-varenyy": 50,
+    "soevye-boby-varenye": 90,
+    "kasha-iz-ovsyanyh-hlopev-na-moloke": 80,
+    "kasha-iz-ovsyanyh-hlopev-na-vode": 50,
+    "syr-motsarella-iz-tselnogo-moloka": 900,
+    "syr-rikotta-iz-tselnogo-moloka": 700,
+    "yaytso-perepelinoe": 800,
+    "kurinye-okorochka": 350,
+    "pechen-govyazhya": 400,
+    "amarant-varenyy": 180,
+    "svekla-otvarnaya": 60,
+    "veshenki-svezhie": 350,
+    "grusha": 180,
+    "persik": 250,
+    "vinograd": 250,
+    "malina": 700,
+    "chernosliv-sliva-sushenaya": 400,
+    "syr-gauda": 850,
+    "suluguni": 800,
+    "hleb-borodinskiy": 150,
+    "semena-chia": 600,
+    "fistashki-syrye": 1400,
+    "keshyu": 1100,
+    "tsukkini": 150,
+    "rukkola": 600,
+    "goroshek-zelenyy": 200,
+    "pyure-kartofelnoe": 80,
+    "kefir-2-5": 110,
+    "moloko-1-5-zhirnosti": 85,
+    "tvorog-9": 420,
+    "mango": 400,
+    "hurma": 200,
+    "arbuz": 50,
+    "dynya": 80,
+    "sparzha": 800,
+    "selderey-zelen": 200,
+    "petrushka-zelen": 400,
+    "seld-atlanticheskaya-nezhirnaya": 400,
+    "midii": 700,
+    "krab-kamchatskiy-myaso": 1800,
+    "telyatina-1-kategorii": 900,
+    "broylery-tsyplyata-2-kat": 280,
+    "ris-dikiy-chernyy-varenyy": 180,
+    "hlebtsy-dr-k-rner-risovye-s-vitaminami": 500,
+    "mayonez-legkiy": 300,
+    "omlet": 200,
+    "syrniki": 250,
+    "tvorozhnaya-zapekanka": 250,
+    "salat-tsezar-s-kuritsey": 450,
+    "salat-olive": 350,
+    "vinegret": 180,
+    "okroshka-na-kefire": 200,
+    "borsch": 150,
+    "kurinyy-sup-s-lapshoy": 180,
+    "ovoschnoe-ragu": 200,
+    "ryba-zapechennaya": 500,
+    "grecheskiy-salat": 400,
+    "plov-s-kuritsey": 280,
+    "grechka-s-kuritsey": 250,
+    "golubtsy": 280,
+    "farshirovannyy-perets": 280,
+    "tefteli-v-tomatnom-souse": 280,
+    "gulyash": 350,
+    "pasta-s-tomatnym-sousom": 220,
+    "ris-s-ovoschami": 150
+  },
+  "recipes": [
+    {
+      "id": "ovsyanka-banan",
+      "slot": "breakfast",
+      "title": "Овсянка с бананом и орехами",
+      "main": "grain",
+      "avoid": [
+        "gluten",
+        "dairy",
+        "nuts"
+      ],
+      "ingredients": [
+        {
+          "foodId": "ovsyanye-hlopya",
+          "grams": 50
+        },
+        {
+          "foodId": "moloko-2-5",
+          "grams": 200
+        },
+        {
+          "foodId": "banan",
+          "grams": 100
+        },
+        {
+          "foodId": "gretskie-orehi",
+          "grams": 15
+        },
+        {
+          "foodId": "med-naturalnyy",
+          "grams": 10
+        }
+      ]
+    },
+    {
+      "id": "omlet-ovoschi",
+      "slot": "breakfast",
+      "title": "Омлет с овощами и тостом",
+      "main": "eggs",
+      "avoid": [
+        "dairy",
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "yaytso-kurinoe",
+          "grams": 150
+        },
+        {
+          "foodId": "moloko-2-5",
+          "grams": 50
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 80
+        },
+        {
+          "foodId": "perets-sladkiy",
+          "grams": 60
+        },
+        {
+          "foodId": "shpinat",
+          "grams": 30
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 5
+        },
+        {
+          "foodId": "hleb-tselnozernovoy-iz-smesi-zlakov",
+          "grams": 40
+        }
+      ]
+    },
+    {
+      "id": "syrniki-domashnie",
+      "slot": "breakfast",
+      "title": "Сырники на овсянке с яблоком",
+      "main": "cottage",
+      "avoid": [
+        "dairy",
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "tvorog-5",
+          "grams": 200
+        },
+        {
+          "foodId": "yaytso-kurinoe",
+          "grams": 50
+        },
+        {
+          "foodId": "ovsyanye-hlopya",
+          "grams": 30
+        },
+        {
+          "foodId": "smetana-10",
+          "grams": 40
+        },
+        {
+          "foodId": "yabloki",
+          "grams": 100
+        }
+      ]
+    },
+    {
+      "id": "tvorog-yagody",
+      "slot": "breakfast",
+      "title": "Творог с черникой и льном",
+      "main": "cottage",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "tvorog-5",
+          "grams": 200
+        },
+        {
+          "foodId": "chernika",
+          "grams": 80
+        },
+        {
+          "foodId": "med-naturalnyy",
+          "grams": 15
+        },
+        {
+          "foodId": "semena-lna",
+          "grams": 10
+        }
+      ]
+    },
+    {
+      "id": "grechka-yaytso",
+      "slot": "breakfast",
+      "title": "Гречка с яйцом и огурцом",
+      "main": "eggs",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "grechka-varenaya",
+          "grams": 200
+        },
+        {
+          "foodId": "yaytso-kurinoe-otvarnoe",
+          "grams": 100
+        },
+        {
+          "foodId": "ogurtsy-gruntovye",
+          "grams": 100
+        },
+        {
+          "foodId": "ukrop",
+          "grams": 10
+        },
+        {
+          "foodId": "maslo-podsolnechnoe",
+          "grams": 5
+        }
+      ]
+    },
+    {
+      "id": "tost-avokado",
+      "slot": "breakfast",
+      "title": "Тост с авокадо и яйцом",
+      "main": "eggs",
+      "avoid": [
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "hleb-tselnozernovoy-iz-smesi-zlakov",
+          "grams": 80
+        },
+        {
+          "foodId": "avokado",
+          "grams": 80
+        },
+        {
+          "foodId": "yaytso-kurinoe-otvarnoe",
+          "grams": 100
+        },
+        {
+          "foodId": "pomidory-cherri",
+          "grams": 60
+        },
+        {
+          "foodId": "limon",
+          "grams": 10
+        }
+      ]
+    },
+    {
+      "id": "yogurt-frukty",
+      "slot": "breakfast",
+      "title": "Греческий йогурт с фруктами и семечками",
+      "main": "yogurt",
+      "avoid": [
+        "dairy",
+        "nuts"
+      ],
+      "ingredients": [
+        {
+          "foodId": "yogurt-grecheskiy",
+          "grams": 200
+        },
+        {
+          "foodId": "banan",
+          "grams": 80
+        },
+        {
+          "foodId": "kivi",
+          "grams": 70
+        },
+        {
+          "foodId": "semechki-tykvennye-yadra-sushenye",
+          "grams": 15
+        },
+        {
+          "foodId": "med-naturalnyy",
+          "grams": 10
+        }
+      ]
+    },
+    {
+      "id": "kasha-pshennaya-tykva",
+      "slot": "breakfast",
+      "title": "Пшённая каша с тыквой",
+      "main": "grain",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "psheno-varenoe",
+          "grams": 250
+        },
+        {
+          "foodId": "tykva-otvarnaya",
+          "grams": 120
+        },
+        {
+          "foodId": "moloko-2-5",
+          "grams": 100
+        },
+        {
+          "foodId": "maslo-slivochnoe",
+          "grams": 5
+        },
+        {
+          "foodId": "izyum",
+          "grams": 15
+        }
+      ]
+    },
+    {
+      "id": "shakshuka",
+      "slot": "breakfast",
+      "title": "Шакшука с ржаным хлебом",
+      "main": "eggs",
+      "avoid": [
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "yaytso-kurinoe",
+          "grams": 150
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 250
+        },
+        {
+          "foodId": "perets-sladkiy",
+          "grams": 80
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 50
+        },
+        {
+          "foodId": "chesnok",
+          "grams": 5
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 8
+        },
+        {
+          "foodId": "hleb-rzhanoy",
+          "grams": 50
+        }
+      ]
+    },
+    {
+      "id": "ris-kasha-yabloko",
+      "slot": "breakfast",
+      "title": "Рисовая каша с яблоком и корицей",
+      "main": "grain",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "ris-belyy-shlifovannyy-varenyy",
+          "grams": 200
+        },
+        {
+          "foodId": "moloko-2-5",
+          "grams": 150
+        },
+        {
+          "foodId": "yabloki",
+          "grams": 120
+        },
+        {
+          "foodId": "med-naturalnyy",
+          "grams": 10
+        }
+      ]
+    },
+    {
+      "id": "zapekanka-tvorozhnaya",
+      "slot": "breakfast",
+      "title": "Творожная запеканка с изюмом",
+      "main": "cottage",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "tvorog-5",
+          "grams": 250
+        },
+        {
+          "foodId": "yaytso-kurinoe",
+          "grams": 100
+        },
+        {
+          "foodId": "izyum",
+          "grams": 20
+        },
+        {
+          "foodId": "smetana-10",
+          "grams": 30
+        },
+        {
+          "foodId": "med-naturalnyy",
+          "grams": 10
+        }
+      ]
+    },
+    {
+      "id": "kuritsa-grechka-ovoschi",
+      "slot": "lunch",
+      "title": "Куриная грудка с гречкой и брокколи",
+      "main": "chicken",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kurinaya-grudka",
+          "grams": 150
+        },
+        {
+          "foodId": "grechka-varenaya",
+          "grams": 200
+        },
+        {
+          "foodId": "kapusta-brokkoli-zamorozhennaya-varenaya",
+          "grams": 120
+        },
+        {
+          "foodId": "morkov",
+          "grams": 50
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 7
+        }
+      ]
+    },
+    {
+      "id": "plov-kurinyy",
+      "slot": "lunch",
+      "title": "Плов с курицей",
+      "main": "chicken",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kuritsa-2-kat",
+          "grams": 120
+        },
+        {
+          "foodId": "ris-belyy-shlifovannyy-varenyy",
+          "grams": 220
+        },
+        {
+          "foodId": "morkov",
+          "grams": 80
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 50
+        },
+        {
+          "foodId": "maslo-podsolnechnoe",
+          "grams": 10
+        },
+        {
+          "foodId": "chesnok",
+          "grams": 5
+        }
+      ]
+    },
+    {
+      "id": "mintay-kartofel",
+      "slot": "lunch",
+      "title": "Запечённый минтай с картофелем",
+      "main": "fish",
+      "avoid": [
+        "fish"
+      ],
+      "ingredients": [
+        {
+          "foodId": "mintay",
+          "grams": 200
+        },
+        {
+          "foodId": "kartofel-otvarnoy",
+          "grams": 200
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 40
+        },
+        {
+          "foodId": "limon",
+          "grams": 20
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 7
+        },
+        {
+          "foodId": "ogurtsy-gruntovye",
+          "grams": 80
+        }
+      ]
+    },
+    {
+      "id": "gorbusha-buryy-ris",
+      "slot": "lunch",
+      "title": "Горбуша с бурым рисом и салатом",
+      "main": "fish",
+      "avoid": [
+        "fish"
+      ],
+      "ingredients": [
+        {
+          "foodId": "gorbusha",
+          "grams": 150
+        },
+        {
+          "foodId": "ris-neshlifovannyy-varenyy",
+          "grams": 180
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 100
+        },
+        {
+          "foodId": "ogurtsy-gruntovye",
+          "grams": 80
+        },
+        {
+          "foodId": "salat-listovoy",
+          "grams": 30
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 7
+        }
+      ]
+    },
+    {
+      "id": "pasta-indeyka",
+      "slot": "lunch",
+      "title": "Паста с индейкой и томатами",
+      "main": "turkey",
+      "avoid": [
+        "meat",
+        "gluten",
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "indeyka-farsh",
+          "grams": 130
+        },
+        {
+          "foodId": "makaronnye-izdeliya-iz-muki-tverdyh-sortov-v-s-varenye",
+          "grams": 220
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 150
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 40
+        },
+        {
+          "foodId": "chesnok",
+          "grams": 5
+        },
+        {
+          "foodId": "syr-rossiyskiy",
+          "grams": 20
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 7
+        }
+      ]
+    },
+    {
+      "id": "govyadina-perlovka",
+      "slot": "lunch",
+      "title": "Говядина тушёная с перловкой",
+      "main": "beef",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "govyadina-2-kategorii",
+          "grams": 150
+        },
+        {
+          "foodId": "perlovaya-krupa-varenaya",
+          "grams": 220
+        },
+        {
+          "foodId": "morkov",
+          "grams": 60
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 50
+        },
+        {
+          "foodId": "maslo-podsolnechnoe",
+          "grams": 8
+        },
+        {
+          "foodId": "kapusta-kvashenaya",
+          "grams": 80
+        }
+      ]
+    },
+    {
+      "id": "chechevichnyy-sup",
+      "slot": "lunch",
+      "title": "Чечевичный суп с ржаным хлебом",
+      "main": "legumes",
+      "avoid": [
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "chechevitsa-varenaya",
+          "grams": 250
+        },
+        {
+          "foodId": "morkov",
+          "grams": 60
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 50
+        },
+        {
+          "foodId": "kartofel-otvarnoy",
+          "grams": 100
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 8
+        },
+        {
+          "foodId": "chesnok",
+          "grams": 5
+        },
+        {
+          "foodId": "hleb-rzhanoy",
+          "grams": 60
+        }
+      ]
+    },
+    {
+      "id": "kurinyy-sup-ris",
+      "slot": "lunch",
+      "title": "Куриный суп с рисом и овощами",
+      "main": "chicken",
+      "avoid": [
+        "meat",
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kurinaya-grudka",
+          "grams": 100
+        },
+        {
+          "foodId": "ris-belyy-shlifovannyy-varenyy",
+          "grams": 120
+        },
+        {
+          "foodId": "kartofel-otvarnoy",
+          "grams": 120
+        },
+        {
+          "foodId": "morkov",
+          "grams": 50
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 40
+        },
+        {
+          "foodId": "ukrop",
+          "grams": 5
+        },
+        {
+          "foodId": "hleb-rzhanoy",
+          "grams": 50
+        }
+      ]
+    },
+    {
+      "id": "boul-nut-kinoa",
+      "slot": "lunch",
+      "title": "Боул с нутом, киноа и авокадо",
+      "main": "legumes",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "nut-varenyy",
+          "grams": 200
+        },
+        {
+          "foodId": "kinoa-varenaya",
+          "grams": 150
+        },
+        {
+          "foodId": "avokado",
+          "grams": 60
+        },
+        {
+          "foodId": "pomidory-cherri",
+          "grams": 100
+        },
+        {
+          "foodId": "ogurtsy-gruntovye",
+          "grams": 80
+        },
+        {
+          "foodId": "limon",
+          "grams": 10
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "svinina-ragu",
+      "slot": "lunch",
+      "title": "Свиная вырезка с овощным рагу",
+      "main": "pork",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "svinina-vyrezka",
+          "grams": 150
+        },
+        {
+          "foodId": "kabachki",
+          "grams": 150
+        },
+        {
+          "foodId": "baklazhany",
+          "grams": 100
+        },
+        {
+          "foodId": "perets-sladkiy",
+          "grams": 80
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 100
+        },
+        {
+          "foodId": "maslo-podsolnechnoe",
+          "grams": 8
+        },
+        {
+          "foodId": "kartofel-otvarnoy",
+          "grams": 120
+        }
+      ]
+    },
+    {
+      "id": "tefteli-indeyka",
+      "slot": "lunch",
+      "title": "Тефтели из индейки с рисом",
+      "main": "turkey",
+      "avoid": [
+        "meat",
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "indeyka-farsh",
+          "grams": 150
+        },
+        {
+          "foodId": "ris-belyy-shlifovannyy-varenyy",
+          "grams": 200
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 120
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 40
+        },
+        {
+          "foodId": "yaytso-kurinoe",
+          "grams": 30
+        },
+        {
+          "foodId": "smetana-10",
+          "grams": 30
+        }
+      ]
+    },
+    {
+      "id": "treska-pyure",
+      "slot": "lunch",
+      "title": "Треска на пару с пюре и стручковой фасолью",
+      "main": "fish",
+      "avoid": [
+        "fish",
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "treska-atlanticheskaya",
+          "grams": 200
+        },
+        {
+          "foodId": "kartofel-otvarnoy",
+          "grams": 220
+        },
+        {
+          "foodId": "moloko-2-5",
+          "grams": 50
+        },
+        {
+          "foodId": "maslo-slivochnoe",
+          "grams": 8
+        },
+        {
+          "foodId": "fasol-struchkovaya",
+          "grams": 120
+        }
+      ]
+    },
+    {
+      "id": "pechen-grechka",
+      "slot": "lunch",
+      "title": "Куриная печень с луком и гречкой",
+      "main": "chicken",
+      "avoid": [
+        "meat",
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kurinaya-pechen",
+          "grams": 150
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 80
+        },
+        {
+          "foodId": "grechka-varenaya",
+          "grams": 200
+        },
+        {
+          "foodId": "smetana-10",
+          "grams": 40
+        },
+        {
+          "foodId": "maslo-podsolnechnoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "fasol-ragu-kukuruza",
+      "slot": "lunch",
+      "title": "Рагу с фасолью, кукурузой и рисом",
+      "main": "legumes",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "fasol-krasnaya-varenaya",
+          "grams": 200
+        },
+        {
+          "foodId": "kukuruza-sladkaya",
+          "grams": 80
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 150
+        },
+        {
+          "foodId": "perets-sladkiy",
+          "grams": 80
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 50
+        },
+        {
+          "foodId": "ris-belyy-shlifovannyy-varenyy",
+          "grams": 150
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "hek-ovoschi",
+      "slot": "dinner",
+      "title": "Хек, запечённый с овощами",
+      "main": "fish",
+      "avoid": [
+        "fish"
+      ],
+      "ingredients": [
+        {
+          "foodId": "hek",
+          "grams": 200
+        },
+        {
+          "foodId": "kabachki",
+          "grams": 150
+        },
+        {
+          "foodId": "perets-sladkiy",
+          "grams": 80
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 100
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 7
+        },
+        {
+          "foodId": "limon",
+          "grams": 15
+        }
+      ]
+    },
+    {
+      "id": "salat-kuritsa-teplyy",
+      "slot": "dinner",
+      "title": "Тёплый салат с курицей",
+      "main": "chicken",
+      "avoid": [
+        "meat",
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kurinaya-grudka",
+          "grams": 150
+        },
+        {
+          "foodId": "salat-listovoy",
+          "grams": 60
+        },
+        {
+          "foodId": "pomidory-cherri",
+          "grams": 100
+        },
+        {
+          "foodId": "ogurtsy-gruntovye",
+          "grams": 100
+        },
+        {
+          "foodId": "perets-sladkiy",
+          "grams": 60
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 8
+        },
+        {
+          "foodId": "hleb-tselnozernovoy-iz-smesi-zlakov",
+          "grams": 40
+        }
+      ]
+    },
+    {
+      "id": "omlet-shpinat-syr",
+      "slot": "dinner",
+      "title": "Омлет со шпинатом и сыром",
+      "main": "eggs",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "yaytso-kurinoe",
+          "grams": 150
+        },
+        {
+          "foodId": "shpinat",
+          "grams": 80
+        },
+        {
+          "foodId": "syr-rossiyskiy",
+          "grams": 30
+        },
+        {
+          "foodId": "moloko-2-5",
+          "grams": 40
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 100
+        }
+      ]
+    },
+    {
+      "id": "tvorog-ogurets-zelen",
+      "slot": "dinner",
+      "title": "Творог с огурцом, зеленью и хлебцами",
+      "main": "cottage",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "tvorog-5",
+          "grams": 200
+        },
+        {
+          "foodId": "ogurtsy-gruntovye",
+          "grams": 150
+        },
+        {
+          "foodId": "ukrop",
+          "grams": 10
+        },
+        {
+          "foodId": "luk-zelenyy",
+          "grams": 10
+        },
+        {
+          "foodId": "hlebtsy-dr-k-rner-grechnevye-s-vitaminami",
+          "grams": 30
+        },
+        {
+          "foodId": "smetana-10",
+          "grams": 30
+        }
+      ]
+    },
+    {
+      "id": "indeyka-brokkoli-batat",
+      "slot": "dinner",
+      "title": "Индейка с брокколи и бататом",
+      "main": "turkey",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "indeyka-grudka",
+          "grams": 150
+        },
+        {
+          "foodId": "kapusta-brokkoli-zamorozhennaya-varenaya",
+          "grams": 150
+        },
+        {
+          "foodId": "batat-otvarnoy-bez-kozhury",
+          "grams": 150
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 7
+        }
+      ]
+    },
+    {
+      "id": "krevetki-ris-ovoschi",
+      "slot": "dinner",
+      "title": "Креветки с бурым рисом и пекинской капустой",
+      "main": "seafood",
+      "avoid": [
+        "fish"
+      ],
+      "ingredients": [
+        {
+          "foodId": "krevetki",
+          "grams": 150
+        },
+        {
+          "foodId": "ris-neshlifovannyy-varenyy",
+          "grams": 150
+        },
+        {
+          "foodId": "kapusta-pekinskaya",
+          "grams": 100
+        },
+        {
+          "foodId": "perets-sladkiy",
+          "grams": 60
+        },
+        {
+          "foodId": "chesnok",
+          "grams": 5
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "govyadina-kapusta",
+      "slot": "dinner",
+      "title": "Говядина с тушёной капустой",
+      "main": "beef",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "govyadina-vyrezka",
+          "grams": 150
+        },
+        {
+          "foodId": "kapusta-belokochannaya",
+          "grams": 250
+        },
+        {
+          "foodId": "morkov",
+          "grams": 60
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 50
+        },
+        {
+          "foodId": "maslo-podsolnechnoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "grechka-griby",
+      "slot": "dinner",
+      "title": "Гречка с шампиньонами и яйцом",
+      "main": "grain",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "grechka-varenaya",
+          "grams": 220
+        },
+        {
+          "foodId": "shampinony",
+          "grams": 150
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 60
+        },
+        {
+          "foodId": "maslo-podsolnechnoe",
+          "grams": 10
+        },
+        {
+          "foodId": "yaytso-kurinoe-otvarnoe",
+          "grams": 50
+        }
+      ]
+    },
+    {
+      "id": "skumbriya-kartofel",
+      "slot": "dinner",
+      "title": "Скумбрия запечённая с картофелем",
+      "main": "fish",
+      "avoid": [
+        "fish"
+      ],
+      "ingredients": [
+        {
+          "foodId": "skumbriya",
+          "grams": 150
+        },
+        {
+          "foodId": "kartofel-otvarnoy",
+          "grams": 150
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 40
+        },
+        {
+          "foodId": "limon",
+          "grams": 15
+        },
+        {
+          "foodId": "ogurtsy-solenye",
+          "grams": 60
+        }
+      ]
+    },
+    {
+      "id": "kotlety-kurinye-tsvetnaya",
+      "slot": "dinner",
+      "title": "Куриные котлеты с цветной капустой",
+      "main": "chicken",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kurinaya-grudka",
+          "grams": 150
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 40
+        },
+        {
+          "foodId": "yaytso-kurinoe",
+          "grams": 30
+        },
+        {
+          "foodId": "kapusta-tsvetnaya",
+          "grams": 200
+        },
+        {
+          "foodId": "maslo-podsolnechnoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "grecheskiy-salat-feta",
+      "slot": "dinner",
+      "title": "Греческий салат с фетой и хлебом",
+      "main": "veg",
+      "avoid": [
+        "dairy",
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 150
+        },
+        {
+          "foodId": "ogurtsy-gruntovye",
+          "grams": 150
+        },
+        {
+          "foodId": "perets-sladkiy",
+          "grams": 80
+        },
+        {
+          "foodId": "luk-repchatyy-krasnyy",
+          "grams": 30
+        },
+        {
+          "foodId": "syr-feta",
+          "grams": 60
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 10
+        },
+        {
+          "foodId": "hleb-tselnozernovoy-iz-smesi-zlakov",
+          "grams": 50
+        }
+      ]
+    },
+    {
+      "id": "ragu-nut-ovoschi",
+      "slot": "dinner",
+      "title": "Овощное рагу с нутом",
+      "main": "legumes",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "nut-varenyy",
+          "grams": 150
+        },
+        {
+          "foodId": "kabachki",
+          "grams": 150
+        },
+        {
+          "foodId": "baklazhany",
+          "grams": 100
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 150
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 50
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "kalmar-ovoschi-ris",
+      "slot": "dinner",
+      "title": "Кальмар с овощами и рисом",
+      "main": "seafood",
+      "avoid": [
+        "fish"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kalmar",
+          "grams": 180
+        },
+        {
+          "foodId": "perets-sladkiy",
+          "grams": 80
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 60
+        },
+        {
+          "foodId": "morkov",
+          "grams": 60
+        },
+        {
+          "foodId": "ris-belyy-shlifovannyy-varenyy",
+          "grams": 120
+        },
+        {
+          "foodId": "maslo-podsolnechnoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "yabloko-orehi",
+      "slot": "snack",
+      "title": "Яблоко с грецкими орехами",
+      "main": "fruit",
+      "avoid": [
+        "nuts"
+      ],
+      "ingredients": [
+        {
+          "foodId": "yabloki",
+          "grams": 150
+        },
+        {
+          "foodId": "gretskie-orehi",
+          "grams": 20
+        }
+      ]
+    },
+    {
+      "id": "kefir-hlebtsy",
+      "slot": "snack",
+      "title": "Кефир с хлебцами",
+      "main": "yogurt",
+      "avoid": [
+        "dairy",
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kefir-1",
+          "grams": 250
+        },
+        {
+          "foodId": "hlebtsy-dr-k-rner-sem-zlakov",
+          "grams": 30
+        }
+      ]
+    },
+    {
+      "id": "banan-arahis",
+      "slot": "snack",
+      "title": "Банан с арахисом",
+      "main": "fruit",
+      "avoid": [
+        "nuts"
+      ],
+      "ingredients": [
+        {
+          "foodId": "banan",
+          "grams": 120
+        },
+        {
+          "foodId": "arahis",
+          "grams": 20
+        }
+      ]
+    },
+    {
+      "id": "tvorog-med",
+      "slot": "snack",
+      "title": "Творог с мёдом",
+      "main": "cottage",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "tvorog-5",
+          "grams": 120
+        },
+        {
+          "foodId": "med-naturalnyy",
+          "grams": 10
+        }
+      ]
+    },
+    {
+      "id": "yaytsa-ogurets",
+      "slot": "snack",
+      "title": "Варёные яйца с огурцом",
+      "main": "eggs",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "yaytso-kurinoe-otvarnoe",
+          "grams": 100
+        },
+        {
+          "foodId": "ogurtsy-gruntovye",
+          "grams": 100
+        }
+      ]
+    },
+    {
+      "id": "yogurt-klubnika",
+      "slot": "snack",
+      "title": "Йогурт с клубникой",
+      "main": "yogurt",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "yogurt-grecheskiy",
+          "grams": 150
+        },
+        {
+          "foodId": "klubnika",
+          "grams": 80
+        }
+      ]
+    },
+    {
+      "id": "morkov-syr",
+      "slot": "snack",
+      "title": "Морковь с сыром",
+      "main": "veg",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "morkov",
+          "grams": 120
+        },
+        {
+          "foodId": "syr-rossiyskiy",
+          "grams": 30
+        }
+      ]
+    },
+    {
+      "id": "kuraga-mindal",
+      "slot": "snack",
+      "title": "Курага с миндалём",
+      "main": "fruit",
+      "avoid": [
+        "nuts"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kuraga",
+          "grams": 40
+        },
+        {
+          "foodId": "mindalnyy-oreh",
+          "grams": 20
+        }
+      ]
+    },
+    {
+      "id": "buterbrod-syr-pomidor",
+      "slot": "snack",
+      "title": "Бутерброд с сыром и помидором",
+      "main": "grain",
+      "avoid": [
+        "gluten",
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "hleb-rzhanoy",
+          "grams": 50
+        },
+        {
+          "foodId": "syr-rossiyskiy",
+          "grams": 30
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 60
+        }
+      ]
+    },
+    {
+      "id": "apelsin-kivi",
+      "slot": "snack",
+      "title": "Апельсин и киви",
+      "main": "fruit",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "apelsiny",
+          "grams": 150
+        },
+        {
+          "foodId": "kivi",
+          "grams": 80
+        }
+      ]
+    },
+    {
+      "id": "ovsyanka-voda-yabloko-chia",
+      "slot": "breakfast",
+      "title": "Овсянка на воде с яблоком и чиа",
+      "main": "oats",
+      "avoid": [
+        "gluten",
+        "nuts"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kasha-iz-ovsyanyh-hlopev-na-vode",
+          "grams": 250
+        },
+        {
+          "foodId": "yabloki",
+          "grams": 120
+        },
+        {
+          "foodId": "semena-chia",
+          "grams": 12
+        },
+        {
+          "foodId": "med-naturalnyy",
+          "grams": 10
+        }
+      ]
+    },
+    {
+      "id": "omlet-griby-zavtrak",
+      "slot": "breakfast",
+      "title": "Омлет с шампиньонами",
+      "main": "eggs",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "yaytso-kurinoe",
+          "grams": 150
+        },
+        {
+          "foodId": "shampinony",
+          "grams": 120
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 40
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 7
+        }
+      ]
+    },
+    {
+      "id": "syrniki-malina",
+      "slot": "breakfast",
+      "title": "Сырники с малиной",
+      "main": "cottage",
+      "avoid": [
+        "dairy",
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "syrniki",
+          "grams": 180
+        },
+        {
+          "foodId": "malina",
+          "grams": 80
+        },
+        {
+          "foodId": "smetana-10",
+          "grams": 30
+        }
+      ]
+    },
+    {
+      "id": "yogurt-mango-chia",
+      "slot": "breakfast",
+      "title": "Йогурт с манго и чиа",
+      "main": "yogurt",
+      "avoid": [
+        "dairy",
+        "nuts"
+      ],
+      "ingredients": [
+        {
+          "foodId": "yogurt-grecheskiy",
+          "grams": 200
+        },
+        {
+          "foodId": "mango",
+          "grams": 120
+        },
+        {
+          "foodId": "semena-chia",
+          "grams": 12
+        }
+      ]
+    },
+    {
+      "id": "tost-motsarella-pomidor",
+      "slot": "breakfast",
+      "title": "Тост с моцареллой и томатом",
+      "main": "cheese",
+      "avoid": [
+        "gluten",
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "hleb-tselnozernovoy-iz-smesi-zlakov",
+          "grams": 80
+        },
+        {
+          "foodId": "syr-motsarella-iz-tselnogo-moloka",
+          "grams": 60
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 100
+        },
+        {
+          "foodId": "rukkola",
+          "grams": 20
+        }
+      ]
+    },
+    {
+      "id": "ovsyanka-moloko-kuraga",
+      "slot": "breakfast",
+      "title": "Овсянка на молоке с курагой",
+      "main": "oats",
+      "avoid": [
+        "gluten",
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kasha-iz-ovsyanyh-hlopev-na-moloke",
+          "grams": 280
+        },
+        {
+          "foodId": "kuraga",
+          "grams": 30
+        },
+        {
+          "foodId": "semena-lna",
+          "grams": 10
+        }
+      ]
+    },
+    {
+      "id": "grechka-moloko-grusha",
+      "slot": "breakfast",
+      "title": "Гречка на молоке с грушей",
+      "main": "buckwheat",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "grechka-varenaya",
+          "grams": 200
+        },
+        {
+          "foodId": "moloko-1-5-zhirnosti",
+          "grams": 150
+        },
+        {
+          "foodId": "grusha",
+          "grams": 120
+        },
+        {
+          "foodId": "med-naturalnyy",
+          "grams": 10
+        }
+      ]
+    },
+    {
+      "id": "rikotta-persik",
+      "slot": "breakfast",
+      "title": "Рикотта с персиком",
+      "main": "cheese",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "syr-rikotta-iz-tselnogo-moloka",
+          "grams": 150
+        },
+        {
+          "foodId": "persik",
+          "grams": 150
+        },
+        {
+          "foodId": "med-naturalnyy",
+          "grams": 10
+        }
+      ]
+    },
+    {
+      "id": "perepel-ogurets-hleb",
+      "slot": "breakfast",
+      "title": "Перепелиные яйца с огурцом и бородинским",
+      "main": "eggs",
+      "avoid": [
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "yaytso-perepelinoe",
+          "grams": 80
+        },
+        {
+          "foodId": "ogurtsy-gruntovye",
+          "grams": 120
+        },
+        {
+          "foodId": "hleb-borodinskiy",
+          "grams": 60
+        },
+        {
+          "foodId": "ukrop",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "kinoa-yabloko-mindal",
+      "slot": "breakfast",
+      "title": "Киноа с яблоком и миндалём",
+      "main": "quinoa",
+      "avoid": [
+        "nuts"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kinoa-varenaya",
+          "grams": 180
+        },
+        {
+          "foodId": "yabloki",
+          "grams": 120
+        },
+        {
+          "foodId": "mindalnyy-oreh",
+          "grams": 15
+        },
+        {
+          "foodId": "med-naturalnyy",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "omlet-brokkoli-syr",
+      "slot": "breakfast",
+      "title": "Омлет с брокколи и гаудой",
+      "main": "eggs",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "omlet",
+          "grams": 180
+        },
+        {
+          "foodId": "kapusta-brokkoli-zamorozhennaya-varenaya",
+          "grams": 100
+        },
+        {
+          "foodId": "syr-gauda",
+          "grams": 30
+        }
+      ]
+    },
+    {
+      "id": "kefir-banan-oves",
+      "slot": "breakfast",
+      "title": "Кефир с бананом и овсянкой",
+      "main": "yogurt",
+      "avoid": [
+        "dairy",
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kefir-2-5",
+          "grams": 250
+        },
+        {
+          "foodId": "banan",
+          "grams": 100
+        },
+        {
+          "foodId": "ovsyanye-hlopya",
+          "grams": 40
+        }
+      ]
+    },
+    {
+      "id": "amarant-moloko-izyum",
+      "slot": "breakfast",
+      "title": "Амарант на молоке с изюмом",
+      "main": "amaranth",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "amarant-varenyy",
+          "grams": 220
+        },
+        {
+          "foodId": "moloko-2-5",
+          "grams": 120
+        },
+        {
+          "foodId": "izyum",
+          "grams": 20
+        }
+      ]
+    },
+    {
+      "id": "tost-avokado-suluguni",
+      "slot": "breakfast",
+      "title": "Тост с авокадо и сулугуни",
+      "main": "cheese",
+      "avoid": [
+        "gluten",
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "hleb-rzhanoy",
+          "grams": 70
+        },
+        {
+          "foodId": "avokado",
+          "grams": 70
+        },
+        {
+          "foodId": "suluguni",
+          "grams": 40
+        },
+        {
+          "foodId": "pomidory-cherri",
+          "grams": 60
+        }
+      ]
+    },
+    {
+      "id": "tvorog-9-hurma",
+      "slot": "breakfast",
+      "title": "Творог 9% с хурмой",
+      "main": "cottage",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "tvorog-9",
+          "grams": 180
+        },
+        {
+          "foodId": "hurma",
+          "grams": 120
+        },
+        {
+          "foodId": "semena-lna",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "zapekanka-persik",
+      "slot": "breakfast",
+      "title": "Творожная запеканка с персиком",
+      "main": "cottage",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "tvorozhnaya-zapekanka",
+          "grams": 200
+        },
+        {
+          "foodId": "persik",
+          "grams": 100
+        }
+      ]
+    },
+    {
+      "id": "shakshuka-feta",
+      "slot": "breakfast",
+      "title": "Шакшука с фетой",
+      "main": "eggs",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "yaytso-kurinoe",
+          "grams": 150
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 200
+        },
+        {
+          "foodId": "perets-sladkiy",
+          "grams": 80
+        },
+        {
+          "foodId": "syr-feta",
+          "grams": 40
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 7
+        }
+      ]
+    },
+    {
+      "id": "psheno-yabloko-orehi",
+      "slot": "breakfast",
+      "title": "Пшено с яблоком и грецкими орехами",
+      "main": "millet",
+      "avoid": [
+        "nuts"
+      ],
+      "ingredients": [
+        {
+          "foodId": "psheno-varenoe",
+          "grams": 220
+        },
+        {
+          "foodId": "yabloki",
+          "grams": 100
+        },
+        {
+          "foodId": "gretskie-orehi",
+          "grams": 15
+        }
+      ]
+    },
+    {
+      "id": "krolik-perlovka",
+      "slot": "lunch",
+      "title": "Кролик тушёный с перловкой",
+      "main": "rabbit",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "krolik",
+          "grams": 160
+        },
+        {
+          "foodId": "perlovaya-krupa-varenaya",
+          "grams": 200
+        },
+        {
+          "foodId": "morkov",
+          "grams": 60
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 50
+        },
+        {
+          "foodId": "maslo-podsolnechnoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "tilapiya-kinoa",
+      "slot": "lunch",
+      "title": "Тилапия с киноа и цуккини",
+      "main": "tilapia",
+      "avoid": [
+        "fish"
+      ],
+      "ingredients": [
+        {
+          "foodId": "tilapiya",
+          "grams": 180
+        },
+        {
+          "foodId": "kinoa-varenaya",
+          "grams": 160
+        },
+        {
+          "foodId": "tsukkini",
+          "grams": 120
+        },
+        {
+          "foodId": "limon",
+          "grams": 15
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 7
+        }
+      ]
+    },
+    {
+      "id": "tunets-salat-ogurets",
+      "slot": "lunch",
+      "title": "Салат с тунцом и огурцом",
+      "main": "tuna",
+      "avoid": [
+        "fish"
+      ],
+      "ingredients": [
+        {
+          "foodId": "tunets-polosatyy",
+          "grams": 140
+        },
+        {
+          "foodId": "ogurtsy-gruntovye",
+          "grams": 120
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 100
+        },
+        {
+          "foodId": "salat-listovoy",
+          "grams": 40
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 8
+        },
+        {
+          "foodId": "hleb-rzhanoy",
+          "grams": 50
+        }
+      ]
+    },
+    {
+      "id": "losos-sparzha-ris",
+      "slot": "lunch",
+      "title": "Лосось со спаржей и диким рисом",
+      "main": "salmon",
+      "avoid": [
+        "fish"
+      ],
+      "ingredients": [
+        {
+          "foodId": "losos",
+          "grams": 140
+        },
+        {
+          "foodId": "ris-dikiy-chernyy-varenyy",
+          "grams": 160
+        },
+        {
+          "foodId": "sparzha",
+          "grams": 100
+        },
+        {
+          "foodId": "limon",
+          "grams": 10
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 6
+        }
+      ]
+    },
+    {
+      "id": "gorohovyy-sup",
+      "slot": "lunch",
+      "title": "Гороховый суп с бородинским",
+      "main": "peas",
+      "avoid": [
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "goroh-varenyy",
+          "grams": 250
+        },
+        {
+          "foodId": "morkov",
+          "grams": 60
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 50
+        },
+        {
+          "foodId": "kartofel-otvarnoy",
+          "grams": 100
+        },
+        {
+          "foodId": "maslo-podsolnechnoe",
+          "grams": 8
+        },
+        {
+          "foodId": "hleb-borodinskiy",
+          "grams": 60
+        }
+      ]
+    },
+    {
+      "id": "mash-ris-ovoschi",
+      "slot": "lunch",
+      "title": "Маш с рисом и овощами",
+      "main": "mung",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "mash-varenyy",
+          "grams": 200
+        },
+        {
+          "foodId": "ris-belyy-shlifovannyy-varenyy",
+          "grams": 160
+        },
+        {
+          "foodId": "perets-sladkiy",
+          "grams": 80
+        },
+        {
+          "foodId": "morkov",
+          "grams": 60
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "soya-grechka-shpinat",
+      "slot": "lunch",
+      "title": "Соевые бобы с гречкой и шпинатом",
+      "main": "soy",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "soevye-boby-varenye",
+          "grams": 180
+        },
+        {
+          "foodId": "grechka-varenaya",
+          "grams": 180
+        },
+        {
+          "foodId": "shpinat",
+          "grams": 60
+        },
+        {
+          "foodId": "chesnok",
+          "grams": 5
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 7
+        }
+      ]
+    },
+    {
+      "id": "telyatina-kartofel",
+      "slot": "lunch",
+      "title": "Телятина с картофелем и морковью",
+      "main": "veal",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "telyatina-1-kategorii",
+          "grams": 150
+        },
+        {
+          "foodId": "kartofel-otvarnoy",
+          "grams": 200
+        },
+        {
+          "foodId": "morkov",
+          "grams": 70
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 40
+        },
+        {
+          "foodId": "maslo-podsolnechnoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "pechen-govyazhya-pyure",
+      "slot": "lunch",
+      "title": "Говяжья печень с пюре",
+      "main": "liver",
+      "avoid": [
+        "meat",
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "pechen-govyazhya",
+          "grams": 150
+        },
+        {
+          "foodId": "pyure-kartofelnoe",
+          "grams": 200
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 60
+        },
+        {
+          "foodId": "maslo-podsolnechnoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "okorochka-kukuruza-ris",
+      "slot": "lunch",
+      "title": "Куриные окорочка с кукурузой и рисом",
+      "main": "chicken",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kurinye-okorochka",
+          "grams": 160
+        },
+        {
+          "foodId": "ris-belyy-shlifovannyy-varenyy",
+          "grams": 180
+        },
+        {
+          "foodId": "kukuruza-sladkaya",
+          "grams": 80
+        },
+        {
+          "foodId": "goroshek-zelenyy",
+          "grams": 80
+        }
+      ]
+    },
+    {
+      "id": "sudak-ovoschi",
+      "slot": "lunch",
+      "title": "Судак с овощным рагу",
+      "main": "pikeperch",
+      "avoid": [
+        "fish"
+      ],
+      "ingredients": [
+        {
+          "foodId": "sudak",
+          "grams": 180
+        },
+        {
+          "foodId": "ovoschnoe-ragu",
+          "grams": 200
+        },
+        {
+          "foodId": "limon",
+          "grams": 10
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 6
+        }
+      ]
+    },
+    {
+      "id": "keta-buryy-ris",
+      "slot": "lunch",
+      "title": "Кета с бурым рисом и салатом",
+      "main": "keta",
+      "avoid": [
+        "fish"
+      ],
+      "ingredients": [
+        {
+          "foodId": "keta",
+          "grams": 160
+        },
+        {
+          "foodId": "ris-neshlifovannyy-varenyy",
+          "grams": 180
+        },
+        {
+          "foodId": "ogurtsy-gruntovye",
+          "grams": 80
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 80
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 7
+        }
+      ]
+    },
+    {
+      "id": "pasta-brokkoli-motsarella",
+      "slot": "lunch",
+      "title": "Паста с брокколи и моцареллой",
+      "main": "pasta",
+      "avoid": [
+        "gluten",
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "makaronnye-izdeliya-iz-muki-tverdyh-sortov-v-s-varenye",
+          "grams": 220
+        },
+        {
+          "foodId": "kapusta-brokkoli-zamorozhennaya-varenaya",
+          "grams": 150
+        },
+        {
+          "foodId": "syr-motsarella-iz-tselnogo-moloka",
+          "grams": 50
+        },
+        {
+          "foodId": "chesnok",
+          "grams": 5
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "borsch-govyadina",
+      "slot": "lunch",
+      "title": "Борщ с говядиной и хлебом",
+      "main": "beef",
+      "avoid": [
+        "meat",
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "borsch",
+          "grams": 350
+        },
+        {
+          "foodId": "govyadina-2-kategorii",
+          "grams": 80
+        },
+        {
+          "foodId": "smetana-10",
+          "grams": 30
+        },
+        {
+          "foodId": "hleb-rzhanoy",
+          "grams": 50
+        }
+      ]
+    },
+    {
+      "id": "vinegret-hleb",
+      "slot": "lunch",
+      "title": "Винегрет с ржаным хлебом",
+      "main": "beet",
+      "avoid": [
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "vinegret",
+          "grams": 250
+        },
+        {
+          "foodId": "hleb-rzhanoy",
+          "grams": 60
+        },
+        {
+          "foodId": "ogurtsy-solenye",
+          "grams": 50
+        }
+      ]
+    },
+    {
+      "id": "indeyka-kinoa-shpinat",
+      "slot": "lunch",
+      "title": "Индейка с киноа и шпинатом",
+      "main": "turkey",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "indeyka-grudka",
+          "grams": 150
+        },
+        {
+          "foodId": "kinoa-varenaya",
+          "grams": 160
+        },
+        {
+          "foodId": "shpinat",
+          "grams": 80
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 7
+        }
+      ]
+    },
+    {
+      "id": "svinina-grechka-kvashenaya",
+      "slot": "lunch",
+      "title": "Свинина с гречкой и квашеной капустой",
+      "main": "pork",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "svinina-vyrezka",
+          "grams": 140
+        },
+        {
+          "foodId": "grechka-varenaya",
+          "grams": 200
+        },
+        {
+          "foodId": "kapusta-kvashenaya",
+          "grams": 100
+        },
+        {
+          "foodId": "maslo-podsolnechnoe",
+          "grams": 6
+        }
+      ]
+    },
+    {
+      "id": "midii-pasta",
+      "slot": "lunch",
+      "title": "Мидии с пастой",
+      "main": "mussels",
+      "avoid": [
+        "fish",
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "midii",
+          "grams": 180
+        },
+        {
+          "foodId": "makaronnye-izdeliya-iz-muki-tverdyh-sortov-v-s-varenye",
+          "grams": 200
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 120
+        },
+        {
+          "foodId": "chesnok",
+          "grams": 5
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "broyler-goroshek-ris",
+      "slot": "lunch",
+      "title": "Цыплёнок с горошком и рисом",
+      "main": "chicken",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "broylery-tsyplyata-2-kat",
+          "grams": 160
+        },
+        {
+          "foodId": "ris-belyy-shlifovannyy-varenyy",
+          "grams": 180
+        },
+        {
+          "foodId": "goroshek-zelenyy",
+          "grams": 100
+        },
+        {
+          "foodId": "morkov",
+          "grams": 50
+        }
+      ]
+    },
+    {
+      "id": "fasol-batat",
+      "slot": "lunch",
+      "title": "Фасоль с бататом и перцем",
+      "main": "legumes",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "fasol-krasnaya-varenaya",
+          "grams": 200
+        },
+        {
+          "foodId": "batat-otvarnoy-bez-kozhury",
+          "grams": 160
+        },
+        {
+          "foodId": "perets-sladkiy",
+          "grams": 80
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 40
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "okroshka-obed",
+      "slot": "lunch",
+      "title": "Окрошка на кефире с яйцом",
+      "main": "okroshka",
+      "avoid": [
+        "dairy",
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "okroshka-na-kefire",
+          "grams": 400
+        },
+        {
+          "foodId": "yaytso-kurinoe-otvarnoe",
+          "grams": 50
+        },
+        {
+          "foodId": "hleb-rzhanoy",
+          "grams": 40
+        }
+      ]
+    },
+    {
+      "id": "kurinyy-sup-lapsha",
+      "slot": "lunch",
+      "title": "Куриный суп с лапшой",
+      "main": "chicken",
+      "avoid": [
+        "meat",
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kurinyy-sup-s-lapshoy",
+          "grams": 400
+        },
+        {
+          "foodId": "kurinaya-grudka",
+          "grams": 60
+        },
+        {
+          "foodId": "hleb-rzhanoy",
+          "grams": 40
+        }
+      ]
+    },
+    {
+      "id": "plov-kuritsa-gotovyy",
+      "slot": "lunch",
+      "title": "Плов с курицей и салатом",
+      "main": "chicken",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "plov-s-kuritsey",
+          "grams": 280
+        },
+        {
+          "foodId": "ogurtsy-gruntovye",
+          "grams": 100
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 80
+        }
+      ]
+    },
+    {
+      "id": "golubtsy-obed",
+      "slot": "lunch",
+      "title": "Голубцы со сметаной",
+      "main": "cabbage-roll",
+      "avoid": [
+        "meat",
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "golubtsy",
+          "grams": 280
+        },
+        {
+          "foodId": "smetana-10",
+          "grams": 40
+        },
+        {
+          "foodId": "ogurtsy-solenye",
+          "grams": 50
+        }
+      ]
+    },
+    {
+      "id": "perets-farshirovannyy",
+      "slot": "lunch",
+      "title": "Фаршированный перец",
+      "main": "stuffed",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "farshirovannyy-perets",
+          "grams": 300
+        },
+        {
+          "foodId": "salat-listovoy",
+          "grams": 40
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 80
+        }
+      ]
+    },
+    {
+      "id": "gulyash-pyure",
+      "slot": "lunch",
+      "title": "Гуляш с картофельным пюре",
+      "main": "beef",
+      "avoid": [
+        "meat",
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "gulyash",
+          "grams": 220
+        },
+        {
+          "foodId": "pyure-kartofelnoe",
+          "grams": 200
+        }
+      ]
+    },
+    {
+      "id": "forel-tsukkini",
+      "slot": "dinner",
+      "title": "Форель с цуккини",
+      "main": "trout",
+      "avoid": [
+        "fish"
+      ],
+      "ingredients": [
+        {
+          "foodId": "forel",
+          "grams": 180
+        },
+        {
+          "foodId": "tsukkini",
+          "grams": 180
+        },
+        {
+          "foodId": "limon",
+          "grams": 15
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 7
+        }
+      ]
+    },
+    {
+      "id": "semga-ogurets-ris",
+      "slot": "dinner",
+      "title": "Сёмга с огурцом и рисом",
+      "main": "salmon",
+      "avoid": [
+        "fish"
+      ],
+      "ingredients": [
+        {
+          "foodId": "semga",
+          "grams": 130
+        },
+        {
+          "foodId": "ris-belyy-shlifovannyy-varenyy",
+          "grams": 140
+        },
+        {
+          "foodId": "ogurtsy-gruntovye",
+          "grams": 120
+        },
+        {
+          "foodId": "ukrop",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "krolik-griby-uzhin",
+      "slot": "dinner",
+      "title": "Кролик с вешенками",
+      "main": "rabbit",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "krolik",
+          "grams": 160
+        },
+        {
+          "foodId": "veshenki-svezhie",
+          "grams": 150
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 50
+        },
+        {
+          "foodId": "maslo-podsolnechnoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "omlet-veshenki",
+      "slot": "dinner",
+      "title": "Омлет с вешенками",
+      "main": "eggs",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "yaytso-kurinoe",
+          "grams": 150
+        },
+        {
+          "foodId": "veshenki-svezhie",
+          "grams": 140
+        },
+        {
+          "foodId": "luk-zelenyy",
+          "grams": 15
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 6
+        }
+      ]
+    },
+    {
+      "id": "tunets-rukkola",
+      "slot": "dinner",
+      "title": "Тунец с рукколой и черри",
+      "main": "tuna",
+      "avoid": [
+        "fish"
+      ],
+      "ingredients": [
+        {
+          "foodId": "tunets-polosatyy",
+          "grams": 140
+        },
+        {
+          "foodId": "rukkola",
+          "grams": 50
+        },
+        {
+          "foodId": "pomidory-cherri",
+          "grams": 100
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 8
+        },
+        {
+          "foodId": "limon",
+          "grams": 10
+        }
+      ]
+    },
+    {
+      "id": "tvorog-svekla-zelen",
+      "slot": "dinner",
+      "title": "Творог со свёклой и зеленью",
+      "main": "cottage",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "tvorog-nezhirnyy",
+          "grams": 180
+        },
+        {
+          "foodId": "svekla-otvarnaya",
+          "grams": 120
+        },
+        {
+          "foodId": "ukrop",
+          "grams": 8
+        },
+        {
+          "foodId": "petrushka-zelen",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "pasta-krevetki-uzhin",
+      "slot": "dinner",
+      "title": "Паста с креветками",
+      "main": "shrimp",
+      "avoid": [
+        "fish",
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "krevetki",
+          "grams": 140
+        },
+        {
+          "foodId": "makaronnye-izdeliya-iz-muki-tverdyh-sortov-v-s-varenye",
+          "grams": 180
+        },
+        {
+          "foodId": "chesnok",
+          "grams": 5
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 8
+        },
+        {
+          "foodId": "limon",
+          "grams": 10
+        }
+      ]
+    },
+    {
+      "id": "svinina-pekinskaya",
+      "slot": "dinner",
+      "title": "Свинина с пекинской капустой",
+      "main": "pork",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "svinina-vyrezka",
+          "grams": 150
+        },
+        {
+          "foodId": "kapusta-pekinskaya",
+          "grams": 180
+        },
+        {
+          "foodId": "morkov",
+          "grams": 50
+        },
+        {
+          "foodId": "maslo-podsolnechnoe",
+          "grams": 7
+        }
+      ]
+    },
+    {
+      "id": "indeyka-sparzha",
+      "slot": "dinner",
+      "title": "Индейка со спаржей",
+      "main": "turkey",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "indeyka-grudka",
+          "grams": 160
+        },
+        {
+          "foodId": "sparzha",
+          "grams": 150
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 7
+        },
+        {
+          "foodId": "limon",
+          "grams": 10
+        }
+      ]
+    },
+    {
+      "id": "chechevitsa-tykva",
+      "slot": "dinner",
+      "title": "Чечевица с тыквой",
+      "main": "legumes",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "chechevitsa-varenaya",
+          "grams": 200
+        },
+        {
+          "foodId": "tykva-otvarnaya",
+          "grams": 180
+        },
+        {
+          "foodId": "luk-repchatyy",
+          "grams": 40
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "seld-kartofel",
+      "slot": "dinner",
+      "title": "Сельдь с отварным картофелем",
+      "main": "herring",
+      "avoid": [
+        "fish"
+      ],
+      "ingredients": [
+        {
+          "foodId": "seld-atlanticheskaya-nezhirnaya",
+          "grams": 120
+        },
+        {
+          "foodId": "kartofel-otvarnoy",
+          "grams": 200
+        },
+        {
+          "foodId": "luk-repchatyy-krasnyy",
+          "grams": 40
+        },
+        {
+          "foodId": "ukrop",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "telyatina-tsukkini",
+      "slot": "dinner",
+      "title": "Телятина с цуккини",
+      "main": "veal",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "telyatina-1-kategorii",
+          "grams": 160
+        },
+        {
+          "foodId": "tsukkini",
+          "grams": 180
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 80
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 7
+        }
+      ]
+    },
+    {
+      "id": "soya-shpinat-ris",
+      "slot": "dinner",
+      "title": "Соя со шпинатом и рисом",
+      "main": "soy",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "soevye-boby-varenye",
+          "grams": 160
+        },
+        {
+          "foodId": "shpinat",
+          "grams": 80
+        },
+        {
+          "foodId": "ris-neshlifovannyy-varenyy",
+          "grams": 140
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 7
+        }
+      ]
+    },
+    {
+      "id": "baklazhan-motsarella",
+      "slot": "dinner",
+      "title": "Баклажан с моцареллой",
+      "main": "eggplant",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "baklazhany",
+          "grams": 220
+        },
+        {
+          "foodId": "syr-motsarella-iz-tselnogo-moloka",
+          "grams": 70
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 120
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "kabachki-yaytso-syr",
+      "slot": "dinner",
+      "title": "Кабачки, запечённые с яйцом и сыром",
+      "main": "eggs",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kabachki",
+          "grams": 200
+        },
+        {
+          "foodId": "yaytso-kurinoe",
+          "grams": 100
+        },
+        {
+          "foodId": "syr-rossiyskiy",
+          "grams": 30
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 6
+        }
+      ]
+    },
+    {
+      "id": "losos-rukkola-avokado",
+      "slot": "dinner",
+      "title": "Лосось с рукколой и авокадо",
+      "main": "salmon",
+      "avoid": [
+        "fish"
+      ],
+      "ingredients": [
+        {
+          "foodId": "losos",
+          "grams": 130
+        },
+        {
+          "foodId": "rukkola",
+          "grams": 40
+        },
+        {
+          "foodId": "avokado",
+          "grams": 60
+        },
+        {
+          "foodId": "pomidory-cherri",
+          "grams": 80
+        },
+        {
+          "foodId": "limon",
+          "grams": 10
+        }
+      ]
+    },
+    {
+      "id": "mash-ovoschi-uzhin",
+      "slot": "dinner",
+      "title": "Маш с кабачком и морковью",
+      "main": "mung",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "mash-varenyy",
+          "grams": 200
+        },
+        {
+          "foodId": "kabachki",
+          "grams": 150
+        },
+        {
+          "foodId": "morkov",
+          "grams": 60
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "sudak-brokkoli",
+      "slot": "dinner",
+      "title": "Судак с брокколи",
+      "main": "pikeperch",
+      "avoid": [
+        "fish"
+      ],
+      "ingredients": [
+        {
+          "foodId": "sudak",
+          "grams": 180
+        },
+        {
+          "foodId": "kapusta-brokkoli-zamorozhennaya-varenaya",
+          "grams": 160
+        },
+        {
+          "foodId": "limon",
+          "grams": 10
+        },
+        {
+          "foodId": "maslo-olivkovoe",
+          "grams": 6
+        }
+      ]
+    },
+    {
+      "id": "krab-ogurets-hlebtsy",
+      "slot": "dinner",
+      "title": "Камчатский краб с огурцом и хлебцами",
+      "main": "crab",
+      "avoid": [
+        "fish",
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "krab-kamchatskiy-myaso",
+          "grams": 120
+        },
+        {
+          "foodId": "ogurtsy-gruntovye",
+          "grams": 120
+        },
+        {
+          "foodId": "hlebtsy-dr-k-rner-risovye-s-vitaminami",
+          "grams": 30
+        },
+        {
+          "foodId": "mayonez-legkiy",
+          "grams": 15
+        }
+      ]
+    },
+    {
+      "id": "ryba-zapechennaya-salat",
+      "slot": "dinner",
+      "title": "Запечённая рыба с греческим салатом",
+      "main": "fish",
+      "avoid": [
+        "fish",
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "ryba-zapechennaya",
+          "grams": 180
+        },
+        {
+          "foodId": "grecheskiy-salat",
+          "grams": 150
+        }
+      ]
+    },
+    {
+      "id": "tsezar-kuritsa-uzhin",
+      "slot": "dinner",
+      "title": "Цезарь с курицей",
+      "main": "chicken",
+      "avoid": [
+        "meat",
+        "dairy",
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "salat-tsezar-s-kuritsey",
+          "grams": 250
+        },
+        {
+          "foodId": "kurinaya-grudka",
+          "grams": 50
+        }
+      ]
+    },
+    {
+      "id": "olive-uzhin",
+      "slot": "dinner",
+      "title": "Оливье с бородинским",
+      "main": "salad",
+      "avoid": [
+        "gluten",
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "salat-olive",
+          "grams": 220
+        },
+        {
+          "foodId": "hleb-borodinskiy",
+          "grams": 40
+        }
+      ]
+    },
+    {
+      "id": "pasta-tomat-uzhin",
+      "slot": "dinner",
+      "title": "Паста с томатным соусом",
+      "main": "pasta",
+      "avoid": [
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "pasta-s-tomatnym-sousom",
+          "grams": 280
+        },
+        {
+          "foodId": "salat-listovoy",
+          "grams": 40
+        }
+      ]
+    },
+    {
+      "id": "ris-ovoschi-uzhin",
+      "slot": "dinner",
+      "title": "Рис с овощами и яйцом",
+      "main": "grain",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "ris-s-ovoschami",
+          "grams": 250
+        },
+        {
+          "foodId": "yaytso-kurinoe-otvarnoe",
+          "grams": 50
+        }
+      ]
+    },
+    {
+      "id": "tefteli-uzhin",
+      "slot": "dinner",
+      "title": "Тефтели в томате с гречкой",
+      "main": "beef",
+      "avoid": [
+        "meat"
+      ],
+      "ingredients": [
+        {
+          "foodId": "tefteli-v-tomatnom-souse",
+          "grams": 220
+        },
+        {
+          "foodId": "grechka-varenaya",
+          "grams": 150
+        }
+      ]
+    },
+    {
+      "id": "grusha-keshyu",
+      "slot": "snack",
+      "title": "Груша с кешью",
+      "main": "fruit",
+      "avoid": [
+        "nuts"
+      ],
+      "ingredients": [
+        {
+          "foodId": "grusha",
+          "grams": 160
+        },
+        {
+          "foodId": "keshyu",
+          "grams": 20
+        }
+      ]
+    },
+    {
+      "id": "persik-tvorog",
+      "slot": "snack",
+      "title": "Персик с творогом",
+      "main": "cottage",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "persik",
+          "grams": 150
+        },
+        {
+          "foodId": "tvorog-5",
+          "grams": 80
+        }
+      ]
+    },
+    {
+      "id": "hurma-fistashki",
+      "slot": "snack",
+      "title": "Хурма с фисташками",
+      "main": "fruit",
+      "avoid": [
+        "nuts"
+      ],
+      "ingredients": [
+        {
+          "foodId": "hurma",
+          "grams": 140
+        },
+        {
+          "foodId": "fistashki-syrye",
+          "grams": 18
+        }
+      ]
+    },
+    {
+      "id": "arbuz-feta",
+      "slot": "snack",
+      "title": "Арбуз с фетой",
+      "main": "fruit",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "arbuz",
+          "grams": 250
+        },
+        {
+          "foodId": "syr-feta",
+          "grams": 30
+        }
+      ]
+    },
+    {
+      "id": "dynya-tvorog",
+      "slot": "snack",
+      "title": "Дыня с творогом",
+      "main": "cottage",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "dynya",
+          "grams": 200
+        },
+        {
+          "foodId": "tvorog-nezhirnyy",
+          "grams": 80
+        }
+      ]
+    },
+    {
+      "id": "kefir-banan-perekus",
+      "slot": "snack",
+      "title": "Кефир с бананом",
+      "main": "yogurt",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kefir-2-5",
+          "grams": 250
+        },
+        {
+          "foodId": "banan",
+          "grams": 80
+        }
+      ]
+    },
+    {
+      "id": "hlebtsy-avokado",
+      "slot": "snack",
+      "title": "Рисовые хлебцы с авокадо",
+      "main": "avocado",
+      "avoid": [
+        "gluten"
+      ],
+      "ingredients": [
+        {
+          "foodId": "hlebtsy-dr-k-rner-risovye-s-vitaminami",
+          "grams": 30
+        },
+        {
+          "foodId": "avokado",
+          "grams": 50
+        }
+      ]
+    },
+    {
+      "id": "morkov-goroh",
+      "slot": "snack",
+      "title": "Морковь с зелёным горошком",
+      "main": "veg",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "morkov",
+          "grams": 120
+        },
+        {
+          "foodId": "goroshek-zelenyy",
+          "grams": 80
+        }
+      ]
+    },
+    {
+      "id": "yaytsa-pomidor-perekus",
+      "slot": "snack",
+      "title": "Яйцо с помидором",
+      "main": "eggs",
+      "avoid": [],
+      "ingredients": [
+        {
+          "foodId": "yaytso-kurinoe-otvarnoe",
+          "grams": 100
+        },
+        {
+          "foodId": "pomidory-gruntovye",
+          "grams": 100
+        }
+      ]
+    },
+    {
+      "id": "vinograd-gauda",
+      "slot": "snack",
+      "title": "Виноград с гаудой",
+      "main": "cheese",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "vinograd",
+          "grams": 120
+        },
+        {
+          "foodId": "syr-gauda",
+          "grams": 30
+        }
+      ]
+    },
+    {
+      "id": "malina-yogurt",
+      "slot": "snack",
+      "title": "Малина с йогуртом",
+      "main": "yogurt",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "malina",
+          "grams": 80
+        },
+        {
+          "foodId": "yogurt-grecheskiy",
+          "grams": 120
+        }
+      ]
+    },
+    {
+      "id": "chernosliv-orehi",
+      "slot": "snack",
+      "title": "Чернослив с грецкими орехами",
+      "main": "fruit",
+      "avoid": [
+        "nuts"
+      ],
+      "ingredients": [
+        {
+          "foodId": "chernosliv-sliva-sushenaya",
+          "grams": 40
+        },
+        {
+          "foodId": "gretskie-orehi",
+          "grams": 18
+        }
+      ]
+    },
+    {
+      "id": "ogurets-suluguni",
+      "slot": "snack",
+      "title": "Огурец с сулугуни",
+      "main": "cheese",
+      "avoid": [
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "ogurtsy-gruntovye",
+          "grams": 150
+        },
+        {
+          "foodId": "suluguni",
+          "grams": 40
+        }
+      ]
+    },
+    {
+      "id": "mango-yogurt-chia",
+      "slot": "snack",
+      "title": "Манго с йогуртом и чиа",
+      "main": "yogurt",
+      "avoid": [
+        "dairy",
+        "nuts"
+      ],
+      "ingredients": [
+        {
+          "foodId": "mango",
+          "grams": 100
+        },
+        {
+          "foodId": "yogurt-grecheskiy",
+          "grams": 100
+        },
+        {
+          "foodId": "semena-chia",
+          "grams": 8
+        }
+      ]
+    },
+    {
+      "id": "borodinskiy-tvorog",
+      "slot": "snack",
+      "title": "Бородинский с творогом",
+      "main": "grain",
+      "avoid": [
+        "gluten",
+        "dairy"
+      ],
+      "ingredients": [
+        {
+          "foodId": "hleb-borodinskiy",
+          "grams": 50
+        },
+        {
+          "foodId": "tvorog-5",
+          "grams": 80
+        }
+      ]
+    },
+    {
+      "id": "kivi-mindal",
+      "slot": "snack",
+      "title": "Киви с миндалём",
+      "main": "fruit",
+      "avoid": [
+        "nuts"
+      ],
+      "ingredients": [
+        {
+          "foodId": "kivi",
+          "grams": 120
+        },
+        {
+          "foodId": "mindalnyy-oreh",
+          "grams": 15
+        }
+      ]
+    },
+    {
+      "id": "selderey-arahis",
+      "slot": "snack",
+      "title": "Сельдерей с арахисом",
+      "main": "veg",
+      "avoid": [
+        "nuts"
+      ],
+      "ingredients": [
+        {
+          "foodId": "selderey-zelen",
+          "grams": 80
+        },
+        {
+          "foodId": "arahis",
+          "grams": 20
+        }
+      ]
+    }
+  ]
+}

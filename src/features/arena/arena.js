@@ -16,6 +16,10 @@ import { lookOfStreak } from "../streaks/look";
 import { AchievementPlaque } from "../achievements/plaque";
 import { ProfileChip } from "../avatar/ProfileChip";
 import { NudgeBanner } from "../friends/NudgeBanner";
+import { CheckinCard } from "../checkins/CheckinCard";
+import { WeeklyCard } from "../checkins/WeeklyCard";
+import { TodayPlanCard } from "../checkins/WeekPlan";
+import { todayPlanItem } from "../checkins/recommend";
 import { sessionById, warmupSessions } from "../workouts/catalog";
 import { useSession } from "../workouts/sessionStore";
 
@@ -154,15 +158,24 @@ export default function ArenaScreen() {
       />
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 22, paddingBottom: 16 }}
+        contentContainerStyle={{ paddingHorizontal: 22, paddingBottom: 28 }}
         showsVerticalScrollIndicator={false}
       >
         <View className="mb-5 flex-row items-center justify-between pt-2">
-          <Text className="text-[34px] font-semibold text-white">Дней подряд</Text>
+          <Text className="mr-3 flex-1 text-[28px] font-semibold leading-8 text-white" numberOfLines={1}>
+            Дней подряд
+          </Text>
           <ProfileChip />
         </View>
 
         <NudgeBanner />
+        <TodayPlanCard
+          user={user}
+          onOpen={(session) => {
+            openSession(session);
+            router.replace("/workouts");
+          }}
+        />
 
         <GlassPanel delay={40} style={{ borderRadius: 32, paddingHorizontal: 24, paddingVertical: 28 }}>
           <View className="items-center">
@@ -186,7 +199,10 @@ export default function ArenaScreen() {
           </View>
         </GlassPanel>
 
-        {warmups.length ? (
+        <WeeklyCard compact />
+        <CheckinCard compact />
+
+        {warmups.length > 0 && !todayPlanItem(user)?.rest ? (
           <View className="mt-8">
             <Text className="text-[11px] font-medium tracking-[1px]" style={{ color: getPalette().accent }}>
               1 МИНУТА
@@ -203,6 +219,7 @@ export default function ArenaScreen() {
                     onPress={() => openWarmup(item)}
                     className="flex-1 rounded-[20px] px-3 py-4"
                     style={glassStyle({
+                      variant: "fill",
                       borderRadius: 20,
                       backgroundColor: on ? "rgba(125,255,179,0.16)" : undefined,
                     })}
@@ -217,7 +234,7 @@ export default function ArenaScreen() {
           </View>
         ) : null}
 
-        <Pressable onPress={openCalories} className="mt-8 rounded-[24px] px-4 py-5" style={glassStyle({ borderRadius: 24 })}>
+        <Pressable onPress={openCalories} className="mt-8 rounded-[24px] px-4 py-5" style={glassStyle({ variant: "fill", borderRadius: 24 })}>
           <View className="flex-row">
             <StatCell label="Цель, ккал" value={target.kcal} />
             <StatCell label="Съедено" value={eaten} />
@@ -249,7 +266,7 @@ export default function ArenaScreen() {
                 key={task.id}
                 onPress={() => openTask(task)}
                 className="mb-2 flex-row items-center rounded-[20px] px-3"
-                style={{ ...glassStyle({ borderRadius: 20 }), minHeight: 64 }}
+                style={{ ...glassStyle({ variant: "fill", borderRadius: 20 }), minHeight: 64 }}
               >
                 <View
                   className="mr-3 h-10 w-10 items-center justify-center rounded-full"
@@ -270,7 +287,7 @@ export default function ArenaScreen() {
           })}
         </View>
 
-        <View className="mt-8 rounded-[24px] px-5 py-5" style={glassStyle({ borderRadius: 24 })}>
+        <View className="mt-8 rounded-[24px] px-5 py-5" style={glassStyle({ variant: "fill", borderRadius: 24 })}>
           <View className="mb-4 flex-row items-center justify-between">
             <Text className="text-[13px] text-white/60">
               Текущий: <Text className="font-semibold text-white">{Number(weight.current).toFixed(1)} кг</Text>

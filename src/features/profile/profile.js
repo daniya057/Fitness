@@ -2,45 +2,81 @@ import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { lightTap } from "../../lib/haptics";
-import { Calendar, CircleDashed, Goal, History, Repeat, Ruler, Scale } from "lucide-react-native";
 import { Field, PrimaryButton, SectionLabel, TextLink } from "../../ui/kit";
 import { glassStyle } from "../../ui/Glass";
 import { getPalette } from "../../ui/theme";
 import { AvatarBadge } from "../avatar/AvatarBadge";
-import { AvatarPicker } from "../avatar/AvatarPicker";
 import { PublicProfile } from "../friends/PublicProfile";
 import { utcDay } from "../calories/foods";
+import { foodSkipLabel } from "../calories/foodSkip";
 import { useAuth } from "../auth/AuthContext";
 import { BirthdayCalendar } from "../onboarding/BirthdayCalendar";
-import { GOALS, GOAL_LABELS, EXPERIENCE_LABELS, SEX_LABELS, SEX_OPTIONS } from "../onboarding/catalog";
+import { BmiMark } from "../onboarding/BmiMark";
+import { GOALS, EXPERIENCE_LABELS, SEX_LABELS, SEX_OPTIONS } from "../onboarding/catalog";
+import { coerceTrainDayIds, DIET_LABELS, FOCUS_LABELS, PLACE_LABELS, TIME_LABELS, trainDaysLabel } from "../onboarding/quiz";
+import { DaysPicker } from "../onboarding/DaysPicker";
 import { ExperiencePicker } from "../onboarding/ExperiencePicker";
 import { ValueSlider } from "../onboarding/ValueSlider";
 
-function FactRow({ Icon, label, value }) {
+function FactCell({ label, value }) {
   return (
-    <View className="mb-3 flex-row items-center rounded-[20px] px-4 py-4" style={glassStyle({ borderRadius: 20 })}>
-      <View
-        className="mr-3 h-10 w-10 items-center justify-center rounded-full"
-        style={{ backgroundColor: "rgba(125,255,179,0.14)" }}
-      >
-        <Icon size={18} color={getPalette().accent} strokeWidth={1.8} />
-      </View>
-      <View className="flex-1">
-        <Text className="text-[12px] text-white/45">{label}</Text>
-        <Text className="mt-0.5 text-[16px] font-semibold text-white">{value}</Text>
-      </View>
+    <View className="min-h-[60px] flex-1 justify-center rounded-[16px] px-3 py-3" style={glassStyle({ borderRadius: 16 })}>
+      <Text className="text-[11px] text-white/45">{label}</Text>
+      <Text className="mt-1 text-[16px] font-semibold text-white" numberOfLines={2}>
+        {value}
+      </Text>
     </View>
   );
 }
 
-function weekLabel(count) {
-  if (count === 1) {
-    return "раз";
+function weightProgress(weight) {
+  const start = Number(weight?.start);
+  const current = Number(weight?.current);
+  const goal = Number(weight?.goal);
+  if (![start, current, goal].every(Number.isFinite)) {
+    return 0;
   }
-  if (count < 5) {
-    return "раза";
+  const total = goal - start;
+  if (total === 0) {
+    return current === goal ? 1 : 0;
   }
-  return "раз";
+  return Math.max(0, Math.min(1, (current - start) / total));
+}
+
+function WeightCard({ weight }) {
+  if (!weight) {
+    return <FactCell label="Вес" value="—" />;
+  }
+  const current = Number(weight.current);
+  const goal = Number(weight.goal);
+  const fill = weightProgress(weight);
+  const pct = Math.round(fill * 100);
+
+  return (
+    <View className="rounded-[16px] px-4 py-3" style={glassStyle({ borderRadius: 16 })}>
+      <Text className="text-[11px] text-white/45">Вес</Text>
+      <View className="mt-2 flex-row items-center" style={{ gap: 8 }}>
+        <View className="flex-1 rounded-[14px] px-3 py-2" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
+          <Text className="text-[18px] font-semibold text-white">{current.toFixed(1)} кг</Text>
+          <Text className="mt-0.5 text-[11px] text-white/45">текущий</Text>
+        </View>
+        <Text className="text-[16px] text-white/35">→</Text>
+        <View className="flex-1 rounded-[14px] px-3 py-2" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
+          <Text className="text-[18px] font-semibold text-white">{goal.toFixed(1)} кг</Text>
+          <Text className="mt-0.5 text-[11px] text-white/45">цель</Text>
+        </View>
+      </View>
+      <View className="mt-3 flex-row items-center" style={{ gap: 8 }}>
+        <View className="h-1.5 flex-1 overflow-hidden rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.14)" }}>
+          <View
+            className="h-full rounded-full"
+            style={{ width: `${pct}%`, backgroundColor: getPalette().bar }}
+          />
+        </View>
+        <Text className="text-[11px] text-white/45">{current === goal ? "на цели" : `${pct}%`}</Text>
+      </View>
+    </View>
+  );
 }
 
 function seedForm(user) {
@@ -54,6 +90,7 @@ function seedForm(user) {
     birthDate: user?.birthDate || "2000-01-15",
     goals: user?.goals?.length ? [...user.goals] : ["walk"],
     daysPerWeek: Number(user?.daysPerWeek) || 3,
+    trainDays: coerceTrainDayIds(user?.trainDays, user?.daysPerWeek || 3),
     experience: EXPERIENCE_LABELS[user?.experience] ? user.experience : "",
   };
 }
@@ -62,14 +99,12 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { user, logout, patch } = useAuth();
   const [editing, setEditing] = useState(false);
-  const [lookOpen, setLookOpen] = useState(false);
   const [form, setForm] = useState(() => seedForm(user));
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
   const name = user?.name || "Гость";
   const status = String(user?.status || "").trim();
-  const goalNames = (user?.goals || []).map((id) => GOAL_LABELS[id]).filter(Boolean);
   const weight = user?.weight;
 
   const startEdit = () => {
@@ -110,6 +145,10 @@ export default function ProfileScreen() {
       setError("Выбери, как давно занимаешься");
       return;
     }
+    if (!form.trainDays.length) {
+      setError("Выбери хотя бы один день");
+      return;
+    }
     setBusy(true);
     try {
       await patch({
@@ -123,7 +162,8 @@ export default function ProfileScreen() {
         sex: form.sex,
         birthDate: form.birthDate,
         goals: form.goals,
-        daysPerWeek: form.daysPerWeek,
+        daysPerWeek: form.trainDays.length || form.daysPerWeek,
+        trainDays: form.trainDays,
         experience: form.experience,
       });
       setEditing(false);
@@ -147,16 +187,7 @@ export default function ProfileScreen() {
             Профиль
           </Text>
           <View className="mt-4 flex-row items-center">
-            <Pressable
-              onPress={async () => {
-                await lightTap();
-                if (!editing) {
-                  setLookOpen((value) => !value);
-                }
-              }}
-            >
-              <AvatarBadge user={user} size="lg" />
-            </Pressable>
+            <AvatarBadge user={user} size="lg" />
             <View className="ml-4 flex-1">
               <Text className="text-[28px] font-semibold text-white">{name}</Text>
               {status ? <Text className="mt-1 text-[14px] text-white/60">{status}</Text> : null}
@@ -169,7 +200,6 @@ export default function ProfileScreen() {
             ) : (
               <TextLink label="Изменить" onPress={startEdit} />
             )}
-            <TextLink label="Выйти" danger onPress={logout} />
           </View>
         </View>
 
@@ -213,6 +243,7 @@ export default function ProfileScreen() {
               glass
               onChange={(value) => setForm((prev) => ({ ...prev, heightCm: value }))}
             />
+            <BmiMark kg={form.weight} heightCm={form.heightCm} goalKg={form.goal} />
             <SectionLabel glass>Пол</SectionLabel>
             <View className="mb-6 flex-row gap-3">
               {SEX_OPTIONS.map((item) => {
@@ -266,22 +297,52 @@ export default function ProfileScreen() {
                 onChange={(id) => setForm((prev) => ({ ...prev, experience: id }))}
               />
             </View>
-            <ValueSlider
-              label="Раз в неделю"
-              value={form.daysPerWeek}
-              min={1}
-              max={7}
-              step={1}
-              unit={form.daysPerWeek === 1 ? "день" : "дней"}
-              glass
-              onChange={(value) => setForm((prev) => ({ ...prev, daysPerWeek: value }))}
+            <DaysPicker
+              label="В какие дни удобно"
+              values={form.trainDays}
+              onChange={(value) => setForm((prev) => ({ ...prev, trainDays: value, daysPerWeek: value.length || 1 }))}
             />
             {error ? <Text className="mb-3 text-[14px] font-medium text-accent">{error}</Text> : null}
             <PrimaryButton label="Сохранить" onPress={save} busy={busy} />
           </View>
         ) : (
           <>
-            <AvatarPicker open={lookOpen} onToggle={() => setLookOpen((value) => !value)} />
+            <View className="mt-8">
+              <SectionLabel glass>Из опросника</SectionLabel>
+              <View style={{ gap: 10 }}>
+                <View className="flex-row" style={{ gap: 10 }}>
+                  <FactCell label="Возраст" value={user?.age ? `${user.age}` : "—"} />
+                  <FactCell label="Рост" value={user?.heightCm ? `${user.heightCm} см` : "—"} />
+                  <FactCell label="Пол" value={SEX_LABELS[user?.sex] || "—"} />
+                </View>
+                <WeightCard weight={weight} />
+                <BmiMark kg={weight?.current} heightCm={user?.heightCm} goalKg={weight?.goal} />
+                <View className="flex-row" style={{ gap: 10 }}>
+                  <FactCell
+                    label="Дни"
+                    value={trainDaysLabel(user?.trainDays, user?.daysPerWeek) || "—"}
+                  />
+                  <FactCell label="Как давно" value={EXPERIENCE_LABELS[user?.experience] || "—"} />
+                </View>
+                {user?.quizDone && user?.quiz ? (
+                  <>
+                    <View className="flex-row" style={{ gap: 10 }}>
+                      <FactCell label="Фокус" value={FOCUS_LABELS[user.quiz.focus] || "—"} />
+                      <FactCell label="Время" value={TIME_LABELS[user.quiz.timeBudget] || "—"} />
+                    </View>
+                    <FactCell label="Где" value={PLACE_LABELS[user.quiz.place] || "—"} />
+                    <FactCell
+                      label="Питание"
+                      value={(user.quiz.diet || []).map((id) => DIET_LABELS[id]).filter(Boolean).join(" · ") || "—"}
+                    />
+                    <FactCell
+                      label="Не ем"
+                      value={foodSkipLabel(user.quiz.foodSkip) || "ем всё"}
+                    />
+                  </>
+                ) : null}
+              </View>
+            </View>
             <View className="mt-8">
               <PublicProfile
                 mine
@@ -291,58 +352,11 @@ export default function ProfileScreen() {
                 }}
               />
             </View>
-
-            <View className="mt-8">
-              <SectionLabel glass>Из опросника</SectionLabel>
-              <FactRow Icon={Calendar} label="Возраст" value={user?.age ? `${user.age}` : "—"} />
-              <FactRow Icon={Ruler} label="Рост" value={user?.heightCm ? `${user.heightCm} см` : "—"} />
-              <FactRow Icon={CircleDashed} label="Пол" value={SEX_LABELS[user?.sex] || "—"} />
-              <FactRow
-                Icon={Scale}
-                label="Вес"
-                value={
-                  weight
-                    ? `Текущий ${Number(weight.current).toFixed(1)} кг · цель ${Number(weight.goal).toFixed(1)} кг`
-                    : "—"
-                }
-              />
-              <View className="mb-3 rounded-[20px] px-4 py-4" style={glassStyle({ borderRadius: 20 })}>
-                <View className="flex-row items-center">
-                  <View
-                    className="mr-3 h-10 w-10 items-center justify-center rounded-full"
-                    style={{ backgroundColor: "rgba(125,255,179,0.14)" }}
-                  >
-                    <Goal size={18} color={getPalette().accent} strokeWidth={1.8} />
-                  </View>
-                  <Text className="text-[12px] text-white/45">Цели</Text>
-                </View>
-                <View className="mt-3 flex-row flex-wrap" style={{ gap: 8 }}>
-                  {goalNames.length ? (
-                    goalNames.map((item) => (
-                      <View
-                        key={item}
-                        className="rounded-full px-3 py-2"
-                        style={{ backgroundColor: "rgba(125,255,179,0.16)" }}
-                      >
-                        <Text className="text-[13px] font-medium" style={{ color: getPalette().accent }}>
-                          {item}
-                        </Text>
-                      </View>
-                    ))
-                  ) : (
-                    <Text className="text-[15px] text-white/55">—</Text>
-                  )}
-                </View>
-              </View>
-              <FactRow
-                Icon={Repeat}
-                label="В неделю"
-                value={user?.daysPerWeek ? `${user.daysPerWeek} ${weekLabel(user.daysPerWeek)}` : "—"}
-              />
-              <FactRow Icon={History} label="Как давно" value={EXPERIENCE_LABELS[user?.experience] || "—"} />
-            </View>
           </>
         )}
+        <View className="mt-10 items-start">
+          <TextLink label="Выйти" danger onPress={logout} />
+        </View>
       </ScrollView>
     </View>
   );

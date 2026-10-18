@@ -7,3 +7,11 @@ export async function lightTap() {
     // Веб и симуляторы без тактильного движка просто пропускают вибро.
   }
 }
+
+export async function celebrateTap() {
+  try {
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  } catch {
+    // Веб и симуляторы без тактильного движка просто пропускают вибро.
+  }
+}

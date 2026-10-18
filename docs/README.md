@@ -16,7 +16,7 @@
 | [ios.md](ios.md) | Поставить на iPhone: Expo Go, EAS, лимит Safari |
 | [navigation.md](navigation.md) | Вкладки и экраны |
 | [screens/arena.md](screens/arena.md) | Главная |
-| [screens/workouts.md](screens/workouts.md) | Тренировки: семь групп и таймер |
+| [screens/workouts.md](screens/workouts.md) | Тренировки: группы, зал и таймер |
 | [screens/tabs.md](screens/tabs.md) | Пять вкладок, портрет |
 | [roadmap.md](roadmap.md) | Фазы и спринты с чекбоксами |
 | [glossary.md](glossary.md) | Термины |
@@ -31,6 +31,7 @@
 |---|---|
 | [mechanics/streaks.md](mechanics/streaks.md) | Прощающая серия, щиты, Edge Function |
 | [mechanics/fuel.md](mechanics/fuel.md) | Дневник на вкладке Калории |
+| [mechanics/checkins.md](mechanics/checkins.md) | Опросники, план недели, питание |
 | [mechanics/quick-start.md](mechanics/quick-start.md) | 10 секунд, «Засчитать разминку» |
 | [mechanics/daily.md](mechanics/daily.md) | Ежедневные челленджи |
 | [mechanics/avatar.md](mechanics/avatar.md) | Аватар и бейджи |

@@ -3,6 +3,7 @@ import "../global.css";
 import { Slot } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { AchievementUnlock } from "../src/features/achievements/AchievementUnlock";
 import { AuthGate } from "../src/features/auth/AuthGate";
 import { AuthProvider } from "../src/features/auth/AuthContext";
 import { PortraitShell } from "../src/ui/PortraitShell";
@@ -16,6 +17,7 @@ export default function RootLayout() {
             <AuthGate>
               <Slot />
             </AuthGate>
+            <AchievementUnlock />
           </PortraitShell>
         </AuthProvider>
       </SafeAreaProvider>

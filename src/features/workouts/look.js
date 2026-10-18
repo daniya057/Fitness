@@ -1,86 +1,34 @@
-import { Dumbbell, Flame, Heart, Sparkles, Trophy, User, Utensils, Zap } from "lucide-react-native";
+import { Dumbbell, Flame, Heart, Sparkles, Timer, Trophy, User, Utensils, Weight, Zap } from "lucide-react-native";
+
+const MINT = "#9BFFC8";
+const INK = "#07140F";
+
+function look(Icon) {
+  return {
+    card: "rgba(125,255,179,0.16)",
+    ink: INK,
+    mute: "rgba(255,255,255,0.55)",
+    accent: MINT,
+    onAccent: INK,
+    chipOn: MINT,
+    chipOff: "rgba(255,255,255,0.1)",
+    player: "rgba(125,255,179,0.12)",
+    Icon,
+  };
+}
 
 const LOOKS = {
-  full: {
-    card: "#C9EBD6",
-    ink: "#1A1A1A",
-    mute: "#2E7D32",
-    accent: "#2E7D32",
-    chipOn: "#2E7D32",
-    chipOff: "#E8F5E9",
-    player: "#C9EBD6",
-    Icon: User,
-  },
-  push: {
-    card: "#BBDEFB",
-    ink: "#0D47A1",
-    mute: "#1565C0",
-    accent: "#1565C0",
-    chipOn: "#1565C0",
-    chipOff: "#E3F2FD",
-    player: "#BBDEFB",
-    Icon: Dumbbell,
-  },
-  pull: {
-    card: "#A5D6A7",
-    ink: "#1B5E20",
-    mute: "#2E7D32",
-    accent: "#1B5E20",
-    chipOn: "#1B5E20",
-    chipOff: "#E8F5E9",
-    player: "#A5D6A7",
-    Icon: Zap,
-  },
-  legs: {
-    card: "#FFE0B2",
-    ink: "#E65100",
-    mute: "#EF6C00",
-    accent: "#EF6C00",
-    chipOn: "#EF6C00",
-    chipOff: "#FFF3E0",
-    player: "#FFE0B2",
-    Icon: Trophy,
-  },
-  core: {
-    card: "#E1BEE7",
-    ink: "#6A1B9A",
-    mute: "#7B1FA2",
-    accent: "#7B1FA2",
-    chipOn: "#7B1FA2",
-    chipOff: "#F3E5F5",
-    player: "#E1BEE7",
-    Icon: Flame,
-  },
-  cardio: {
-    card: "#FFCDD2",
-    ink: "#B71C1C",
-    mute: "#C62828",
-    accent: "#C62828",
-    chipOn: "#C62828",
-    chipOff: "#FFEBEE",
-    player: "#FFCDD2",
-    Icon: Heart,
-  },
-  meal: {
-    card: "#DCEDC8",
-    ink: "#33691E",
-    mute: "#558B2F",
-    accent: "#558B2F",
-    chipOn: "#558B2F",
-    chipOff: "#F1F8E9",
-    player: "#DCEDC8",
-    Icon: Utensils,
-  },
-  stretch: {
-    card: "#B2EBF2",
-    ink: "#006064",
-    mute: "#00838F",
-    accent: "#00838F",
-    chipOn: "#00838F",
-    chipOff: "#E0F7FA",
-    player: "#B2EBF2",
-    Icon: Sparkles,
-  },
+  full: look(User),
+  push: look(Dumbbell),
+  pull: look(Zap),
+  legs: look(Trophy),
+  core: look(Flame),
+  cardio: look(Heart),
+  meal: look(Utensils),
+  stretch: look(Sparkles),
+  gym: look(Weight),
+  short: look(Timer),
+  custom: look(Sparkles),
 };
 
 export function lookOfGroup(id) {

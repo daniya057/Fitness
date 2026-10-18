@@ -1,59 +1,84 @@
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Play, Sun, Sunset } from "lucide-react-native";
+import { Play, Plus, Sun, Sunset } from "lucide-react-native";
 import { SoftPress } from "../../ui/SoftPress";
-import { ScreenHeader } from "../../ui/kit";
+import { ScreenHeader, TextLink } from "../../ui/kit";
 import { glassStyle } from "../../ui/Glass";
 import { getPalette } from "../../ui/theme";
+import { CustomEditor } from "./CustomEditor";
 import { MoveHintModal, MoveList } from "./MoveHint";
 import { SessionPlayer } from "./SessionPlayer";
+import { WorkoutCalendar } from "./WorkoutCalendar";
 import {
-  WORKOUT_GROUPS,
+  defaultGroupId,
   levelLabel,
   levelProgressCount,
   nextLockedSession,
   openLevel,
   openSessions,
   sessionDetail,
+  visibleGroups,
   warmupSessions,
   workoutsLeftPhrase,
 } from "./catalog";
 import { ProfileChip } from "../avatar/ProfileChip";
 import { useAuth } from "../auth/AuthContext";
+import { WeekPlan } from "../checkins/WeekPlan";
 import { lookOfGroup } from "./look";
+import { ACCENT_INK } from "../../ui/layout";
 import { useSession } from "./sessionStore";
 
 export default function WorkoutsScreen() {
   const insets = useSafeAreaInsets();
-  const { user } = useAuth();
+  const { user, patch } = useAuth();
   const session = useSession((s) => s.session);
   const open = useSession((s) => s.open);
-  const [groupId, setGroupId] = useState(WORKOUT_GROUPS[0].id);
+  const groups = useMemo(() => visibleGroups(user), [user]);
+  const preferred = defaultGroupId(user);
+  const [picked, setPicked] = useState("");
+  const groupId = groups.some((item) => item.id === picked) ? picked : preferred;
   const [hintTitle, setHintTitle] = useState("");
+  const [composer, setComposer] = useState(false);
   const list = useMemo(() => openSessions(groupId, user), [groupId, user]);
   const locked = useMemo(() => nextLockedSession(groupId, user), [groupId, user]);
   const warmups = useMemo(() => warmupSessions(), []);
+  const mine = Array.isArray(user?.customSessions) ? user.customSessions : [];
   const todaySessions = new Set(Array.isArray(user?.todaySessions) ? user.todaySessions : []);
   const look = lookOfGroup(groupId);
+  const customLook = lookOfGroup("custom");
   const current = openLevel(user);
   const leftPhrase = current >= 5 ? "Все уровни открыты" : workoutsLeftPhrase(levelProgressCount(user));
 
+  const removeCustom = async (id) => {
+    try {
+      await patch({ deleteCustom: id });
+    } catch {
+      // Карточка останется, если сеть моргнула.
+    }
+  };
+
   if (session) {
     return <SessionPlayer />;
+  }
+
+  if (composer) {
+    return <CustomEditor onClose={() => setComposer(false)} />;
   }
 
   return (
     <View className="flex-1" style={{ paddingTop: insets.top, backgroundColor: "transparent" }}>
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 22, paddingBottom: 28 }}
+        contentContainerStyle={{ paddingHorizontal: 22, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        <ScreenHeader glass title="Тренировки" subtitle="Следующий уровень — после трёх тренировок" right={<ProfileChip />} />
+        <ScreenHeader glass title="Тренировки" right={<ProfileChip />} />
         <Text className="mb-4 text-[15px] font-medium text-white">
           {levelLabel(current)}. {leftPhrase}.
         </Text>
+        <WorkoutCalendar user={user} />
+        <WeekPlan user={user} onOpen={open} />
         {warmups.length ? (
           <View className="mb-5 flex-row gap-2">
             {warmups.map((item) => {
@@ -66,6 +91,7 @@ export default function WorkoutsScreen() {
                   onPress={() => open(item)}
                   className="flex-1 rounded-[24px] px-4 py-4"
                   style={glassStyle({
+                    variant: "fill",
                     borderRadius: 24,
                     backgroundColor: on ? "rgba(125,255,179,0.12)" : undefined,
                   })}
@@ -78,14 +104,39 @@ export default function WorkoutsScreen() {
             })}
           </View>
         ) : null}
+        {mine.length ? (
+          <View className="mb-5">
+            <Text className="mb-3 text-[12px] font-medium tracking-[1.2px] text-white/55">Мои</Text>
+            {mine.map((item) => (
+              <View key={item.id} className="mb-3 rounded-[24px] px-4 py-4" style={glassStyle({ variant: "fill", borderRadius: 24 })}>
+                <Text className="text-[12px] font-medium" style={{ color: customLook.accent }}>
+                  Своя
+                </Text>
+                <View className="mt-0.5 flex-row items-center">
+                  <Text className="mr-3 flex-1 text-[18px] font-semibold leading-6 text-white">{item.title}</Text>
+                  <SoftPress
+                    onPress={() => open(item)}
+                    className="h-11 w-11 items-center justify-center rounded-full"
+                    style={{ backgroundColor: customLook.accent, width: 44, height: 44, borderRadius: 999 }}
+                  >
+                    <Play size={18} color={ACCENT_INK} fill={ACCENT_INK} strokeWidth={1.8} />
+                  </SoftPress>
+                </View>
+                <Text className="mt-1 text-[13px] text-white/55">{sessionDetail(item)}</Text>
+                <MoveList session={item} onHint={setHintTitle} />
+                <TextLink label="Убрать" onPress={() => removeCustom(item.id)} />
+              </View>
+            ))}
+          </View>
+        ) : null}
         <View className="mb-5 flex-row flex-wrap gap-2">
-          {WORKOUT_GROUPS.map((group) => {
+          {groups.map((group) => {
             const on = group.id === groupId;
             const chip = lookOfGroup(group.id);
             return (
               <Pressable
                 key={group.id}
-                onPress={() => setGroupId(group.id)}
+                onPress={() => setPicked(group.id)}
                 className="rounded-full px-4"
                 style={{
                   ...glassStyle({
@@ -107,7 +158,7 @@ export default function WorkoutsScreen() {
 
         {list.map((item) => {
           return (
-            <View key={item.id} className="mb-3 rounded-[24px] px-4 py-4" style={glassStyle({ borderRadius: 24 })}>
+            <View key={item.id} className="mb-3 rounded-[24px] px-4 py-4" style={glassStyle({ variant: "fill", borderRadius: 24 })}>
               <Text className="text-[12px] font-medium" style={{ color: look.accent }}>
                 {levelLabel(item.level)}
               </Text>
@@ -118,7 +169,7 @@ export default function WorkoutsScreen() {
                   className="h-11 w-11 items-center justify-center rounded-full"
                   style={{ backgroundColor: look.accent, width: 44, height: 44, borderRadius: 999 }}
                 >
-                  <Play size={18} color="#FFFFFF" fill="#FFFFFF" strokeWidth={1.8} />
+                  <Play size={18} color={ACCENT_INK} fill={ACCENT_INK} strokeWidth={1.8} />
                 </SoftPress>
               </View>
               <Text className="mt-1 text-[13px] text-white/55">{sessionDetail(item)}</Text>
@@ -127,7 +178,7 @@ export default function WorkoutsScreen() {
           );
         })}
         {locked ? (
-          <View className="mb-3 rounded-[24px] px-4 py-4 opacity-70" style={glassStyle({ borderRadius: 24 })}>
+          <View className="mb-3 rounded-[24px] px-4 py-4 opacity-70" style={glassStyle({ variant: "fill", borderRadius: 24 })}>
             <Text className="text-[13px] font-medium text-white/55">{levelLabel(locked.level)}</Text>
             <Text className="mt-1 text-[22px] font-semibold leading-7 text-white">{locked.title}</Text>
             <Text className="mt-2 text-[13px] text-white/55">
@@ -138,6 +189,21 @@ export default function WorkoutsScreen() {
         ) : null}
       </ScrollView>
       <MoveHintModal title={hintTitle} onClose={() => setHintTitle("")} />
+      <SoftPress
+        onPress={() => setComposer(true)}
+        className="items-center justify-center rounded-full"
+        style={{
+          position: "absolute",
+          right: 22,
+          bottom: 18,
+          width: 56,
+          height: 56,
+          borderRadius: 999,
+          backgroundColor: getPalette().accent,
+        }}
+      >
+        <Plus size={26} color="#07140F" strokeWidth={2.2} />
+      </SoftPress>
     </View>
   );
 }

@@ -1,4 +1,4 @@
-import { Award, Bike, Calendar, Dumbbell, Flame, Footprints, Layers, Medal, Moon, RotateCcw, Shield, ShieldCheck, Sparkles, Star, Sun, Sunrise, Sunset, Timer, Trophy, User, Utensils, Zap } from "lucide-react-native";
+import { Award, Bike, Calendar, ClipboardList, Dumbbell, Flame, Footprints, Layers, ListChecks, Medal, MessageCircle, Moon, PenLine, RotateCcw, Salad, Shield, ShieldCheck, Sparkles, Star, Sun, Sunrise, Sunset, Timer, Trophy, User, Users, Utensils, Zap } from "lucide-react-native";
 import data from "../../../data/content/achievements.json";
 
 const ICONS = {
@@ -31,6 +31,18 @@ const ICONS = {
   warmupMorning: Sun,
   warmupEvening: Sunset,
   warmupDay: Sparkles,
+  week3: Calendar,
+  week5: Flame,
+  week7: Trophy,
+  checkin: MessageCircle,
+  checkin7: ClipboardList,
+  weekly: ListChecks,
+  custom: PenLine,
+  customPlay: Sparkles,
+  express: Timer,
+  longDone: Dumbbell,
+  kindMeal: Salad,
+  friend: Users,
 };
 
 const ALL_KINDS = ["strength", "run", "nutrition", "walk", "stretch", "bike"];
@@ -54,6 +66,26 @@ function countedFuelItems(items) {
 
 function utcToday() {
   return new Date().toISOString().slice(0, 10);
+}
+
+function weekStartOf(iso) {
+  const day = new Date(`${String(iso || utcToday())}T00:00:00.000Z`);
+  if (Number.isNaN(day.getTime())) {
+    return utcToday();
+  }
+  const weekday = day.getUTCDay();
+  const back = weekday === 0 ? 6 : weekday - 1;
+  day.setUTCDate(day.getUTCDate() - back);
+  return day.toISOString().slice(0, 10);
+}
+
+function weekActivityCount(user) {
+  const start = weekStartOf(utcToday());
+  const endDate = new Date(`${start}T00:00:00.000Z`);
+  endDate.setUTCDate(endDate.getUTCDate() + 7);
+  const end = endDate.toISOString().slice(0, 10);
+  const dates = Array.isArray(user?.activityDates) ? user.activityDates : [];
+  return dates.filter((day) => day >= start && day < end).length;
 }
 
 export const ACHIEVEMENTS = data;
@@ -81,20 +113,21 @@ export function isHidden(user, item) {
   return Boolean(item?.secret) && !earnedSet(user).has(item.id);
 }
 
-function dayWord(count) {
+function ruNoun(count, one, few, many) {
   const n = Math.abs(Math.round(Number(count) || 0));
   const mod10 = n % 10;
   const mod100 = n % 100;
-  if (mod100 >= 11 && mod100 <= 14) {
-    return "дней";
+  if (mod10 === 1 && mod100 !== 11) {
+    return one;
   }
-  if (mod10 === 1) {
-    return "день";
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+    return few;
   }
-  if (mod10 >= 2 && mod10 <= 4) {
-    return "дня";
-  }
-  return "дней";
+  return many;
+}
+
+function dayWord(count) {
+  return ruNoun(count, "день", "дня", "дней");
 }
 
 export function conditionOf(item) {
@@ -103,16 +136,31 @@ export function conditionOf(item) {
     return `${need} ${dayWord(need)}`;
   }
   if (item?.rule === "activity") {
-    return need === 1 ? "1 тренировка" : `${need} тренировок`;
+    return `${need} ${ruNoun(need, "тренировка", "тренировки", "тренировок")}`;
   }
   if (item?.rule === "fuel") {
-    return need === 1 ? "1 запись" : `${need} записи`;
+    return `${need} ${ruNoun(need, "запись", "записи", "записей")}`;
   }
   if (item?.rule === "dailyCount") {
-    return need === 1 ? "1 задание" : `${need} заданий`;
+    return `${need} ${ruNoun(need, "задание", "задания", "заданий")}`;
   }
   if (item?.rule === "kinds") {
     return `${need} типов`;
+  }
+  if (item?.rule === "weekDays") {
+    return `${need} ${dayWord(need)} на неделе`;
+  }
+  if (item?.rule === "checkins") {
+    return need === 1 ? "1 опрос" : `${need} опросов`;
+  }
+  if (item?.rule === "weeklyReviews") {
+    return "1 обзор";
+  }
+  if (item?.rule === "customMade") {
+    return "1 своя";
+  }
+  if (item?.rule === "friends") {
+    return "1 друг";
   }
   return item?.hint || "";
 }
@@ -174,6 +222,30 @@ export function progressValue(user, item) {
     const needIds = Array.isArray(item.sessionIds) ? item.sessionIds : [];
     const today = Array.isArray(user?.todaySessions) ? user.todaySessions : [];
     return needIds.length > 0 && needIds.every((id) => today.includes(id)) ? 1 : 0;
+  }
+  if (item.rule === "weekDays") {
+    return weekActivityCount(user);
+  }
+  if (item.rule === "checkins") {
+    return Array.isArray(user?.checkins) ? user.checkins.length : 0;
+  }
+  if (item.rule === "weeklyReviews") {
+    return Array.isArray(user?.weeklyReviews) ? user.weeklyReviews.length : 0;
+  }
+  if (item.rule === "customMade") {
+    return Array.isArray(user?.customSessions) ? user.customSessions.length : 0;
+  }
+  if (item.rule === "customPlay") {
+    return user?.customPlay ? 1 : 0;
+  }
+  if (item.rule === "shortDone") {
+    return user?.shortDone ? 1 : 0;
+  }
+  if (item.rule === "longDone") {
+    return user?.longDone ? 1 : 0;
+  }
+  if (item.rule === "friends") {
+    return Number(user?.friendCount) || 0;
   }
   return 0;
 }

@@ -6,6 +6,7 @@ import { PillButton, PrimaryButton, ScreenHeader, SectionLabel } from "../../ui/
 import { SoftPress } from "../../ui/SoftPress";
 import { glassStyle } from "../../ui/Glass";
 import { getPalette } from "../../ui/theme";
+import { FadeEdge } from "../../ui/layout";
 import { ProfileChip } from "../avatar/ProfileChip";
 import { useAuth } from "../auth/AuthContext";
 import { BarcodeScan } from "./BarcodeScan";
@@ -22,6 +23,8 @@ import {
   sumLog,
   utcDay,
 } from "./foods";
+import { FoodSkipCard } from "./FoodSkipCard";
+import { MealPlanCard } from "./MealPlanCard";
 import { dailyKcalTarget, targetHint } from "./target";
 
 function DayTotals({ totals, target, fill, guessedSex }) {
@@ -231,6 +234,11 @@ export default function CaloriesScreen() {
         <ScreenHeader glass title="Калории" subtitle={targetHint(target)} right={<ProfileChip />} />
 
         <DayTotals totals={totals} target={target} fill={fill} guessedSex={target.guessedSex} />
+        {user?.quizDone && !user.quiz?.foodSkipSet ? (
+          <FoodSkipCard user={user} />
+        ) : (
+          <MealPlanCard user={user} busy={busy} onAddItem={(item) => saveItems([...items, item])} />
+        )}
 
         <View className="mt-10">
           <SectionLabel glass>Дневник</SectionLabel>
@@ -256,26 +264,28 @@ export default function CaloriesScreen() {
               <ScanLine size={22} color="#07140F" strokeWidth={2.2} />
             </SoftPress>
           </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            className="mt-3"
-            contentContainerStyle={{ gap: 8, paddingRight: 8 }}
-          >
-            <PillButton
-              label="Все"
-              tone={category === "all" ? "glassOn" : "glass"}
-              onPress={() => setCategory("all")}
-            />
-            {FOOD_CATEGORIES.map((item) => (
+          <View className="relative mt-3 overflow-hidden">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 8, paddingRight: 28 }}
+            >
               <PillButton
-                key={item.id}
-                label={item.title}
-                tone={category === item.id ? "glassOn" : "glass"}
-                onPress={() => setCategory(item.id)}
+                label="Все"
+                tone={category === "all" ? "glassOn" : "glass"}
+                onPress={() => setCategory("all")}
               />
-            ))}
-          </ScrollView>
+              {FOOD_CATEGORIES.map((item) => (
+                <PillButton
+                  key={item.id}
+                  label={item.title}
+                  tone={category === item.id ? "glassOn" : "glass"}
+                  onPress={() => setCategory(item.id)}
+                />
+              ))}
+            </ScrollView>
+            <FadeEdge />
+          </View>
 
           {picked && portion ? (
             <View ref={portionRef} className="mt-4 rounded-[24px] px-5 py-6" style={glassStyle({ borderRadius: 24, backgroundColor: "rgba(125,255,179,0.1)" })}>
@@ -367,11 +377,6 @@ export default function CaloriesScreen() {
               );
             })
           )}
-          {items.length ? (
-            <View className="mt-2">
-              <DayTotals totals={totals} target={target} fill={fill} guessedSex={false} />
-            </View>
-          ) : null}
         </View>
 
         {error ? <Text className="mt-4 text-[13px] text-accent">{error}</Text> : null}

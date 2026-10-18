@@ -18,7 +18,7 @@ const {
   searchPeople,
   unreadNudges,
 } = require("./friends");
-const { mailConfigured, sendCodeEmail } = require("./mail");
+const { sendCodeEmail } = require("./mail");
 const { settleStreak, shieldNoticeOpen, utcDay } = require("./streak");
 
 loadEnv();
@@ -103,6 +103,22 @@ function userPath(id) {
 const ALLOWED_GOALS = ["strength", "run", "nutrition", "walk", "stretch", "bike"];
 const ALLOWED_SEX = ["male", "female"];
 const ALLOWED_EXPERIENCE = ["none", "m1_3", "m3_6", "m6_12", "y1"];
+const ALLOWED_PLACE = ["home", "homeGear", "gym", "anywhere"];
+const ALLOWED_TIME = ["30", "60", "90", "120"];
+const ALLOWED_PAIN = ["knees", "back", "lumbar", "shoulders", "wrists", "neck"];
+const ALLOWED_DIET = ["all", "noMeat", "noFish", "noDairy", "noGluten", "noNuts"];
+const ALLOWED_MEALS = ["2", "3", "4", "5", "varies"];
+const ALLOWED_FOCUS = ["habit", "loss", "strength", "energy", "posture"];
+const ALLOWED_ENERGY = ["low", "ok", "high"];
+const ALLOWED_SLEEP = ["bad", "ok", "good"];
+const ALLOWED_DAY_TIME = ["30", "60", "90", "120"];
+const ALLOWED_FEEL = ["easy", "ok", "hard", "veryHard"];
+const ALLOWED_WEEK_MOOD = ["great", "ok", "hard"];
+const ALLOWED_BLOCKER = ["time", "tired", "forgot", "bored", "pain", "none"];
+const ALLOWED_FAVORITE = ["strength", "cardio", "stretch", "short", "circuit"];
+const ALLOWED_PACE = ["slower", "same", "harder"];
+const CHECKINS_MAX = 90;
+const WEEKLY_MAX = 26;
 
 function ageFromBirthDate(iso) {
   const birth = new Date(`${iso}T00:00:00`);
@@ -122,13 +138,43 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
+const SLOT_WEEKDAYS = {
+  1: [0],
+  2: [0, 3],
+  3: [0, 2, 4],
+  4: [0, 1, 3, 5],
+  5: [0, 1, 2, 3, 4],
+  6: [0, 1, 2, 3, 4, 5],
+  7: [0, 1, 2, 3, 4, 5, 6],
+};
+
+function parseTrainDays(raw) {
+  return [...new Set((Array.isArray(raw) ? raw : []).map((item) => Math.round(Number(item))))]
+    .filter((day) => Number.isInteger(day) && day >= 0 && day <= 6)
+    .sort((a, b) => a - b);
+}
+
+function defaultTrainDays(count) {
+  const days = Math.max(1, Math.min(7, Math.round(Number(count) || 3)));
+  return SLOT_WEEKDAYS[days] || SLOT_WEEKDAYS[3];
+}
+
+function applyTrainDays(record, raw, fallbackCount) {
+  const parsed = parseTrainDays(raw);
+  const next = parsed.length ? parsed : defaultTrainDays(fallbackCount || record.daysPerWeek || 3);
+  record.trainDays = next;
+  record.daysPerWeek = next.length;
+  return next;
+}
+
 function applyQuizFields(record, body, { keepStart }) {
   const current = Number(body.weight);
   const goal = Number(body.goal);
   const heightCm = Math.round(Number(body.heightCm));
   const birthDate = String(body.birthDate || "");
   const age = ageFromBirthDate(birthDate);
-  const daysPerWeek = Math.round(Number(body.daysPerWeek));
+  const pickedDays = parseTrainDays(body.trainDays);
+  const daysPerWeek = pickedDays.length || Math.round(Number(body.daysPerWeek));
   const goals = Array.isArray(body.goals)
     ? [...new Set(body.goals.filter((item) => ALLOWED_GOALS.includes(item)))]
     : [];
@@ -172,13 +218,257 @@ function applyQuizFields(record, body, { keepStart }) {
   record.birthDate = birthDate;
   record.age = age;
   record.goals = goals;
-  record.daysPerWeek = daysPerWeek;
+  applyTrainDays(record, pickedDays.length ? pickedDays : body.trainDays, daysPerWeek);
   record.experience = experience;
   record.weight = {
     start: clamp(start, 40, 160),
     current: clamp(current, 40, 160),
     goal: clamp(goal, 40, 160),
   };
+  if (body.quiz) {
+    applyQuizExtra(record, body);
+  }
+  return null;
+}
+
+function pickAllowed(list, value, fallback) {
+  return list.includes(value) ? value : fallback;
+}
+
+function coerceTime(value, fallback) {
+  const raw = String(value || "");
+  if (ALLOWED_TIME.includes(raw)) {
+    return raw;
+  }
+  if (raw === "3" || raw === "10" || raw === "20") {
+    return "30";
+  }
+  return fallback;
+}
+
+function uniqueAllowed(list, values) {
+  return [...new Set((Array.isArray(values) ? values : []).filter((item) => list.includes(item)))];
+}
+
+function sanitizeQuiz(raw) {
+  const source = raw && typeof raw === "object" ? raw : {};
+  let diet = uniqueAllowed(ALLOWED_DIET, source.diet);
+  if (diet.includes("all") && diet.length > 1) {
+    diet = diet.filter((item) => item !== "all");
+  }
+  if (!diet.length) {
+    diet = ["all"];
+  }
+  const foodSkipRaw = Array.isArray(source.foodSkip) ? source.foodSkip : String(source.foodSkip || "").split(/[,;\n]+/);
+  const foodSkipSeen = new Set();
+  const foodSkip = [];
+  for (const item of foodSkipRaw) {
+    const label = String(item || "").replace(/\s+/g, " ").trim().slice(0, 32);
+    const key = label.toLowerCase().replace(/ё/g, "е");
+    if (!label || foodSkipSeen.has(key)) {
+      continue;
+    }
+    foodSkipSeen.add(key);
+    foodSkip.push(label);
+    if (foodSkip.length >= 12) {
+      break;
+    }
+  }
+  return {
+    place: pickAllowed(ALLOWED_PLACE, String(source.place || ""), "anywhere"),
+    timeBudget: coerceTime(source.timeBudget, "60"),
+    restrictions: uniqueAllowed(ALLOWED_PAIN, source.restrictions),
+    diet,
+    meals: pickAllowed(ALLOWED_MEALS, String(source.meals || ""), "3"),
+    focus: pickAllowed(ALLOWED_FOCUS, String(source.focus || ""), "habit"),
+    foodSkip,
+    foodSkipSet: source.foodSkipSet === false ? false : Boolean(source.foodSkipSet) || foodSkip.length > 0,
+  };
+}
+
+function applyQuizExtra(record, body) {
+  record.quiz = sanitizeQuiz(body.quiz || body);
+  record.quizDone = true;
+  return null;
+}
+
+function applyCheckin(record, body) {
+  const raw = body.checkin;
+  if (!raw || typeof raw !== "object") {
+    return "Непонятный чек-ин";
+  }
+  const date = utcDay();
+  const energy = pickAllowed(ALLOWED_ENERGY, String(raw.energy || ""), "");
+  const sleep = pickAllowed(ALLOWED_SLEEP, String(raw.sleep || ""), "");
+  const time = coerceTime(raw.time, coerceTime(record.quiz?.timeBudget, "60"));
+  if (!energy || !sleep || !time) {
+    return "Ответь: силы, сон и время";
+  }
+  let pain = uniqueAllowed(ALLOWED_PAIN, raw.pain);
+  if (Array.isArray(raw.pain) && raw.pain.includes("none")) {
+    pain = [];
+  }
+  const list = Array.isArray(record.checkins) ? record.checkins.filter((item) => item.date !== date) : [];
+  const prev = (Array.isArray(record.checkins) ? record.checkins : []).find((item) => item.date === date);
+  list.push({
+    date,
+    energy,
+    sleep,
+    pain,
+    time,
+    feel: prev && ALLOWED_FEEL.includes(prev.feel) ? prev.feel : null,
+  });
+  record.checkins = list.slice(-CHECKINS_MAX);
+  return null;
+}
+
+function applyCheckinFeel(record, feel) {
+  const next = String(feel || "");
+  if (!ALLOWED_FEEL.includes(next)) {
+    return "Как зашло — один из четырёх ответов";
+  }
+  const date = utcDay();
+  const list = Array.isArray(record.checkins) ? [...record.checkins] : [];
+  const index = list.findIndex((item) => item.date === date);
+  if (index >= 0) {
+    list[index] = { ...list[index], feel: next };
+  } else {
+    list.push({
+      date,
+      energy: "ok",
+      sleep: "ok",
+      pain: [],
+      time: coerceTime(record.quiz?.timeBudget, "60"),
+      feel: next,
+    });
+  }
+  record.checkins = list.slice(-CHECKINS_MAX);
+  return null;
+}
+
+function weekStartUtc(iso) {
+  const day = new Date(`${iso}T00:00:00.000Z`);
+  if (Number.isNaN(day.getTime())) {
+    return utcDay();
+  }
+  const weekday = day.getUTCDay();
+  const back = weekday === 0 ? 6 : weekday - 1;
+  day.setUTCDate(day.getUTCDate() - back);
+  return day.toISOString().slice(0, 10);
+}
+
+function weekActivityCount(record) {
+  ensureActivityDates(record);
+  const start = weekStartUtc(utcDay());
+  const endDate = new Date(`${start}T00:00:00.000Z`);
+  endDate.setUTCDate(endDate.getUTCDate() + 7);
+  const end = endDate.toISOString().slice(0, 10);
+  const dates = Array.isArray(record.activityDates) ? record.activityDates : [];
+  return dates.filter((day) => day >= start && day < end).length;
+}
+
+function friendCountOf(record) {
+  if (!Array.isArray(record?.friends)) {
+    return 0;
+  }
+  return [...new Set(record.friends.filter((id) => typeof id === "string" && id))].length;
+}
+
+function stampSessionFlags(record, session) {
+  if (!session) {
+    return;
+  }
+  if (session.custom) {
+    record.customPlay = true;
+  }
+  if (session.group === "short") {
+    record.shortDone = true;
+  }
+  if (!session.daily && !session.warmup && session.group !== "short" && session.group !== "meal" && !session.custom) {
+    record.longDone = true;
+  }
+}
+
+function backfillSessionFlags(record) {
+  if (record.shortDone && record.longDone && record.customPlay) {
+    return;
+  }
+  const done = Array.isArray(record.sessionsDone) ? record.sessionsDone : [];
+  if (!done.length) {
+    return;
+  }
+  if (done.some((id) => String(id).startsWith("short-"))) {
+    record.shortDone = true;
+  }
+  if (done.some((id) => String(id).startsWith("custom-"))) {
+    record.customPlay = true;
+  }
+  if (record.longDone) {
+    return;
+  }
+  const catalog = loadWorkoutsFile();
+  const sessions = Array.isArray(catalog.sessions) ? catalog.sessions : [];
+  const known = new Set(done);
+  for (const session of sessions) {
+    if (!session || !known.has(session.id)) {
+      continue;
+    }
+    if (session.daily || session.warmup || session.group === "short" || session.group === "meal") {
+      continue;
+    }
+    record.longDone = true;
+    break;
+  }
+}
+
+function applyWeeklyReview(record, body) {
+  const raw = body.weeklyReview;
+  if (!raw || typeof raw !== "object") {
+    return "Непонятный обзор недели";
+  }
+  const mood = pickAllowed(ALLOWED_WEEK_MOOD, String(raw.mood || ""), "");
+  const favorite = pickAllowed(ALLOWED_FAVORITE, String(raw.favorite || ""), "");
+  const pace = pickAllowed(ALLOWED_PACE, String(raw.pace || ""), "same");
+  if (!mood || !favorite) {
+    return "Настроение и любимый тип";
+  }
+  let blockers = uniqueAllowed(ALLOWED_BLOCKER, raw.blockers);
+  if (blockers.includes("none")) {
+    blockers = [];
+  }
+  const nextDays = Math.round(Number(raw.nextDays));
+  if (!Number.isFinite(nextDays) || nextDays < 1 || nextDays > 7) {
+    return "Дней на следующей неделе — от 1 до 7";
+  }
+  const start = weekStartUtc(String(raw.weekStart || utcDay()));
+  const weightKg = Number(raw.weightKg);
+  const weight =
+    !raw.skippedWeight && Number.isFinite(weightKg) && weightKg >= 40 && weightKg <= 160
+      ? clamp(weightKg, 40, 160)
+      : null;
+  const list = Array.isArray(record.weeklyReviews) ? record.weeklyReviews.filter((item) => item.weekStart !== start) : [];
+  list.push({
+    weekStart: start,
+    mood,
+    blockers,
+    favorite,
+    nextDays,
+    pace,
+    weightKg: weight,
+    skippedWeight: Boolean(raw.skippedWeight) || weight == null,
+  });
+  record.weeklyReviews = list.slice(-WEEKLY_MAX);
+  if (Array.isArray(raw.trainDays) && parseTrainDays(raw.trainDays).length) {
+    applyTrainDays(record, raw.trainDays, nextDays);
+  } else {
+    record.daysPerWeek = nextDays;
+    if (!parseTrainDays(record.trainDays).length) {
+      applyTrainDays(record, [], nextDays);
+    }
+  }
+  if (weight != null && record.weight) {
+    record.weight = { ...record.weight, current: weight };
+  }
   return null;
 }
 
@@ -266,11 +556,74 @@ function dayGap(from, to) {
 }
 
 const ACTIVITY_KINDS = ["strength", "run", "nutrition", "walk", "stretch", "bike"];
-const MIN_ACTIVITY_SEC = 60;
 const FUEL_GAP_MS = 20000;
+
+function clampBlockSec(value, fallback = 30) {
+  const n = Math.round(Number(value));
+  if (!Number.isFinite(n)) {
+    return fallback;
+  }
+  return Math.max(10, Math.min(90, n));
+}
+
+function workSecondsOf(session) {
+  const moves = Array.isArray(session?.moves) ? session.moves : [];
+  if (session?.custom) {
+    return moves.reduce((sum, move) => {
+      const sets = Math.max(1, Math.min(6, Math.round(Number(move.sets) || 1)));
+      return sum + sets * clampBlockSec(move.sec, 30);
+    }, 0);
+  }
+  const rounds = Math.max(1, Math.min(8, Math.round(Number(session?.rounds) || 1)));
+  const one = moves.reduce((sum, move) => sum + clampBlockSec(move.sec, 30), 0);
+  return rounds * one;
+}
+
+function minActivitySecOf(session) {
+  if (!session) {
+    return 60;
+  }
+  return Math.max(1, Math.round(workSecondsOf(session) / 2));
+}
+
+function findActivitySession(record, sessionId, workouts) {
+  const id = String(sessionId || "").trim();
+  if (!id) {
+    return null;
+  }
+  const catalog = (Array.isArray(workouts?.sessions) ? workouts.sessions : []).find((item) => item && item.id === id);
+  if (catalog) {
+    return catalog;
+  }
+  const mine = Array.isArray(record?.customSessions) ? record.customSessions : [];
+  return mine.find((item) => item && item.id === id) || null;
+}
+const ACTIVITY_DATES_MAX = 400;
+const DAY_ISO = /^\d{4}-\d{2}-\d{2}$/;
+
+function ensureActivityDates(record) {
+  if (Array.isArray(record.activityDates)) {
+    return false;
+  }
+  record.activityDates = record.lastActivityDate && DAY_ISO.test(record.lastActivityDate) ? [record.lastActivityDate] : [];
+  return true;
+}
+
+function stampActivityDate(record, day) {
+  ensureActivityDates(record);
+  const date = DAY_ISO.test(day) ? day : utcDay();
+  if (record.lastActivityDate && DAY_ISO.test(record.lastActivityDate) && !record.activityDates.includes(record.lastActivityDate)) {
+    record.activityDates.push(record.lastActivityDate);
+  }
+  if (!record.activityDates.includes(date)) {
+    record.activityDates.push(date);
+  }
+  record.activityDates = record.activityDates.filter((item) => DAY_ISO.test(item)).sort().slice(-ACTIVITY_DATES_MAX);
+}
 
 function applyActivity(record) {
   const today = utcDay();
+  stampActivityDate(record, today);
   if (record.lastActivityDate === today) {
     return false;
   }
@@ -524,6 +877,30 @@ function achievementMet(record, item) {
     const today = Array.isArray(record.todaySessions) ? record.todaySessions : [];
     return needIds.length > 0 && needIds.every((id) => today.includes(id));
   }
+  if (item.rule === "weekDays") {
+    return weekActivityCount(record) >= need;
+  }
+  if (item.rule === "checkins") {
+    return (Array.isArray(record.checkins) ? record.checkins.length : 0) >= need;
+  }
+  if (item.rule === "weeklyReviews") {
+    return (Array.isArray(record.weeklyReviews) ? record.weeklyReviews.length : 0) >= need;
+  }
+  if (item.rule === "customMade") {
+    return (Array.isArray(record.customSessions) ? record.customSessions.length : 0) >= need;
+  }
+  if (item.rule === "customPlay") {
+    return Boolean(record.customPlay);
+  }
+  if (item.rule === "shortDone") {
+    return Boolean(record.shortDone);
+  }
+  if (item.rule === "longDone") {
+    return Boolean(record.longDone);
+  }
+  if (item.rule === "friends") {
+    return friendCountOf(record) >= need;
+  }
   return false;
 }
 
@@ -560,6 +937,7 @@ function ensureAchievements(record) {
   if (scoreDaily(record)) {
     seeded = true;
   }
+  backfillSessionFlags(record);
   const catalog = loadAchievements().filter((item) => item && item.id);
   const known = new Set(catalog.map((item) => item.id));
   const prev = Array.isArray(record.achievements) ? record.achievements.filter((id) => known.has(id)) : [];
@@ -640,6 +1018,103 @@ function sanitizeFuelLog(incoming, previous) {
   return { date: today, items };
 }
 
+const CUSTOM_MAX = 12;
+const CUSTOM_MOVES_MAX = 8;
+const CUSTOM_HOLD = new Set([
+  "Планка",
+  "Планка на коленях",
+  "Планка на прямых руках",
+  "Боковая планка слева",
+  "Боковая планка справа",
+  "Стена-стул",
+  "Поза ребёнка",
+  "Растяжка груди у стены",
+  "Наклон к ногам сидя",
+  "Наклон к ногам стоя",
+  "Растяжка сгибателей бедра",
+  "Скрутка лёжа",
+  "Поза голубя упрощённая",
+  "Дыхание лёжа",
+]);
+
+function customMoveSec(title, reps) {
+  const count = Math.max(1, Math.min(40, Math.round(Number(reps) || 10)));
+  if (CUSTOM_HOLD.has(title)) {
+    return Math.max(10, Math.min(90, count));
+  }
+  return Math.max(10, Math.min(90, count * 3));
+}
+
+function sanitizeCustomSession(raw) {
+  const title = String(raw?.title || "")
+    .trim()
+    .slice(0, 32);
+  if (title.length < 2) {
+    return null;
+  }
+  const incoming = Array.isArray(raw?.moves) ? raw.moves : [];
+  const moves = [];
+  for (const item of incoming.slice(0, CUSTOM_MOVES_MAX)) {
+    const moveTitle = String(item?.title || "")
+      .trim()
+      .slice(0, 40);
+    if (moveTitle.length < 2) {
+      continue;
+    }
+    const reps = Math.max(1, Math.min(40, Math.round(Number(item.reps) || 10)));
+    const sets = Math.max(1, Math.min(6, Math.round(Number(item.sets) || 3)));
+    moves.push({
+      title: moveTitle,
+      reps,
+      sets,
+      sec: customMoveSec(moveTitle, reps),
+    });
+  }
+  if (!moves.length) {
+    return null;
+  }
+  const given = String(raw?.id || "").trim();
+  const id = /^custom-[a-z0-9]{6,24}$/i.test(given) ? given : `custom-${crypto.randomBytes(6).toString("hex")}`;
+  return {
+    id,
+    custom: true,
+    group: "custom",
+    kind: "strength",
+    title,
+    restSec: 15,
+    roundRestSec: 40,
+    moves,
+  };
+}
+
+function ensureCustomSessions(record) {
+  if (!Array.isArray(record.customSessions)) {
+    record.customSessions = [];
+  }
+}
+
+function applyCustomSessions(record, body) {
+  ensureCustomSessions(record);
+  if (body.deleteCustom) {
+    const id = String(body.deleteCustom).trim();
+    record.customSessions = record.customSessions.filter((item) => item && item.id !== id);
+    return "";
+  }
+  if (!body.saveCustom) {
+    return "";
+  }
+  const next = sanitizeCustomSession(body.saveCustom);
+  if (!next) {
+    return "Добавь имя и хотя бы одно упражнение";
+  }
+  const exists = record.customSessions.some((item) => item && item.id === next.id);
+  if (!exists && record.customSessions.length >= CUSTOM_MAX) {
+    return "Слишком много своих тренировок";
+  }
+  record.customSessions = [...record.customSessions.filter((item) => item && item.id !== next.id), next];
+  return "";
+}
+
 function publicUser(record) {
   ensureDayLogs(record);
   ensureFreezes(record);
@@ -653,6 +1128,7 @@ function publicUser(record) {
     streak: record.streak || 0,
     freezesLeft: record.freezesLeft,
     lastActivityDate: record.lastActivityDate || null,
+    activityDates: Array.isArray(record.activityDates) ? record.activityDates : record.lastActivityDate ? [record.lastActivityDate] : [],
     activityCount: record.activityCount || 0,
     cleanStreak: record.cleanStreak || 0,
     returned: Boolean(record.returned),
@@ -678,6 +1154,7 @@ function publicUser(record) {
     sex: ALLOWED_SEX.includes(record.sex) ? record.sex : null,
     goals: Array.isArray(record.goals) ? record.goals : [],
     daysPerWeek: record.daysPerWeek || null,
+    trainDays: parseTrainDays(record.trainDays),
     experience: ALLOWED_EXPERIENCE.includes(record.experience) ? record.experience : null,
     programLevel: openProgramLevel(record, loadWorkoutsFile().experienceRank),
     levelProgress: Math.max(0, Math.round(Number(record.levelProgress) || 0)),
@@ -686,6 +1163,15 @@ function publicUser(record) {
     emailVerified: record.emailVerified !== false,
     ...publicAvatar(record),
     incomingNudges: unreadNudges(record, usersById(listUsers())),
+    customSessions: Array.isArray(record.customSessions) ? record.customSessions : [],
+    quizDone: Boolean(record.quizDone),
+    quiz: record.quiz || null,
+    checkins: Array.isArray(record.checkins) ? record.checkins : [],
+    weeklyReviews: Array.isArray(record.weeklyReviews) ? record.weeklyReviews : [],
+    friendCount: friendCountOf(record),
+    customPlay: Boolean(record.customPlay),
+    shortDone: Boolean(record.shortDone),
+    longDone: Boolean(record.longDone),
     createdAt: record.createdAt,
   };
 }
@@ -817,14 +1303,20 @@ const server = http.createServer(async (req, res) => {
         activityCount: 0,
         achievements: [],
         lastActivityDate: null,
+        activityDates: [],
         freezesLeft: START_FREEZES,
         onboardingDone: false,
+        quizDone: false,
+        quiz: null,
+        checkins: [],
+        weeklyReviews: [],
         sex: null,
         heightCm: null,
         birthDate: null,
         age: null,
         goals: [],
         daysPerWeek: null,
+        trainDays: [],
         experience: null,
         weight: {
           start: 70,
@@ -839,6 +1331,7 @@ const server = http.createServer(async (req, res) => {
         avatarPhoto: "",
         friends: [],
         nudges: [],
+        customSessions: [],
         createdAt: now,
         updatedAt: now,
       };
@@ -850,7 +1343,7 @@ const server = http.createServer(async (req, res) => {
         token,
         user: publicUser(record),
         mailed: mailed.sent,
-        ...(mailed.sent || mailConfigured() ? {} : { code }),
+        ...(mailed.sent ? {} : { code }),
       });
       return;
     }
@@ -897,10 +1390,6 @@ const server = http.createServer(async (req, res) => {
       record.updatedAt = new Date().toISOString();
       saveUser(record);
       const mailed = await sendCodeEmail({ to: email, code, kind: "reset" });
-      if (mailConfigured() && !mailed.sent) {
-        send(res, 502, { error: "Письмо не ушло" });
-        return;
-      }
       send(res, 200, {
         ok: true,
         mailed: mailed.sent,
@@ -959,14 +1448,11 @@ const server = http.createServer(async (req, res) => {
       record.updatedAt = new Date().toISOString();
       saveUser(record);
       const mailed = await sendCodeEmail({ to: record.email, code, kind: "verify" });
-      if (!mailed.sent) {
-        send(res, 502, {
-          error: "Письмо не ушло",
-          ...(mailConfigured() ? {} : { code }),
-        });
-        return;
-      }
-      send(res, 200, { ok: true, mailed: true });
+      send(res, 200, {
+        ok: true,
+        mailed: mailed.sent,
+        ...(mailed.sent ? {} : { code }),
+      });
       return;
     }
 
@@ -1035,7 +1521,8 @@ const server = http.createServer(async (req, res) => {
         ensureAchievements(record) ||
         ensureStatus(record) ||
         ensureFriends(record) ||
-        ensureNudges(record)
+        ensureNudges(record) ||
+        ensureActivityDates(record)
       ) {
         record.updatedAt = new Date().toISOString();
         saveUser(record);
@@ -1096,10 +1583,48 @@ const server = http.createServer(async (req, res) => {
         }
       }
 
+      if (body.saveQuiz === true) {
+        applyQuizExtra(record, body);
+      }
+
+      if (Object.prototype.hasOwnProperty.call(body, "trainDays")) {
+        applyTrainDays(record, body.trainDays, body.daysPerWeek || record.daysPerWeek);
+      }
+
+      if (body.checkin) {
+        const error = applyCheckin(record, body);
+        if (error) {
+          send(res, 400, { error });
+          return;
+        }
+      }
+
+      if (body.checkinFeel) {
+        const error = applyCheckinFeel(record, body.checkinFeel);
+        if (error) {
+          send(res, 400, { error });
+          return;
+        }
+      }
+
+      if (body.weeklyReview) {
+        const error = applyWeeklyReview(record, body);
+        if (error) {
+          send(res, 400, { error });
+          return;
+        }
+      }
+
       if (Object.prototype.hasOwnProperty.call(body, "fuelLog")) {
         record.fuelLog = sanitizeFuelLog(body.fuelLog, record.fuelLog);
       } else {
         ensureFuelLog(record);
+      }
+
+      const customError = applyCustomSessions(record, body);
+      if (customError) {
+        send(res, 400, { error: customError });
+        return;
       }
 
       delete record.stepLog;
@@ -1113,16 +1638,19 @@ const server = http.createServer(async (req, res) => {
       if (body.nudgeSeen === true) {
         markNudgesSeen(record);
       }
-      if (body.activityDone === true && Number(body.elapsedSec) >= MIN_ACTIVITY_SEC) {
-        applyActivity(record);
-        rememberActivity(record, body);
+      if (body.activityDone === true) {
         const workouts = loadWorkoutsFile();
         const sessionId = String(body.activitySession || "").trim();
-        const session = (Array.isArray(workouts.sessions) ? workouts.sessions : []).find((item) => item && item.id === sessionId);
-        noteProgramProgress(record, session, {
-          unlockEvery: workouts.unlockEvery,
-          experienceRank: workouts.experienceRank,
-        });
+        const session = findActivitySession(record, sessionId, workouts);
+        if (Number(body.elapsedSec) >= minActivitySecOf(session)) {
+          applyActivity(record);
+          rememberActivity(record, body);
+          stampSessionFlags(record, session);
+          noteProgramProgress(record, session, {
+            unlockEvery: workouts.unlockEvery,
+            experienceRank: workouts.experienceRank,
+          });
+        }
       }
       ensureAchievements(record);
 
@@ -1190,6 +1718,7 @@ const server = http.createServer(async (req, res) => {
         send(res, 400, { error });
         return;
       }
+      ensureAchievements(record);
       record.updatedAt = new Date().toISOString();
       saveUser(record);
       const listed = listFriendCards(record, usersById(listUsers()));

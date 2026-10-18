@@ -44,6 +44,7 @@ export default function AuthScreen() {
         setAwaitingCode(true);
         if (data.code) {
           setCode(data.code);
+          setError(data.mailed ? "" : "Письмо не дошло. Код подставили в поле.");
         }
         return;
       }
@@ -116,7 +117,9 @@ export default function AuthScreen() {
             editable={!awaitingCode}
           />
           {mode === "reset" && awaitingCode ? (
-            <Text className="mb-4 text-[13px] text-white/45">Если почта есть — код в письме, 15 минут</Text>
+            <Text className="mb-4 text-[13px] text-white/45">
+              {code ? "Код на 15 минут. Если письма нет — он уже в поле." : "Если почта есть — код в письме, 15 минут"}
+            </Text>
           ) : null}
           {mode === "reset" && awaitingCode ? (
             <Field

@@ -17,10 +17,11 @@ export const GLASS_BG = "#07140F";
 const LENS_ID = "lg-lens-clear";
 
 function roundedSdf(nx, ny) {
-  const radius = 0.2;
-  const half = 0.5 - radius;
-  const qx = Math.abs(nx - 0.5) - half;
-  const qy = Math.abs(ny - 0.5) - half;
+  const radius = 0.06;
+  const px = nx - 0.5;
+  const py = ny - 0.5;
+  const qx = Math.abs(px) - 0.5 + radius;
+  const qy = Math.abs(py) - 0.5 + radius;
   const outside = Math.hypot(Math.max(qx, 0), Math.max(qy, 0));
   const inside = Math.min(Math.max(qx, qy), 0);
   return outside + inside - radius;
@@ -33,7 +34,7 @@ function rimMapUrl() {
   canvas.height = size;
   const context = canvas.getContext("2d", { willReadFrequently: true });
   const image = context.createImageData(size, size);
-  const band = 0.24;
+  const band = 0.055;
   const sample = (px, py) => roundedSdf(px, py);
   for (let y = 0; y < size; y += 1) {
     for (let x = 0; x < size; x += 1) {
@@ -43,12 +44,12 @@ function rimMapUrl() {
       let dx = 128;
       let dy = 128;
       if (dist < 0 && dist > -band) {
-        const eps = 0.006;
+        const eps = 0.004;
         const gx = sample(nx + eps, ny) - sample(nx - eps, ny);
         const gy = sample(nx, ny + eps) - sample(nx, ny - eps);
         const len = Math.hypot(gx, gy) || 1;
         const edge = 1 - -dist / band;
-        const push = edge * 127;
+        const push = edge * 96;
         dx = Math.max(0, Math.min(255, 128 + (gx / len) * push));
         dy = Math.max(0, Math.min(255, 128 + (gy / len) * push));
       }
@@ -80,11 +81,11 @@ function ensureLens() {
   svg.setAttribute("id", "lg-lens-svg");
   svg.setAttribute("aria-hidden", "true");
   svg.style.cssText = "position:absolute;width:0;height:0;overflow:hidden";
-  svg.innerHTML = `<filter id="${LENS_ID}" filterUnits="objectBoundingBox" primitiveUnits="objectBoundingBox" x="-0.12" y="-0.12" width="1.24" height="1.24" color-interpolation-filters="sRGB">
+  svg.innerHTML = `<filter id="${LENS_ID}" filterUnits="objectBoundingBox" primitiveUnits="objectBoundingBox" x="-0.04" y="-0.04" width="1.08" height="1.08" color-interpolation-filters="sRGB">
     <feImage href="${href}" result="map" x="0" y="0" width="1" height="1" preserveAspectRatio="none"/>
-    <feDisplacementMap in="SourceGraphic" in2="map" scale="-0.55" xChannelSelector="R" yChannelSelector="G" result="bent"/>
-    <feDisplacementMap in="SourceGraphic" in2="map" scale="-0.46" xChannelSelector="R" yChannelSelector="G" result="bendR"/>
-    <feDisplacementMap in="SourceGraphic" in2="map" scale="-0.64" xChannelSelector="R" yChannelSelector="G" result="bendB"/>
+    <feDisplacementMap in="SourceGraphic" in2="map" scale="-0.06" xChannelSelector="R" yChannelSelector="G" result="bent"/>
+    <feDisplacementMap in="SourceGraphic" in2="map" scale="-0.045" xChannelSelector="R" yChannelSelector="G" result="bendR"/>
+    <feDisplacementMap in="SourceGraphic" in2="map" scale="-0.075" xChannelSelector="R" yChannelSelector="G" result="bendB"/>
     <feColorMatrix in="bendR" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="red"/>
     <feColorMatrix in="bent" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="green"/>
     <feColorMatrix in="bendB" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="blue"/>
@@ -150,8 +151,11 @@ export function glassStyle(extra) {
   const variant = input.variant === "fill" ? "fill" : "material";
   const rest = { ...input };
   delete rest.variant;
+  const skipLens = rest.lens === false;
+  delete rest.lens;
   const radius = Number(rest.borderRadius);
   const thick = variant === "material" && (Number.isFinite(radius) ? radius >= 24 : true);
+  const pill = Number.isFinite(radius) && radius >= 80;
 
   const tone = getPalette();
 
@@ -167,20 +171,22 @@ export function glassStyle(extra) {
   const frost = usesFrost();
   const filter = frost
     ? "blur(22px) saturate(1.85) brightness(1.08)"
-    : "blur(4px) saturate(1.25) brightness(1.03)";
-  const lens = lensEnabled() ? `url(#${LENS_ID}) ${filter}` : filter;
+    : "blur(12px) saturate(1.35) brightness(1.04)";
+  const useLens = !skipLens && !pill && lensEnabled();
+  const lens = useLens ? `url(#${LENS_ID}) ${filter}` : filter;
 
   return {
-    backgroundColor: "rgba(255,255,255,0.03)",
+    backgroundColor: "rgba(7, 20, 15, 0.42)",
     borderWidth: 1,
     borderColor: tone.line,
     ...(Platform.OS === "web"
       ? {
+          overflow: "hidden",
           backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.01) 50%, rgba(255,255,255,0.02))",
           boxShadow: materialShadow(thick, frost),
           backdropFilter: lens,
           WebkitBackdropFilter: lens,
-          ...(frost ? { isolation: "isolate" } : null),
+          isolation: "isolate",
         }
       : {
           backgroundColor: "rgba(255,255,255,0.1)",

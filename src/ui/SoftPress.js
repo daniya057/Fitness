@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Platform, Pressable } from "react-native";
 import Animated, {
   Easing,
@@ -17,6 +18,7 @@ const phoneWeb =
 export function SoftPress({ children, onPress, className, disabled, style, sheen = true }) {
   const scale = useSharedValue(1);
   const sweep = useSharedValue(-1.2);
+  const lastPress = useRef(0);
 
   const animated = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -31,6 +33,11 @@ export function SoftPress({ children, onPress, className, disabled, style, sheen
     if (disabled) {
       return;
     }
+    const now = Date.now();
+    if (now - lastPress.current < 350) {
+      return;
+    }
+    lastPress.current = now;
     await lightTap();
     scale.value = withSequence(
       withTiming(0.97, { duration: 80, easing: Easing.out(Easing.quad) }),
@@ -50,6 +57,7 @@ export function SoftPress({ children, onPress, className, disabled, style, sheen
       accessibilityRole="button"
       accessibilityState={{ disabled: Boolean(disabled) }}
       onPress={handlePress}
+      onClick={Platform.OS === "web" ? handlePress : undefined}
       disabled={disabled}
       className={className}
       style={[
@@ -59,6 +67,7 @@ export function SoftPress({ children, onPress, className, disabled, style, sheen
           justifyContent: "center",
           alignItems: "center",
           opacity: disabled ? 0.5 : 1,
+          ...(Platform.OS === "web" ? { cursor: disabled ? "default" : "pointer" } : null),
         },
         style,
         sheen && !phoneWeb ? { overflow: "hidden" } : null,

@@ -18,7 +18,7 @@
 
 `USDA_API_KEY` — необязательно. Без него поиск КБЖУ ходит в USDA с `DEMO_KEY` (общий лимит). Свой ключ: https://fdc.nal.usda.gov/api-key-signup
 
-`RESEND_API_KEY` — письма с кодом. `MAIL_FROM` по умолчанию `Fitness <onboarding@resend.dev>`. Пока нет своего домена, Resend принимает только почту аккаунта Resend.
+`RESEND_API_KEY` — письма с кодом. `MAIL_FROM` по умолчанию `Fitness <onboarding@resend.dev>`. Пока нет своего домена, Resend принимает только почту аккаунта Resend — на Яндекс такое письмо не уйдёт. Тогда либо SMTP (`MAIL_SMTP_*` в `env.example`), либо код появится на экране.
 
 `admin/` — сессии и хеш пароля админа. В git не попадает.
 

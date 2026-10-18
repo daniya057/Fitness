@@ -47,7 +47,7 @@ export function utcDay(date = new Date()) {
   return date.toISOString().slice(0, 10);
 }
 
-function foldName(value) {
+export function foldName(value) {
   return String(value || "")
     .toLowerCase()
     .replace(/ё/g, "е")

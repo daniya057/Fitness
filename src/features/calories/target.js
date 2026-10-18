@@ -1,3 +1,5 @@
+import { bodyMassIndex } from "../onboarding/bmi";
+
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
@@ -29,14 +31,16 @@ export function dailyKcalTarget(user) {
   const bmr = 10 * kg + 6.25 * cm - 5 * age + offset;
   const tdee = bmr * activityFactor(user?.daysPerWeek);
   const delta = (Number.isFinite(goalKg) ? goalKg : kg) - kg;
+  const bmi = bodyMassIndex(kg, cm);
+  const lockHold = age < 18 || (Number.isFinite(bmi) && bmi < 18.5);
 
   let mode = "hold";
   let kcal = tdee;
 
-  if (delta < -0.5) {
+  if (!lockHold && delta < -0.5) {
     mode = "lose";
-    kcal = tdee - clamp(Math.abs(delta) * 40, 200, 500);
-  } else if (delta > 0.5) {
+    kcal = tdee - clamp(Math.abs(delta) * 40, 200, Math.min(500, tdee * 0.2));
+  } else if (!lockHold && delta > 0.5) {
     mode = "gain";
     const shift = Math.min(clamp(Math.abs(delta) * 40, 200, 500), 400);
     kcal = tdee + shift;
@@ -56,10 +60,10 @@ export function dailyKcalTarget(user) {
 
 export function targetHint(target) {
   if (target.mode === "lose") {
-    return "Дефицит";
+    return "Норма с дефицитом";
   }
   if (target.mode === "gain") {
-    return "Набор";
+    return "Норма на набор";
   }
-  return "Поддержание";
+  return "Норма на поддержание";
 }

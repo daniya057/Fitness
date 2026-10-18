@@ -205,7 +205,7 @@
   },
   {
     "id": "short",
-    "title": "Короткая",
+    "title": "Растяжка",
     "hint": "Закрой растяжку",
     "secret": true,
     "rule": "kind",
@@ -237,6 +237,103 @@
     "secret": true,
     "rule": "sessionsToday",
     "sessionIds": ["warmup-morning", "warmup-evening"],
+    "need": 1
+  },
+  {
+    "id": "week3",
+    "title": "Недельный ритм",
+    "hint": "3 тренировки на этой неделе",
+    "secret": false,
+    "rule": "weekDays",
+    "need": 3
+  },
+  {
+    "id": "week5",
+    "title": "Пять из семи",
+    "hint": "5 тренировок на этой неделе",
+    "secret": false,
+    "rule": "weekDays",
+    "need": 5
+  },
+  {
+    "id": "week7",
+    "title": "Неделя без паузы",
+    "hint": "Тренировка каждый день этой недели",
+    "secret": true,
+    "rule": "weekDays",
+    "need": 7
+  },
+  {
+    "id": "checkin",
+    "title": "Как ты?",
+    "hint": "Пройди дневной опрос",
+    "secret": false,
+    "rule": "checkins",
+    "need": 1
+  },
+  {
+    "id": "checkin7",
+    "title": "Семь ответов",
+    "hint": "7 дневных опросов",
+    "secret": false,
+    "rule": "checkins",
+    "need": 7
+  },
+  {
+    "id": "weekly",
+    "title": "Итоги недели",
+    "hint": "Пройди недельный обзор",
+    "secret": false,
+    "rule": "weeklyReviews",
+    "need": 1
+  },
+  {
+    "id": "custom",
+    "title": "Своя",
+    "hint": "Собери свою тренировку",
+    "secret": false,
+    "rule": "customMade",
+    "need": 1
+  },
+  {
+    "id": "customPlay",
+    "title": "По своему плану",
+    "hint": "Закрой свою тренировку",
+    "secret": false,
+    "rule": "customPlay",
+    "need": 1
+  },
+  {
+    "id": "express",
+    "title": "Экспресс",
+    "hint": "Закрой короткую тренировку",
+    "secret": false,
+    "rule": "shortDone",
+    "need": 1
+  },
+  {
+    "id": "longDone",
+    "title": "Полный круг",
+    "hint": "Закрой программу от 30 минут",
+    "secret": false,
+    "rule": "longDone",
+    "need": 1
+  },
+  {
+    "id": "kindMeal",
+    "title": "Приём",
+    "hint": "Закрой сессию еды",
+    "secret": false,
+    "rule": "kind",
+    "kind": "nutrition",
+    "need": 1
+  },
+  {
+    "id": "friend",
+    "title": "Компания",
+    "hint": "Добавь друга",
+    "secret": false,
+    "rule": "friends",
     "need": 1
   }
 ]

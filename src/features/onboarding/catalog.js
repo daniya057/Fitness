@@ -3,7 +3,7 @@ export const SEX_OPTIONS = [
   { id: "female", title: "ж" },
 ];
 
-export const SEX_LABELS = { male: "м", female: "ж" };
+export const SEX_LABELS = { male: "мужской", female: "женский" };
 
 export const GOALS = [
   { id: "strength", title: "Силовые" },

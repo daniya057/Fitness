@@ -7,6 +7,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState("");
   const [booting, setBooting] = useState(true);
+  const [emailCode, setEmailCode] = useState("");
 
   useEffect(() => {
     let alive = true;
@@ -61,11 +62,13 @@ export function AuthProvider({ children }) {
       user,
       token,
       booting,
+      emailCode,
       async register(payload) {
         const data = await api("/register", { method: "POST", body: payload });
         await writeToken(data.token);
         setToken(data.token);
         setUser(data.user);
+        setEmailCode(data.code || "");
         return data.user;
       },
       async login(payload) {
@@ -88,10 +91,13 @@ export function AuthProvider({ children }) {
       async verifyEmail(code) {
         const data = await api("/email/verify", { method: "POST", token, body: { token, code } });
         setUser(data.user);
+        setEmailCode("");
         return data.user;
       },
       async resendEmailCode() {
-        return api("/email/resend", { method: "POST", token, body: { token } });
+        const data = await api("/email/resend", { method: "POST", token, body: { token } });
+        setEmailCode(data.code || "");
+        return data;
       },
       async logout() {
         try {
@@ -102,6 +108,7 @@ export function AuthProvider({ children }) {
         await writeToken("");
         setToken("");
         setUser(null);
+        setEmailCode("");
       },
       async completeOnboarding(payload) {
         const data = await api("/me", {
@@ -160,7 +167,7 @@ export function AuthProvider({ children }) {
         return data.user;
       },
     }),
-    [token, user, booting]
+    [token, user, booting, emailCode]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { buildPlaylist } from "./catalog";
 
-export const MIN_ACTIVITY_SEC = 60;
 export const PREP_SEC = 15;
 
 export const useSession = create((set, get) => ({
@@ -89,7 +88,9 @@ export const useSession = create((set, get) => ({
     if (!state.running) {
       return;
     }
-    const elapsed = (Number(state.elapsed) || 0) + 1;
+    const step = state.steps[state.index];
+    const workTick = step && step.kind !== "rest" ? 1 : 0;
+    const elapsed = (Number(state.elapsed) || 0) + workTick;
     if (state.remaining > 1) {
       set({ remaining: state.remaining - 1, elapsed });
       return;

@@ -40,15 +40,15 @@ export function PortraitShell({ children }) {
     <View
       className="flex-1"
       style={[
-        { backgroundColor: page },
-        Platform.OS === "web" ? { minHeight: "100vh", alignItems: "center" } : null,
+        { backgroundColor: page, overflow: "hidden" },
+        Platform.OS === "web" ? { height: "100vh", alignItems: "center" } : null,
       ]}
     >
       <StatusBar style={admin ? "dark" : "light"} />
       <View
         className={`flex-1 w-full ${admin ? "bg-canvas" : ""}`}
         style={[
-          { backgroundColor: admin ? "#FFFFFF" : "transparent" },
+          { backgroundColor: admin ? "#FFFFFF" : "transparent", minHeight: 0, overflow: "hidden" },
           Platform.OS === "web" ? { maxWidth: 430, width: "100%", height: "100%" } : { flex: 1 },
         ]}
       >

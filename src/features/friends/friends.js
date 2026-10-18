@@ -125,7 +125,7 @@ export default function FriendsScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <ScreenHeader glass title="Друзья" subtitle="По имени в приложении" right={<ProfileChip />} />
+        <ScreenHeader glass title="Друзья" subtitle="Кто уже зарегистрирован" right={<ProfileChip />} />
         <NudgeBanner />
         <Field
           glass
@@ -187,7 +187,12 @@ export default function FriendsScreen() {
             />
           ))
         ) : (
-          <Text className="mt-2 text-[15px] text-white/45">Найди по имени</Text>
+          <View className="mt-2 rounded-[24px] px-5 py-6" style={glassStyle({ variant: "fill", borderRadius: 24 })}>
+            <Text className="text-[17px] font-semibold text-white">Пока никого</Text>
+            <Text className="mt-2 text-[14px] leading-5 text-white/55">
+              Введи имя сверху. Человек должен уже быть в приложении — ссылку-приглашение добавим позже.
+            </Text>
+          </View>
         )}
         {hint ? <Text className="mt-3 text-[13px] text-white/55">{hint}</Text> : null}
       </ScrollView>
