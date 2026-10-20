@@ -29,7 +29,7 @@
 
 | Файл | О чём |
 |---|---|
-| [mechanics/streaks.md](mechanics/streaks.md) | Прощающая серия, щиты, Edge Function |
+| [mechanics/streaks.md](mechanics/streaks.md) | Прощающая серия, щиты |
 | [mechanics/fuel.md](mechanics/fuel.md) | Дневник на вкладке Калории |
 | [mechanics/checkins.md](mechanics/checkins.md) | Опросники, план недели, питание |
 | [mechanics/quick-start.md](mechanics/quick-start.md) | 10 секунд, «Засчитать разминку» |

@@ -109,6 +109,19 @@ export function shownAchievements(user) {
   return [...ACHIEVEMENTS].sort((a, b) => rank(a) - rank(b));
 }
 
+const NEARBY_ORDER = ["first", "fuel", "streak3", "checkin", "week3", "friend", "dailyDay", "custom", "warmupMorning"];
+
+export function nearbyAchievements(user, limit = 4) {
+  const earned = earnedSet(user);
+  const locked = ACHIEVEMENTS.filter((item) => !earned.has(item.id) && !item.secret);
+  locked.sort((a, b) => {
+    const ai = NEARBY_ORDER.indexOf(a.id);
+    const bi = NEARBY_ORDER.indexOf(b.id);
+    return (ai < 0 ? 50 : ai) - (bi < 0 ? 50 : bi);
+  });
+  return locked.slice(0, Math.max(1, limit));
+}
+
 export function isHidden(user, item) {
   return Boolean(item?.secret) && !earnedSet(user).has(item.id);
 }

@@ -23,6 +23,7 @@ android/
 !.env.example
 keys/.env
 keys/admin/
+keys/share-url.json
 
 # логи и ОС
 npm-debug.*

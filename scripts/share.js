@@ -1,5 +1,6 @@
 const { spawn } = require("child_process");
 const { loadEnv } = require("../server/env");
+const { clearShareUrl, writeShareUrl } = require("../server/share-url");
 const { GATEWAY_PORT, startGateway } = require("./gateway");
 
 loadEnv();
@@ -22,9 +23,11 @@ function printUrl(url, stable) {
     return;
   }
   printed = true;
+  writeShareUrl(url);
   console.log("");
   console.log(`С телефона с любой сети: ${url}`);
   console.log(`Админка: ${url}/admin`);
+  console.log(`Приглашение другу: ${url}/invite/...`);
   if (stable) {
     console.log("Адрес тот же при каждом запуске. Окно share не закрывай, комп не усыпляй.");
   } else {
@@ -48,6 +51,7 @@ function pipeAndWatch(child, patterns, stable) {
   child.stdout.on("data", onChunk);
   child.stderr.on("data", onChunk);
   child.on("exit", (code) => {
+    clearShareUrl();
     process.exit(code || 0);
   });
 }
@@ -105,3 +109,8 @@ if (cfToken) {
   );
   pipeAndWatch(child, [/https:\/\/[a-z0-9-]+\.trycloudflare\.com/i], false);
 }
+
+process.on("SIGINT", () => {
+  clearShareUrl();
+  process.exit(0);
+});

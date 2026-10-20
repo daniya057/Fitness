@@ -1,7 +1,7 @@
 import { Platform, View } from "react-native";
 import { getPalette } from "./theme";
 
-export const ACCENT_INK = "#07140F";
+export const ACCENT_INK = "#10201A";
 
 export function FadeEdge({ side = "right", color } = {}) {
   const tone = color || getPalette().bg;

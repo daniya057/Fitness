@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { api } from "../auth/api";
-import { Field, GhostButton, PrimaryButton, ScreenHeader, SectionLabel } from "../../ui/kit";
+import { Field, GhostButton, MintButton, PillButton, PrimaryButton, ScreenHeader, SectionLabel } from "../../ui/kit";
+import { SoftPress } from "../../ui/SoftPress";
 import { EXPERIENCE_LABELS, GOAL_LABELS, GOALS } from "../onboarding/catalog";
 
 const TOKEN_KEY = "fitness.admin.token";
@@ -207,20 +208,14 @@ export default function AdminScreen() {
         <SectionLabel>Люди</SectionLabel>
         <Field label="Поиск" value={query} onChangeText={setQuery} placeholder="Имя или почта" />
         {filtered.map((user) => (
-          <View key={user.id} className="mb-3 rounded-[24px] bg-card px-4 py-4">
-            <Text className="text-[16px] font-semibold text-ink">{user.name}</Text>
-            <Text className="mt-1 text-[13px] text-mute">{user.email}</Text>
-            <Text className="mt-3 text-[13px] leading-5 text-mute">
-              {user.age ? `${user.age} лет` : "возраст —"} · {weightLabel(user.weight)} · серия {user.streak || 0}
-              {user.freezesLeft != null ? ` · щит ${user.freezesLeft}` : ""}
-            </Text>
-            <Text className="mt-1 text-[13px] leading-5 text-mute">
-              {(user.goals || []).map((id) => GOAL_LABELS[id] || id).join(", ") || "цели не выбраны"}
-              {user.daysPerWeek ? ` · ${user.daysPerWeek} дн.` : ""}
-              {EXPERIENCE_LABELS[user.experience] ? ` · ${EXPERIENCE_LABELS[user.experience]}` : ""}
-            </Text>
-            <Text className="mt-1 text-[12px] text-mute">с {formatDate(user.createdAt)}</Text>
-          </View>
+          <UserCard
+            key={user.id}
+            user={user}
+            token={token}
+            onChanged={async () => {
+              await loadAll(token);
+            }}
+          />
         ))}
         {filtered.length === 0 ? <Text className="mb-6 text-[14px] text-mute">Никого не нашлось</Text> : null}
 
@@ -231,6 +226,183 @@ export default function AdminScreen() {
           </Text>
         </View>
       </ScrollView>
+    </View>
+  );
+}
+
+function emptyForm(user) {
+  return {
+    name: user.name || "",
+    email: user.email || "",
+    streak: String(user.streak || 0),
+    freezesLeft: String(user.freezesLeft ?? 1),
+    emailVerified: user.emailVerified !== false,
+    disabled: Boolean(user.disabled),
+    newPassword: "",
+  };
+}
+
+function UserCard({ user, token, onChanged }) {
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState(() => emptyForm(user));
+  const [busy, setBusy] = useState("");
+  const [error, setError] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const patchField = (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const run = async (kind, work) => {
+    setError("");
+    setBusy(kind);
+    try {
+      await work();
+      await onChanged();
+    } catch (err) {
+      setError(err.message || "Не вышло");
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const save = () =>
+    run("save", async () => {
+      const body = {
+        name: form.name,
+        email: form.email,
+        streak: Number(form.streak),
+        freezesLeft: Number(form.freezesLeft),
+        emailVerified: form.emailVerified,
+        disabled: form.disabled,
+      };
+      if (form.newPassword.trim()) {
+        body.newPassword = form.newPassword.trim();
+      }
+      const data = await api(`/admin/users/${user.id}`, { method: "PATCH", token, body });
+      setForm(emptyForm(data.user || { ...user, ...body, newPassword: "" }));
+      setConfirmDelete(false);
+    });
+
+  const kick = () => run("kick", () => api(`/admin/users/${user.id}`, { method: "PATCH", token, body: { kickSessions: true } }));
+  const resetQuiz = () => run("quiz", () => api(`/admin/users/${user.id}`, { method: "PATCH", token, body: { resetQuiz: true } }));
+  const remove = () =>
+    run("delete", async () => {
+      await api(`/admin/users/${user.id}`, { method: "DELETE", token });
+    });
+
+  return (
+    <View className="mb-3 rounded-[24px] bg-card px-4 py-4">
+      <Text className="text-[16px] font-semibold text-ink">{user.name}</Text>
+      <Text className="mt-1 text-[13px] text-mute">{user.email}</Text>
+      <Text className="mt-3 text-[13px] leading-5 text-mute">
+        {user.age ? `${user.age} лет` : "возраст —"} · {weightLabel(user.weight)} · серия {user.streak || 0}
+        {user.freezesLeft != null ? ` · щит ${user.freezesLeft}` : ""}
+        {user.disabled ? " · отключён" : ""}
+        {user.emailVerified === false ? " · почта не подтверждена" : ""}
+      </Text>
+      <Text className="mt-1 text-[13px] leading-5 text-mute">
+        {(user.goals || []).map((id) => GOAL_LABELS[id] || id).join(", ") || "цели не выбраны"}
+        {user.daysPerWeek ? ` · ${user.daysPerWeek} дн.` : ""}
+        {EXPERIENCE_LABELS[user.experience] ? ` · ${EXPERIENCE_LABELS[user.experience]}` : ""}
+      </Text>
+      <Text className="mt-1 text-[12px] text-mute">
+        с {formatDate(user.createdAt)}
+        {user.sessionCount ? ` · сессий ${user.sessionCount}` : ""}
+        {user.lastActivityDate ? ` · активность ${formatDate(user.lastActivityDate)}` : ""}
+      </Text>
+      <View className="mt-3">
+        <MintButton
+          label={open ? "Свернуть" : "Править"}
+          onPress={() => {
+            setOpen((prev) => !prev);
+            setForm(emptyForm(user));
+            setConfirmDelete(false);
+            setError("");
+          }}
+        />
+      </View>
+      {open ? (
+        <View className="mt-4">
+          <Field label="Имя" value={form.name} onChangeText={(value) => patchField("name", value)} />
+          <Field
+            label="Почта"
+            value={form.email}
+            onChangeText={(value) => patchField("email", value)}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <Field
+            label="Серия"
+            value={form.streak}
+            onChangeText={(value) => patchField("streak", value)}
+            keyboardType="number-pad"
+          />
+          <Field
+            label="Щиты"
+            value={form.freezesLeft}
+            onChangeText={(value) => patchField("freezesLeft", value)}
+            keyboardType="number-pad"
+          />
+          <Field
+            label="Новый пароль"
+            value={form.newPassword}
+            onChangeText={(value) => patchField("newPassword", value)}
+            placeholder="Пусто — не менять"
+            secureTextEntry
+            autoCorrect={false}
+            autoComplete="off"
+          />
+          <View className="mb-3 flex-row" style={{ gap: 8 }}>
+            <View className="flex-1">
+              <PillButton
+                wide
+                tone={form.emailVerified ? "mint" : "canvas"}
+                label={form.emailVerified ? "Почта ок" : "Почта нет"}
+                onPress={() => patchField("emailVerified", !form.emailVerified)}
+              />
+            </View>
+            <View className="flex-1">
+              <PillButton
+                wide
+                tone={form.disabled ? "accent" : "canvas"}
+                label={form.disabled ? "Отключён" : "Включён"}
+                onPress={() => patchField("disabled", !form.disabled)}
+              />
+            </View>
+          </View>
+          {error ? <Text className="mb-3 text-[14px] font-medium text-accent">{error}</Text> : null}
+          <PrimaryButton glass={false} label="Сохранить" onPress={save} busy={busy === "save"} disabled={Boolean(busy)} />
+          <View className="mt-3">
+            <MintButton label={busy === "kick" ? "Секунду" : "Сбросить сессии"} onPress={kick} />
+          </View>
+          <View className="mt-3">
+            <MintButton label={busy === "quiz" ? "Секунду" : "Сбросить опрос"} onPress={resetQuiz} />
+          </View>
+          <View className="mt-2">
+            {confirmDelete ? (
+              <SoftPress
+                onPress={remove}
+                disabled={Boolean(busy)}
+                className="items-center justify-center rounded-full"
+                style={{ minHeight: 48, backgroundColor: "#9f1239" }}
+              >
+                <Text className="text-[15px] font-semibold text-white">{busy === "delete" ? "Секунду" : "Точно удалить"}</Text>
+              </SoftPress>
+            ) : (
+              <SoftPress
+                onPress={() => setConfirmDelete(true)}
+                className="items-center justify-center"
+                style={{ minHeight: 48 }}
+              >
+                <Text className="text-[15px] font-semibold" style={{ color: "#9f1239" }}>
+                  Удалить аккаунт
+                </Text>
+              </SoftPress>
+            )}
+          </View>
+        </View>
+      ) : null}
     </View>
   );
 }

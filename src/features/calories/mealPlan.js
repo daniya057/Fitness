@@ -1,6 +1,6 @@
 import data from "../../../data/content/recipes.json";
 import { dietFlags, macroTargets, quizOf } from "../checkins/recommend";
-import { foodById, round1, utcDay } from "./foods";
+import { foodById, round1, sumLog, utcDay } from "./foods";
 import { parseFoodSkip, recipeHitsSkip } from "./foodSkip";
 
 export const SLOT_TITLES = data.slots;
@@ -17,6 +17,9 @@ const FLAG_TO_AVOID = {
 const MIN_SCALE = 0.6;
 const MAX_SCALE = 1.7;
 const PRICE_STEP = 5;
+const ATE_SOMETHING = 150;
+const ENOUGH_LEFT = 180;
+const SNACK_LEFT = 400;
 
 function hashSeed(text) {
   let h = 2166136261;
@@ -140,6 +143,95 @@ export function scaleRecipe(recipe, targetKcal) {
   };
 }
 
+export function leftoverBudget(targetKcal, eatenKcal) {
+  const target = Math.max(0, Math.round(Number(targetKcal) || 0));
+  const eaten = Math.max(0, Math.round(Number(eatenKcal) || 0));
+  const remaining = Math.max(0, target - eaten);
+  let kind = "full";
+  if (eaten >= ATE_SOMETHING && remaining < ENOUGH_LEFT) {
+    kind = "enough";
+  } else if (eaten >= ATE_SOMETHING && remaining < SNACK_LEFT) {
+    kind = "snack";
+  } else if (eaten >= ATE_SOMETHING) {
+    kind = "rest";
+  }
+  return { target, eaten, remaining, kind };
+}
+
+function mealsWord(count) {
+  if (count === 1) {
+    return "приём";
+  }
+  if (count >= 2 && count <= 4) {
+    return "приёма";
+  }
+  return "приёмов";
+}
+
+export function leftoverCopy(leftover) {
+  if (!leftover || leftover.kind === "full") {
+    return "Приёмы пищи под твою норму, с продуктами и ценой.";
+  }
+  if (leftover.kind === "enough") {
+    return `На сегодня хватит. В дневнике уже ${leftover.eaten} из ${leftover.target}. Можно перекус, если голоден.`;
+  }
+  if (leftover.kind === "snack") {
+    return `Почти норма. Соберём перекус примерно на ${leftover.remaining} ккал.`;
+  }
+  return `Соберём на остаток ~${leftover.remaining} ккал: норма ${leftover.target} минус ${leftover.eaten} в дневнике.`;
+}
+
+export function leftoverHeadline(plan) {
+  const leftover = plan?.leftover;
+  const count = plan?.meals?.length || 0;
+  const kcal = plan?.totals?.kcal || 0;
+  if (!leftover || leftover.kind === "full") {
+    return `${count} ${mealsWord(count)} · ${kcal} из ${plan.target.kcal} ккал`;
+  }
+  if (leftover.kind === "enough") {
+    return `В дневнике ${leftover.eaten} из ${leftover.target}`;
+  }
+  if (count === 0) {
+    return leftoverCopy(leftover);
+  }
+  return `${count} ${mealsWord(count)} · ${kcal} из ${leftover.remaining} ккал остатка`;
+}
+
+function eatenFromUser(user, override) {
+  if (override != null && Number.isFinite(Number(override))) {
+    return Math.max(0, Math.round(Number(override)));
+  }
+  const log = user?.fuelLog;
+  if (!log || log.date !== utcDay()) {
+    return 0;
+  }
+  return sumLog(log.items).kcal;
+}
+
+function splitForLeftover(macros, leftover) {
+  if (leftover.kind === "enough") {
+    return [];
+  }
+  if (leftover.kind === "snack") {
+    return [["snack", 1]];
+  }
+  if (leftover.kind === "full") {
+    return data.split[String(macros.meals)] || data.split["3"];
+  }
+  if (leftover.remaining < 700) {
+    return [["dinner", 1]];
+  }
+  if (leftover.remaining < 1300) {
+    return [
+      ["lunch", 0.5],
+      ["dinner", 0.5],
+    ];
+  }
+  const base = (data.split[String(macros.meals)] || data.split["3"]).filter((row) => row[0] !== "breakfast");
+  const sum = base.reduce((acc, row) => acc + row[1], 0) || 1;
+  return base.map((row) => [row[0], row[1] / sum]);
+}
+
 function heroOf(recipe) {
   return recipe.ingredients[0]?.foodId || recipe.id;
 }
@@ -164,18 +256,21 @@ function pickRecipe({ slot, pool, rand, usedIds, usedMains, usedHeroes, exclude 
 }
 
 /**
- * Собирает рацион на день: приёмы по норме ккал пользователя, блюда без
- * запрещённых опросником групп, разные основы (курица/рыба/творог/бобовые…).
- * seed — произвольная строка; attempt меняет вариант; exclude — ids прошлого
- * варианта, чтобы «Другой вариант» действительно отличался.
+ * Собирает рацион: если в дневнике уже есть еда — на остаток (норма минус
+ * съеденное), иначе на полный день. Мало остатка — перекус или «хватит».
+ * attempt меняет вариант; exclude — ids прошлого набора.
  */
-export function buildMealPlan(user, { attempt = 0, exclude = [] } = {}) {
+export function buildMealPlan(user, { attempt = 0, exclude = [], eatenKcal } = {}) {
   const macros = macroTargets(user);
-  const split = data.split[String(macros.meals)] || data.split["3"];
+  const leftover = leftoverBudget(macros.kcal, eatenFromUser(user, eatenKcal));
+  const split = splitForLeftover(macros, leftover);
+  const budget = leftover.kind === "full" ? leftover.target : leftover.remaining;
   const tags = avoidTags(user);
   const skipFoods = parseFoodSkip(quizOf(user).foodSkip);
   const pool = data.recipes.filter((recipe) => recipeAllowed(recipe, tags, skipFoods));
-  const seed = hashSeed(`${user?.id || "guest"}|${utcDay()}|${attempt}|${(quizOf(user).foodSkip || []).join("|")}`);
+  const seed = hashSeed(
+    `${user?.id || "guest"}|${utcDay()}|${attempt}|${leftover.kind}|${budget}|${(quizOf(user).foodSkip || []).join("|")}`
+  );
   const rand = mulberry32(seed);
   const usedIds = new Set();
   const usedMains = new Set();
@@ -190,7 +285,7 @@ export function buildMealPlan(user, { attempt = 0, exclude = [] } = {}) {
     usedIds.add(recipe.id);
     usedMains.add(recipe.main);
     usedHeroes.add(heroOf(recipe));
-    meals.push(scaleRecipe(recipe, macros.kcal * share));
+    meals.push(scaleRecipe(recipe, budget * share));
   }
   const totals = meals.reduce(
     (acc, meal) => ({
@@ -206,6 +301,7 @@ export function buildMealPlan(user, { attempt = 0, exclude = [] } = {}) {
     date: utcDay(),
     attempt,
     target: macros,
+    leftover,
     restricted: tags.size > 0 || skipFoods.tokens.length > 0 || skipFoods.groups.size > 0,
     meals,
     totals,

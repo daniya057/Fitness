@@ -8,7 +8,7 @@ import { useAuth } from "../auth/AuthContext";
 import { ACHIEVEMENTS, iconOf } from "./catalog";
 import { Medal } from "./Medal";
 
-const COLORS = ["#9BFFC8", "#7DFFB3", "#FFD54F", "#FFFFFF", "#FF8A65", "#FF6B7A"];
+const COLORS = ["#8FDCB8", "#76C9A8", "#FFD54F", "#FFFFFF", "#FF8A65", "#FF6B7A"];
 
 function ConfettiPiece({ x, drift, delay, color, w, h, rot, fall }) {
   const progress = useSharedValue(0);

@@ -2,7 +2,10 @@ import { foodById, sumLog, utcDay } from "../calories/foods";
 import { dailyKcalTarget } from "../calories/target";
 import { bodyMassIndex } from "../onboarding/bmi";
 import { emptyQuiz, inferFocus, parseTrainDayIds, quizPayload, trainDayNumbers } from "../onboarding/quiz";
+import { guessTimeZone, weekdayMon0 as weekdayMon0Local } from "../../lib/day";
 import {
+  fitSessionToBudget,
+  isSetSession,
   openLevel,
   sessionMinutes,
   sessionsForPlan,
@@ -51,16 +54,27 @@ const PAIN_SKIP_SESSIONS = {
   "gym-full-1": ["knees", "lumbar"],
   "gym-full-2": ["knees", "lumbar"],
   "gym-full-3": ["knees", "lumbar"],
+  "gym-full-4": ["knees", "lumbar"],
+  "gym-full-5": ["knees", "lumbar"],
   "gym-push-1": ["shoulders", "wrists"],
   "gym-push-2": ["shoulders", "wrists"],
   "gym-push-3": ["shoulders", "wrists"],
+  "gym-push-4": ["shoulders", "wrists"],
+  "gym-push-5": ["shoulders", "wrists"],
   "gym-pull-1": ["neck"],
   "gym-pull-2": ["neck"],
   "gym-pull-3": ["neck"],
+  "gym-pull-4": ["neck"],
+  "gym-pull-5": ["neck"],
   "gym-legs-1": ["knees", "lumbar"],
   "gym-legs-2": ["knees", "lumbar"],
   "gym-legs-3": ["knees", "lumbar"],
+  "gym-legs-4": ["knees", "lumbar"],
+  "gym-legs-5": ["knees", "lumbar"],
   "gym-cardio-2": ["knees"],
+  "gym-cardio-3": ["knees"],
+  "gym-cardio-4": ["knees"],
+  "gym-cardio-5": ["knees"],
 };
 
 const PROTEIN_FOODS = [
@@ -87,8 +101,7 @@ export function weekStartUtc(date = new Date()) {
 }
 
 export function weekdayMon0(date = new Date()) {
-  const day = date.getUTCDay();
-  return day === 0 ? 6 : day - 1;
+  return weekdayMon0Local(guessTimeZone(), date);
 }
 
 export function quizOf(user) {
@@ -216,13 +229,13 @@ function pickSession(groupId, user, budget, pain, load, pace) {
       ...sessionsInGroup("short").filter((session) => (Number(session.level) || 1) <= Math.min(2, open)),
     ];
   }
-  const fitting = list.filter((session) => sessionMinutes(session) <= budget + 10);
+  const fitting = list.filter((session) => isSetSession(session) || session.kind === "cardio" || sessionMinutes(session) <= budget + 10);
   const pool = fitting.length ? fitting : list;
   if (!pool.length) {
     const stretch = sessionsInGroup("stretch").filter((session) => !sessionBlocked(session, pain));
     stretch.sort((a, b) => (Number(a.level) || 1) - (Number(b.level) || 1) || sessionMinutes(a) - sessionMinutes(b));
     if (stretch[0]) {
-      return stretch[0];
+      return fitSessionToBudget(stretch[0], budget);
     }
     return warmupSessions()[0] || null;
   }
@@ -231,7 +244,7 @@ function pickSession(groupId, user, budget, pain, load, pace) {
   } else {
     pool.sort((a, b) => sessionMinutes(a) - sessionMinutes(b) || (Number(a.level) || 1) - (Number(b.level) || 1));
   }
-  return pool[0];
+  return fitSessionToBudget(pool[0], budget);
 }
 
 function planReason({ load, pain, budget, quiz }) {
@@ -245,7 +258,7 @@ function planReason({ load, pain, budget, quiz }) {
     return "Слот на полчаса";
   }
   if (quiz.place === "gym") {
-    return "Зал, простые тренажёры";
+    return "Зал, подходы на тренажёрах";
   }
   if (quiz.focus === "loss") {
     return "Больше кругов и кардио";

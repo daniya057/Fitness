@@ -1,8 +1,8 @@
 import { Pressable, Text, View } from "react-native";
 import { lightTap } from "../../lib/haptics";
 import { SectionLabel } from "../../ui/kit";
-import { glassStyle } from "../../ui/Glass";
 import { EXPERIENCE } from "./catalog";
+import { choiceHintStyle, choiceSurface, choiceTitleStyle } from "./ChoiceGrid";
 
 export function ExperiencePicker({ value, onChange, glass = false }) {
   return (
@@ -18,17 +18,16 @@ export function ExperiencePicker({ value, onChange, glass = false }) {
               onChange(item.id);
             }}
             className={`mb-2 rounded-[22px] px-4 py-4 ${glass ? "" : on ? "bg-mint" : "bg-card"}`}
-            style={
-              glass
-                ? glassStyle({
-                    borderRadius: 22,
-                    backgroundColor: on ? "rgba(125,255,179,0.16)" : "rgba(255,255,255,0.08)",
-                  })
-                : undefined
-            }
+            style={glass ? choiceSurface(on, { radius: 22 }) : undefined}
           >
-            <Text className={`text-[16px] font-semibold ${glass ? "text-white" : "text-ink"}`}>{item.title}</Text>
-            {item.hint ? <Text className={`mt-1 text-[12px] ${glass ? "text-white/50" : "text-mute"}`}>{item.hint}</Text> : null}
+            <Text className={`text-[16px] font-semibold ${glass ? "" : "text-ink"}`} style={glass ? choiceTitleStyle(on) : undefined}>
+              {item.title}
+            </Text>
+            {item.hint ? (
+              <Text className={`mt-1 text-[12px] ${glass ? "" : "text-mute"}`} style={glass ? choiceHintStyle(on) : undefined}>
+                {item.hint}
+              </Text>
+            ) : null}
           </Pressable>
         );
       })}

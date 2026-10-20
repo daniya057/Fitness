@@ -1,7 +1,28 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { guessTimeZone, localDay } from "../../lib/day";
 import { api, readToken, writeToken } from "./api";
 
+function withZone(payload = {}) {
+  return { ...payload, timeZone: guessTimeZone() };
+}
+
+function mePath() {
+  return `/me?timeZone=${encodeURIComponent(guessTimeZone())}`;
+}
+
 const AuthContext = createContext(null);
+
+function applySocial(data, setUser) {
+  if (data?.user) {
+    setUser(data.user);
+  }
+  return {
+    friends: data?.friends || [],
+    incoming: data?.incoming || [],
+    outgoing: data?.outgoing || [],
+    status: data?.status || "",
+  };
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -20,7 +41,7 @@ export function AuthProvider({ children }) {
           setBooting(false);
           return null;
         }
-        return api("/me", { token: saved }).then((data) => {
+        return api(mePath(), { token: saved }).then((data) => {
           if (!alive) {
             return;
           }
@@ -43,14 +64,14 @@ export function AuthProvider({ children }) {
     if (!token) {
       return undefined;
     }
-    let day = new Date().toISOString().slice(0, 10);
+    let day = localDay(guessTimeZone());
     const id = setInterval(() => {
-      const next = new Date().toISOString().slice(0, 10);
+      const next = localDay(guessTimeZone());
       if (next === day) {
         return;
       }
       day = next;
-      api("/me", { token })
+      api(mePath(), { token })
         .then((data) => setUser(data.user))
         .catch(() => {});
     }, 15000);
@@ -64,7 +85,7 @@ export function AuthProvider({ children }) {
       booting,
       emailCode,
       async register(payload) {
-        const data = await api("/register", { method: "POST", body: payload });
+        const data = await api("/register", { method: "POST", body: withZone(payload) });
         await writeToken(data.token);
         setToken(data.token);
         setUser(data.user);
@@ -72,7 +93,7 @@ export function AuthProvider({ children }) {
         return data.user;
       },
       async login(payload) {
-        const data = await api("/login", { method: "POST", body: payload });
+        const data = await api("/login", { method: "POST", body: withZone(payload) });
         await writeToken(data.token);
         setToken(data.token);
         setUser(data.user);
@@ -114,13 +135,13 @@ export function AuthProvider({ children }) {
         const data = await api("/me", {
           method: "PATCH",
           token,
-          body: { ...payload, token, onboardingDone: true },
+          body: withZone({ ...payload, token, onboardingDone: true }),
         });
         setUser(data.user);
         return data.user;
       },
       async patch(payload) {
-        const data = await api("/me", { method: "PATCH", token, body: { ...payload, token } });
+        const data = await api("/me", { method: "PATCH", token, body: withZone({ ...payload, token }) });
         setUser(data.user);
         return data.user;
       },
@@ -128,7 +149,7 @@ export function AuthProvider({ children }) {
         if (!token) {
           return null;
         }
-        const data = await api("/me", { token });
+        const data = await api(mePath(), { token });
         setUser(data.user);
         return data.user;
       },
@@ -142,27 +163,34 @@ export function AuthProvider({ children }) {
       },
       async listFriends() {
         const data = await api("/friends", { token });
-        return data.friends || [];
+        return {
+          friends: data.friends || [],
+          incoming: data.incoming || [],
+          outgoing: data.outgoing || [],
+          status: data.status || "",
+        };
       },
-      async addFriend(id) {
+      async requestFriend(id) {
         const data = await api("/friends", { method: "POST", token, body: { token, id } });
-        if (data.user) {
-          setUser(data.user);
-        }
-        return data.friends || [];
+        return applySocial(data, setUser);
+      },
+      async acceptFriend(id) {
+        const data = await api(`/friends/${id}/accept`, { method: "POST", token, body: { token } });
+        return applySocial(data, setUser);
+      },
+      async declineFriend(id) {
+        const data = await api(`/friends/${id}/decline`, { method: "POST", token, body: { token } });
+        return applySocial(data, setUser);
       },
       async removeFriend(id) {
         const data = await api(`/friends/${id}`, { method: "DELETE", token, body: { token } });
-        if (data.user) {
-          setUser(data.user);
-        }
-        return data.friends || [];
+        return applySocial(data, setUser);
       },
       async nudgeFriend(id) {
         await api(`/friends/${id}/nudge`, { method: "POST", token, body: { token } });
       },
       async ackNudges() {
-        const data = await api("/me", { method: "PATCH", token, body: { token, nudgeSeen: true } });
+        const data = await api("/me", { method: "PATCH", token, body: withZone({ token, nudgeSeen: true }) });
         setUser(data.user);
         return data.user;
       },

@@ -52,7 +52,7 @@ export function dailyKcalTarget(user) {
   }
 
   return {
-    kcal: Math.round(kcal),
+    kcal: Math.round(kcal / 10) * 10,
     mode,
     guessedSex,
   };

@@ -31,10 +31,6 @@ async function sendCodeEmail({ to, code, kind }) {
   const text = `Код: ${code}\nДействует 15 минут.`;
   const html = `<p>Код: <strong style="letter-spacing:4px">${code}</strong></p><p>15 минут.</p>`;
 
-  const resend = await sendResend({ to, from, subject, html, text });
-  if (resend.sent) {
-    return resend;
-  }
   if (smtpConfigured()) {
     try {
       await sendSmtpMail({ from, to, subject, text });
@@ -42,6 +38,10 @@ async function sendCodeEmail({ to, code, kind }) {
     } catch (error) {
       console.error("письмо smtp:", error.message);
     }
+  }
+  const resend = await sendResend({ to, from, subject, html, text });
+  if (resend.sent) {
+    return resend;
   }
   return { sent: false, reason: resend.reason || "fail" };
 }

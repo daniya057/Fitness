@@ -12,13 +12,24 @@ export default function PersonScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
-  const { user, getPerson, listFriends, addFriend, removeFriend, nudgeFriend } = useAuth();
+  const { user, getPerson, listFriends, requestFriend, acceptFriend, declineFriend, removeFriend, nudgeFriend } =
+    useAuth();
   const [person, setPerson] = useState(null);
   const [friends, setFriends] = useState([]);
+  const [incoming, setIncoming] = useState([]);
+  const [outgoing, setOutgoing] = useState([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState("");
   const mine = Boolean(user?.id && user.id === id);
   const added = friends.some((item) => item.id === id);
+  const askedMe = incoming.some((item) => item.id === id);
+  const waiting = outgoing.includes(id);
+
+  const applyPack = (pack) => {
+    setFriends(pack.friends || []);
+    setIncoming(pack.incoming || []);
+    setOutgoing(pack.outgoing || []);
+  };
 
   useEffect(() => {
     let alive = true;
@@ -35,9 +46,9 @@ export default function PersonScreen() {
         }
       });
     listFriends()
-      .then((rows) => {
+      .then((pack) => {
         if (alive) {
-          setFriends(rows);
+          applyPack(pack);
         }
       })
       .catch(() => {});
@@ -51,12 +62,15 @@ export default function PersonScreen() {
     setBusy(kind);
     setError("");
     try {
-      const rows = await action();
-      if (Array.isArray(rows)) {
-        setFriends(rows);
+      const pack = await action();
+      if (pack && (Array.isArray(pack.friends) || Array.isArray(pack.incoming))) {
+        applyPack(pack);
       }
       if (kind === "nudge") {
         setError("Приглашение ушло");
+      }
+      if (kind === "add") {
+        setError(pack?.status === "friends" ? "Теперь друзья" : "Заявка ушла — ждём ответ");
       }
     } catch (err) {
       setError(err.message || "Не вышло");
@@ -93,10 +107,12 @@ export default function PersonScreen() {
                   <PillButton
                     wide
                     label={busy === "nudge" ? "Секунду" : "Позвать"}
-                    onPress={() => run("nudge", async () => {
-                      await nudgeFriend(person.id);
-                      return friends;
-                    })}
+                    onPress={() =>
+                      run("nudge", async () => {
+                        await nudgeFriend(person.id);
+                        return { friends, incoming, outgoing };
+                      })
+                    }
                     tone="glassOn"
                   />
                 </View>
@@ -109,12 +125,35 @@ export default function PersonScreen() {
                   />
                 </View>
               </>
+            ) : askedMe ? (
+              <>
+                <View className="flex-1">
+                  <PillButton
+                    wide
+                    label={busy === "accept" ? "Секунду" : "Принять"}
+                    onPress={() => run("accept", () => acceptFriend(person.id))}
+                    tone="glassOn"
+                  />
+                </View>
+                <View className="flex-1">
+                  <PillButton
+                    wide
+                    label={busy === "decline" ? "Секунду" : "Отклонить"}
+                    onPress={() => run("decline", () => declineFriend(person.id))}
+                    tone="fill"
+                  />
+                </View>
+              </>
+            ) : waiting ? (
+              <View className="flex-1">
+                <PillButton wide label="Заявка ушла" disabled tone="fill" />
+              </View>
             ) : (
               <View className="flex-1">
                 <PillButton
                   wide
                   label={busy === "add" ? "Секунду" : "Добавить"}
-                  onPress={() => run("add", () => addFriend(person.id))}
+                  onPress={() => run("add", () => requestFriend(person.id))}
                   tone="glassOn"
                 />
               </View>

@@ -16,12 +16,13 @@ import { lookOfStreak } from "../streaks/look";
 import { AchievementPlaque } from "../achievements/plaque";
 import { ProfileChip } from "../avatar/ProfileChip";
 import { NudgeBanner } from "../friends/NudgeBanner";
-import { CheckinCard } from "../checkins/CheckinCard";
-import { WeeklyCard } from "../checkins/WeeklyCard";
+import { HomeCheckins } from "../checkins/HomeCheckins";
+import { PlanTuneCard } from "../onboarding/PlanTune";
 import { TodayPlanCard } from "../checkins/WeekPlan";
 import { todayPlanItem } from "../checkins/recommend";
-import { sessionById, warmupSessions } from "../workouts/catalog";
+import { sessionById, sessionForUser, warmupSessions } from "../workouts/catalog";
 import { useSession } from "../workouts/sessionStore";
+import { localHour, zoneOf } from "../../lib/day";
 
 function freezeWord(count) {
   const n = Math.abs(Math.round(Number(count) || 0));
@@ -93,7 +94,8 @@ export default function ArenaScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { user } = useAuth();
-  const openSession = useSession((state) => state.open);
+  const openRaw = useSession((state) => state.open);
+  const openSession = (session) => openRaw(sessionForUser(session, user));
   const day = useDayCountdown();
   const streak = user?.streak || 0;
   const look = lookOfStreak(streak);
@@ -108,14 +110,18 @@ export default function ArenaScreen() {
   const taskTotal = dailyTasks.length || 3;
   const taskFill = taskTotal ? dailyDone.size / taskTotal : 0;
   const today = utcDay();
+  const planItem = todayPlanItem(user);
+  const restDay = Boolean(planItem?.rest);
+  const hideDailies = Boolean(planItem?.session && !planItem?.rest);
+  const eveningOpen = localHour(zoneOf(user)) >= 18 && user?.lastActivityDate !== today;
   const eaten = useMemo(() => {
     const items = user?.fuelLog?.date === today ? user.fuelLog.items || [] : [];
     return sumLog(items).kcal;
   }, [user, today]);
   const target = useMemo(() => dailyKcalTarget(user), [user]);
 
-  const openTask = async (task) => {
-    await lightTap();
+  const openTask = (task) => {
+    lightTap();
     const session = sessionById(task?.sessionId);
     if (session) {
       openSession(session);
@@ -123,21 +129,21 @@ export default function ArenaScreen() {
     router.replace("/workouts");
   };
 
-  const openWarmup = async (session) => {
-    await lightTap();
+  const openWarmup = (session) => {
+    lightTap();
     if (session) {
       openSession(session);
     }
     router.replace("/workouts");
   };
 
-  const openCalories = async () => {
-    await lightTap();
+  const openCalories = () => {
+    lightTap();
     router.replace("/calories");
   };
 
-  const openRewards = async () => {
-    await lightTap();
+  const openRewards = () => {
+    lightTap();
     router.replace("/rewards");
   };
 
@@ -169,6 +175,7 @@ export default function ArenaScreen() {
         </View>
 
         <NudgeBanner />
+        <PlanTuneCard />
         <TodayPlanCard
           user={user}
           onOpen={(session) => {
@@ -197,12 +204,25 @@ export default function ArenaScreen() {
               {freezesLeft} {freezeWord(freezesLeft)}
             </Text>
           </View>
+          <Text className="mt-3 px-2 text-center text-[13px] leading-5 text-white/55">
+            {streak === 0
+              ? "Закрой сегодня — будет 1. Щит спасёт, если день выпадет."
+              : "Пропустишь день — серия не обнулится, если есть щит."}
+          </Text>
         </GlassPanel>
 
-        <WeeklyCard compact />
-        <CheckinCard compact />
+        {eveningOpen ? (
+          <View className="mt-5 rounded-[24px] px-5 py-4" style={glassStyle({ variant: "fill", borderRadius: 24, backgroundColor: "rgba(125,255,179,0.1)" })}>
+            <Text className="text-[16px] font-semibold text-white">День ещё открыт</Text>
+            <Text className="mt-1 text-[13px] leading-5 text-white/55">
+              {planItem?.rest ? "Хватит короткой разминки — серия засчитается." : "Закрой план, пока сутки не кончились."}
+            </Text>
+          </View>
+        ) : null}
 
-        {warmups.length > 0 && !todayPlanItem(user)?.rest ? (
+        <HomeCheckins />
+
+        {warmups.length > 0 && !restDay ? (
           <View className="mt-8">
             <Text className="text-[11px] font-medium tracking-[1px]" style={{ color: getPalette().accent }}>
               1 МИНУТА
@@ -241,51 +261,59 @@ export default function ArenaScreen() {
           </View>
         </Pressable>
 
-        <View className="mt-8">
-          <View className="mb-3 flex-row items-end justify-between">
-            <View className="mr-3 flex-1">
-              <Text className="text-[11px] font-medium tracking-[1px]" style={{ color: getPalette().accent }}>
-                СЕГОДНЯ
-              </Text>
-              <Text className="mt-0.5 text-[16px] font-semibold text-white">Задания дня</Text>
-              <Text className="mt-0.5 text-[12px] leading-4 text-white/55">
-                {dailyDone.size} / {dailyTasks.length || 3}
-                {user?.daily?.shieldGranted ? " · щит получен" : " · все три — щит"}
-                {" · "}
-                {day.label}
-              </Text>
+        {hideDailies ? (
+          <Text className="mt-8 text-center text-[12px] leading-4 text-white/45">
+            Сегодня один список: карточка плана выше. {user?.daily?.shieldGranted ? "Щит за сегодня уже есть." : "Закроешь план — будет щит."} · {day.label}
+          </Text>
+        ) : (
+          <View className="mt-8">
+            <View className="mb-3 flex-row items-end justify-between">
+              <View className="mr-3 flex-1">
+                <Text className="text-[11px] font-medium tracking-[1px]" style={{ color: getPalette().accent }}>
+                  СЕГОДНЯ
+                </Text>
+                <Text className="mt-0.5 text-[16px] font-semibold text-white">Задания дня</Text>
+                <Text className="mt-0.5 text-[12px] leading-4 text-white/55">
+                  {dailyDone.size} / {dailyTasks.length || 3}
+                  {user?.daily?.shieldGranted ? " · щит получен" : " · все три — щит"}
+                  {" · "}
+                  {day.label}
+                </Text>
+              </View>
             </View>
+            <View className="mb-3 h-2.5 overflow-hidden rounded-full" style={{ backgroundColor: getPalette().track }}>
+              <View style={{ width: `${Math.round(taskFill * 100)}%`, height: "100%", backgroundColor: getPalette().bar, borderRadius: 999 }} />
+            </View>
+            {dailyTasks.map((task) => {
+              const on = dailyDone.has(task.id);
+              return (
+                <Pressable
+                  key={task.id}
+                  onPress={() => openTask(task)}
+                  className="mb-2 flex-row items-center rounded-[20px] px-3"
+                  style={{ ...glassStyle({ variant: "fill", borderRadius: 20 }), minHeight: 64 }}
+                >
+                  <View
+                    className="mr-3 h-10 w-10 items-center justify-center rounded-full"
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderWidth: 2.5,
+                      borderColor: on ? getPalette().bar : getPalette().faint,
+                      backgroundColor: on ? getPalette().bar : "transparent",
+                    }}
+                  />
+                  <View className="flex-1 py-3">
+                    <Text className="text-[15px] font-semibold" style={{ color: on ? getPalette().accent : "#F2FAF6" }}>
+                      {task.title}
+                    </Text>
+                    <Text className="text-[12px] leading-4 text-white/45">{task.hint}</Text>
+                  </View>
+                </Pressable>
+              );
+            })}
           </View>
-          <View className="mb-3 h-2.5 overflow-hidden rounded-full" style={{ backgroundColor: getPalette().track }}>
-            <View style={{ width: `${Math.round(taskFill * 100)}%`, height: "100%", backgroundColor: getPalette().bar, borderRadius: 999 }} />
-          </View>
-          {dailyTasks.map((task) => {
-            const on = dailyDone.has(task.id);
-            return (
-              <Pressable
-                key={task.id}
-                onPress={() => openTask(task)}
-                className="mb-2 flex-row items-center rounded-[20px] px-3"
-                style={{ ...glassStyle({ variant: "fill", borderRadius: 20 }), minHeight: 64 }}
-              >
-                <View
-                  className="mr-3 h-10 w-10 items-center justify-center rounded-full"
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderWidth: 2.5,
-                    borderColor: on ? getPalette().bar : getPalette().faint,
-                    backgroundColor: on ? getPalette().bar : "transparent",
-                  }}
-                />
-                <View className="flex-1 py-3">
-                  <Text className={`text-[15px] font-semibold ${on ? "text-[#9BFFC8]" : "text-white"}`}>{task.title}</Text>
-                  <Text className="text-[12px] leading-4 text-white/45">{task.hint}</Text>
-                </View>
-              </Pressable>
-            );
-          })}
-        </View>
+        )}
 
         <View className="mt-8 rounded-[24px] px-5 py-5" style={glassStyle({ variant: "fill", borderRadius: 24 })}>
           <View className="mb-4 flex-row items-center justify-between">
@@ -302,7 +330,7 @@ export default function ArenaScreen() {
         </View>
 
         <Animated.View entering={FadeInDown.duration(560).delay(290).springify().damping(18)}>
-          <AchievementPlaque user={user} onPress={openRewards} tone="glass" />
+          <AchievementPlaque user={user} onPress={openRewards} tone="glass" nearby />
         </Animated.View>
       </ScrollView>
     </View>

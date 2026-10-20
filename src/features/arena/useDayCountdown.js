@@ -1,14 +1,11 @@
 import { useEffect, useState } from "react";
+import { msUntilMidnight, zoneOf } from "../../lib/day";
+import { useAuth } from "../auth/AuthContext";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 function pad(value) {
   return String(value).padStart(2, "0");
-}
-
-function msUntilUtcMidnight(now) {
-  const next = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
-  return Math.max(0, next - now.getTime());
 }
 
 function formatHm(ms) {
@@ -19,14 +16,16 @@ function formatHm(ms) {
 }
 
 export function useDayCountdown() {
-  const [ms, setMs] = useState(() => msUntilUtcMidnight(new Date()));
+  const { user } = useAuth();
+  const zone = zoneOf(user);
+  const [ms, setMs] = useState(() => msUntilMidnight(zone));
 
   useEffect(() => {
-    const tick = () => setMs(msUntilUtcMidnight(new Date()));
+    const tick = () => setMs(msUntilMidnight(zone));
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [zone]);
 
   return {
     label: formatHm(ms),

@@ -1,7 +1,7 @@
 import { Dumbbell, Flame, Heart, Sparkles, Timer, Trophy, User, Utensils, Weight, Zap } from "lucide-react-native";
 
-const MINT = "#9BFFC8";
-const INK = "#07140F";
+const MINT = "#8FDCB8";
+const INK = "#10201A";
 
 function look(Icon) {
   return {

@@ -12,7 +12,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-export const GLASS_BG = "#07140F";
+export const GLASS_BG = "#101C18";
 
 const LENS_ID = "lg-lens-clear";
 
@@ -170,26 +170,26 @@ export function glassStyle(extra) {
 
   const frost = usesFrost();
   const filter = frost
-    ? "blur(22px) saturate(1.85) brightness(1.08)"
-    : "blur(12px) saturate(1.35) brightness(1.04)";
+    ? "blur(11px) saturate(1.18) brightness(1.02)"
+    : "blur(8px) saturate(1.06)";
   const useLens = !skipLens && !pill && lensEnabled();
   const lens = useLens ? `url(#${LENS_ID}) ${filter}` : filter;
 
   return {
-    backgroundColor: "rgba(7, 20, 15, 0.42)",
+    backgroundColor: "rgba(16, 28, 24, 0.16)",
     borderWidth: 1,
     borderColor: tone.line,
     ...(Platform.OS === "web"
       ? {
           overflow: "hidden",
-          backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.01) 50%, rgba(255,255,255,0.02))",
+          backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01) 46%, rgba(255,255,255,0.015))",
           boxShadow: materialShadow(thick, frost),
           backdropFilter: lens,
           WebkitBackdropFilter: lens,
           isolation: "isolate",
         }
       : {
-          backgroundColor: "rgba(255,255,255,0.1)",
+          backgroundColor: "rgba(255,255,255,0.08)",
           borderColor: "rgba(255,255,255,0.28)",
           shadowColor: "#000000",
           shadowOpacity: 0.4,
@@ -262,7 +262,7 @@ export function AccentGlow({ size = 120, pulse = false, color = "rgba(125,255,17
                 boxShadow: `0 0 ${Math.round(size * 0.4)}px ${Math.round(size * 0.14)}px ${color}`,
               }
             : {
-                shadowColor: "#7DFFB3",
+                shadowColor: "#76C9A8",
                 shadowOpacity: 0.95,
                 shadowRadius: Math.round(size * 0.38),
                 shadowOffset: { width: 0, height: 0 },

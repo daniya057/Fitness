@@ -11,8 +11,9 @@ import { persistFoodSkip } from "./FoodSkipCard";
 import { FoodSkipEditor } from "./FoodSkipEditor";
 import { foodSkipLabel, parseFoodSkipList } from "./foodSkip";
 import { lookOfFood } from "./look";
-import { formatPrice, mealLogItem } from "./mealPlan";
+import { leftoverBudget, leftoverCopy, leftoverHeadline, formatPrice, mealLogItem } from "./mealPlan";
 import { useMealPlan } from "./mealPlanStore";
+import { macroTargets } from "../checkins/recommend";
 
 const SLOT_EMOJI = {
   breakfast: "🌅",
@@ -20,16 +21,6 @@ const SLOT_EMOJI = {
   dinner: "🌙",
   snack: "🍎",
 };
-
-function mealsWord(count) {
-  if (count === 1) {
-    return "приём";
-  }
-  if (count >= 2 && count <= 4) {
-    return "приёма";
-  }
-  return "приёмов";
-}
 
 function Ingredient({ item, last }) {
   const look = lookOfFood(item);
@@ -135,11 +126,12 @@ function BlacklistPanel({ chips, onChange, busy, error, onSave, onClose }) {
   );
 }
 
-export function MealPlanCard({ user, busy, onAddItem }) {
+export function MealPlanCard({ user, busy, eatenKcal = 0, onAddItem }) {
   const { patch } = useAuth();
   const store = useMealPlan();
   const plan = store.current(user);
   const { addedIds, collapsed } = store;
+  const leftover = leftoverBudget(macroTargets(user).kcal, eatenKcal);
   const [listOpen, setListOpen] = useState(false);
   const [chips, setChips] = useState(() => parseFoodSkipList(user?.quiz?.foodSkip));
   const [listBusy, setListBusy] = useState(false);
@@ -149,8 +141,8 @@ export function MealPlanCard({ user, busy, onAddItem }) {
     return null;
   }
 
-  const compose = () => store.compose(user);
-  const reroll = () => store.reroll(user);
+  const compose = () => store.compose(user, eatenKcal);
+  const reroll = () => store.reroll(user, eatenKcal);
 
   const addMeal = (meal) => {
     if (busy || addedIds.includes(meal.id)) {
@@ -196,15 +188,25 @@ export function MealPlanCard({ user, busy, onAddItem }) {
             <ChefHat size={22} color={getPalette().accent} strokeWidth={2.2} />
           </View>
           <View className="flex-1">
-            <Text className="text-[17px] font-semibold text-white">Рацион на день</Text>
-            <Text className="mt-0.5 text-[13px] leading-5 text-white/55">
-              Приёмы пищи под твою норму, с продуктами и ценой.
+            <Text className="text-[17px] font-semibold text-white">
+              {leftover.kind === "enough"
+                ? "На сегодня хватит"
+                : leftover.kind === "snack"
+                  ? "Перекус"
+                  : leftover.kind === "rest"
+                    ? "Рацион на остаток"
+                    : "Рацион на день"}
             </Text>
+            <Text className="mt-0.5 text-[13px] leading-5 text-white/55">{leftoverCopy(leftover)}</Text>
           </View>
         </View>
         <View className="mt-4 flex-row items-center">
           <View className="mr-2 flex-1">
-            <PrimaryButton glass label="Составить рацион" onPress={compose} />
+            <PrimaryButton
+              glass
+              label={leftover.kind === "enough" ? "Всё равно собрать" : leftover.kind === "snack" ? "Собрать перекус" : leftover.kind === "rest" ? "Собрать на остаток" : "Составить рацион"}
+              onPress={compose}
+            />
           </View>
           <SoftPress
             onPress={listOpen ? () => setListOpen(false) : openList}
@@ -219,7 +221,7 @@ export function MealPlanCard({ user, busy, onAddItem }) {
             <View className="flex-row items-center">
               <Ban size={16} color={listOpen ? getPalette().accent : "#F4FFF8"} strokeWidth={2.2} />
               <Text className="ml-1.5 text-[13px] font-semibold" style={{ color: listOpen ? getPalette().accent : "#F4FFF8" }}>
-                Список
+                Не предлагать
               </Text>
             </View>
           </SoftPress>
@@ -259,9 +261,12 @@ export function MealPlanCard({ user, busy, onAddItem }) {
       <View className="mt-4 rounded-[24px] px-5 py-4" style={glassStyle({ borderRadius: 24 })}>
         <View className="flex-row items-center">
           <View className="flex-1 pr-3">
-            <Text className="text-[12px] font-medium tracking-[1.2px] text-white/55">РАЦИОН НА ДЕНЬ</Text>
+            <Text className="text-[12px] font-medium tracking-[1.2px] text-white/55">
+              {plan.leftover?.kind === "rest" || plan.leftover?.kind === "snack" ? "ОСТАТОК ДНЯ" : "РАЦИОН"}
+            </Text>
             <Text className="mt-1 text-[14px] text-white/80">
-              {count} {mealsWord(count)} · {plan.totals.kcal} ккал · ≈ {formatPrice(plan.totals.price)}
+              {leftoverHeadline(plan)}
+              {count > 0 ? ` · ≈ ${formatPrice(plan.totals.price)}` : ""}
             </Text>
           </View>
           {toggle}
@@ -298,26 +303,35 @@ export function MealPlanCard({ user, busy, onAddItem }) {
 
   return (
     <View className="mt-4 rounded-[24px] px-5 py-5" style={glassStyle({ borderRadius: 24 })}>
-      <View className="flex-row items-center">
+      <View className="flex-row items-start">
         <View className="flex-1 pr-2">
-          <Text className="text-[12px] font-medium tracking-[1.2px] text-white/55">РАЦИОН НА ДЕНЬ</Text>
-          <Text className="mt-1 text-[15px] text-white/80">
-            {count} {mealsWord(count)} · {plan.totals.kcal} из {plan.target.kcal} ккал
+          <Text className="text-[12px] font-medium tracking-[1.2px] text-white/55">
+            {plan.leftover?.kind === "rest" || plan.leftover?.kind === "snack"
+              ? "ОСТАТОК ДНЯ"
+              : plan.leftover?.kind === "enough"
+                ? "РАЦИОН"
+                : "РАЦИОН"}
           </Text>
+          <Text className="mt-1 text-[15px] leading-5 text-white/80">{leftoverHeadline(plan)}</Text>
         </View>
-        <SoftPress
-          onPress={reroll}
-          className="mr-2 flex-row items-center rounded-full px-3"
-          style={{ ...glassStyle({ variant: "fill", borderRadius: 999 }), minHeight: 40 }}
-        >
-          <View className="flex-row items-center">
-            <RefreshCw size={15} color="#F4FFF8" strokeWidth={2.2} />
-            <Text className="ml-1.5 text-[13px] font-semibold text-white">Другой</Text>
-          </View>
-        </SoftPress>
+        {toggle}
+      </View>
+      <View className="mt-3 flex-row items-center">
+        {count > 0 ? (
+          <SoftPress
+            onPress={reroll}
+            className="mr-2 flex-row items-center rounded-full px-3"
+            style={{ ...glassStyle({ variant: "fill", borderRadius: 999 }), minHeight: 40 }}
+          >
+            <View className="flex-row items-center">
+              <RefreshCw size={15} color="#F4FFF8" strokeWidth={2.2} />
+              <Text className="ml-1.5 text-[13px] font-semibold text-white">Другой</Text>
+            </View>
+          </SoftPress>
+        ) : null}
         <SoftPress
           onPress={listOpen ? () => setListOpen(false) : openList}
-          className="mr-2 items-center justify-center rounded-full px-3"
+          className="flex-1 items-center justify-center rounded-full px-3"
           accessibilityLabel="Чёрный список"
           style={{
             ...glassStyle({ variant: "fill", borderRadius: 999 }),
@@ -328,11 +342,10 @@ export function MealPlanCard({ user, busy, onAddItem }) {
           <View className="flex-row items-center">
             <Ban size={15} color={listOpen ? getPalette().accent : "#F4FFF8"} strokeWidth={2.2} />
             <Text className="ml-1.5 text-[13px] font-semibold" style={{ color: listOpen ? getPalette().accent : "#F4FFF8" }}>
-              Список
+              Не предлагать
             </Text>
           </View>
         </SoftPress>
-        {toggle}
       </View>
 
       {listOpen ? (
@@ -346,6 +359,10 @@ export function MealPlanCard({ user, busy, onAddItem }) {
         />
       ) : null}
 
+      {plan.leftover && plan.leftover.kind !== "full" ? (
+        <Text className="mt-3 text-[13px] leading-5 text-white/55">{leftoverCopy(plan.leftover)}</Text>
+      ) : null}
+
       {plan.meals.map((meal) => (
         <MealCard
           key={meal.id}
@@ -357,17 +374,21 @@ export function MealPlanCard({ user, busy, onAddItem }) {
         />
       ))}
 
-      <View className="mt-4 flex-row items-center justify-between rounded-[18px] px-4 py-3" style={{ backgroundColor: "rgba(255,255,255,0.06)" }}>
-        <View>
-          <Text className="text-[12px] text-white/55">Продукты на день</Text>
-          <Text className="mt-0.5 text-[13px] text-white/70">
-            Б {plan.totals.protein} · Ж {plan.totals.fat} · У {plan.totals.carbs}
-          </Text>
+      {count > 0 ? (
+        <View className="mt-4 flex-row items-center justify-between rounded-[18px] px-4 py-3" style={{ backgroundColor: "rgba(255,255,255,0.06)" }}>
+          <View>
+            <Text className="text-[12px] text-white/55">Продукты на день</Text>
+            <Text className="mt-0.5 text-[13px] text-white/70">
+              Б {plan.totals.protein} · Ж {plan.totals.fat} · У {plan.totals.carbs}
+            </Text>
+          </View>
+          <Text className="text-[20px] font-semibold text-white">≈ {formatPrice(plan.totals.price)}</Text>
         </View>
-        <Text className="text-[20px] font-semibold text-white">≈ {formatPrice(plan.totals.price)}</Text>
-      </View>
+      ) : null}
       <Text className="mt-3 text-[12px] leading-4 text-white/45">
-        Цены — ориентир по средним ценам магазинов, в твоём городе могут отличаться.
+        {plan.leftover?.kind === "enough"
+          ? "Если проголодаешься — добавь перекус в дневник вручную."
+          : "Цены — ориентир по средним ценам магазинов, в твоём городе могут отличаться."}
         {foodSkipLabel(user?.quiz?.foodSkip)
           ? ` Не предлагаем: ${foodSkipLabel(user.quiz.foodSkip)}.`
           : plan.restricted

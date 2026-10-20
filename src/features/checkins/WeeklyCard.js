@@ -13,14 +13,12 @@ import {
 import { ChoiceGrid, ChoiceRow } from "../onboarding/ChoiceGrid";
 import { DaysPicker } from "../onboarding/DaysPicker";
 import { useAuth } from "../auth/AuthContext";
-import { PromptRow } from "./PromptRow";
 import { needsWeeklyReview, weekStartUtc } from "./recommend";
 import { checkinSkipped, skipCheckin } from "./skip";
 
-export function WeeklyCard({ compact = false } = {}) {
+export function WeeklyCard({ startOpen = false, onClose } = {}) {
   const { user, patch } = useAuth();
   const [hidden, setHidden] = useState(false);
-  const [open, setOpen] = useState(!compact);
   const [mood, setMood] = useState("");
   const [blockers, setBlockers] = useState([]);
   const [favorite, setFavorite] = useState("");
@@ -39,6 +37,7 @@ export function WeeklyCard({ compact = false } = {}) {
     await lightTap();
     skipCheckin("weeklyHome", user.id);
     setHidden(true);
+    onClose?.();
   };
 
   const save = async () => {
@@ -67,6 +66,7 @@ export function WeeklyCard({ compact = false } = {}) {
           skippedWeight: skipWeight || !weightText,
         },
       });
+      onClose?.();
     } catch (err) {
       setError(err.message || "Не сохранилось");
     } finally {
@@ -74,17 +74,17 @@ export function WeeklyCard({ compact = false } = {}) {
     }
   };
 
-  if (compact && !open) {
-    return <PromptRow kicker="НЕДЕЛЯ" title="Как прошла?" action="Ответить" onPress={() => setOpen(true)} />;
+  if (!startOpen) {
+    return null;
   }
 
   return (
     <View
-      className="mb-5 rounded-[24px] px-5 py-5"
+      className="mt-5 rounded-[24px] px-5 py-5"
       style={glassStyle({
         borderRadius: 24,
         lens: false,
-        backgroundColor: "rgba(7, 20, 15, 0.55)",
+        backgroundColor: "rgba(16, 28, 24, 0.18)",
       })}
     >
       <Text className="text-[11px] font-medium tracking-[1px] text-white/55">НЕДЕЛЯ</Text>

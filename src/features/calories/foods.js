@@ -1,5 +1,6 @@
 import data from "../../../data/content/foods.json";
 import { api } from "../auth/api";
+import { guessTimeZone, localDay } from "../../lib/day";
 
 export const FOOD_CATEGORIES = data.categories;
 export const FOODS = data.foods.filter((item) => item.category !== "quick");
@@ -44,7 +45,24 @@ export function mergeFoodLists(local, remote) {
 }
 
 export function utcDay(date = new Date()) {
-  return date.toISOString().slice(0, 10);
+  return localDay(guessTimeZone(), date);
+}
+
+const SHELF_IDS = [
+  "yaytso-kurinoe",
+  "tvorog-nezhirnyy",
+  "kuritsa-1-kat",
+  "kurinaya-grudka",
+  "banan",
+  "grechka-varenaya",
+  "moloko-2-5",
+  "hleb-rzhanoy",
+  "ovsyanye-hlopya",
+  "kartofel-otvarnoy",
+];
+
+export function shelfFoods() {
+  return SHELF_IDS.map((id) => foodById(id)).filter(Boolean);
 }
 
 export function foldName(value) {
@@ -163,12 +181,18 @@ export function searchFoods(query, categoryId) {
       return false;
     }
     if (!needle) {
-      return Boolean(categoryId && categoryId !== "all");
+      if (categoryId && categoryId !== "all") {
+        return true;
+      }
+      return SHELF_IDS.includes(item.id);
     }
     return matchScore(item.name, needle) < 9 && !isPantryName(item.name);
   });
   if (!needle) {
-    return list;
+    if (!categoryId || categoryId === "all") {
+      return SHELF_IDS.map((id) => list.find((item) => item.id === id)).filter(Boolean);
+    }
+    return list.slice(0, 12);
   }
   return list
     .map((item, index) => ({ item, index, score: matchScore(item.name, needle) }))

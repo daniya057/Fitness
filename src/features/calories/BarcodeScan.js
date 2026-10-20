@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Text, TextInput, View } from "react-native";
+import { Platform, Text, TextInput, View } from "react-native";
 import { GhostButton, PrimaryButton } from "../../ui/kit";
 import { glassStyle } from "../../ui/Glass";
 import { cleanBarcode, lookupBarcode } from "./barcode";
@@ -121,6 +121,11 @@ export function BarcodeScan({ onClose, onFood }) {
     <View className="absolute inset-0 z-20 justify-end bg-ink/50">
       <View className="rounded-t-[28px] px-5 pb-8 pt-5" style={glassStyle({ borderRadius: 28, backgroundColor: "rgba(7,20,15,0.94)" })}>
         <Text className="text-[20px] font-semibold text-white">Сканер</Text>
+        {Platform.OS === "web" ? (
+          <Text className="mt-2 text-[13px] leading-5 text-white/60">
+            На телефоне камера ловит код лучше. Здесь можно ввести цифры с пачки.
+          </Text>
+        ) : null}
         <Text className="mt-2 text-[13px] leading-5 text-white/60">{hint}</Text>
         <View ref={hostRef} className="mt-4 h-[220px] overflow-hidden rounded-[22px]" style={{ backgroundColor: "rgba(255,255,255,0.06)" }} />
         <TextInput

@@ -2,12 +2,36 @@ import { Pressable, Text, View } from "react-native";
 import { lightTap } from "../../lib/haptics";
 import { SectionLabel } from "../../ui/kit";
 import { glassStyle } from "../../ui/Glass";
+import { ACCENT_INK } from "../../ui/layout";
+import { getPalette } from "../../ui/theme";
+
+export function choiceSurface(on, { fill = false, radius = 22 } = {}) {
+  if (on) {
+    return {
+      backgroundColor: getPalette().accent,
+      borderRadius: radius,
+    };
+  }
+  return glassStyle({
+    variant: fill ? "fill" : undefined,
+    borderRadius: radius,
+    backgroundColor: "rgba(255,255,255,0.08)",
+  });
+}
+
+export function choiceTitleStyle(on) {
+  return { color: on ? ACCENT_INK : "#F2FAF6" };
+}
+
+export function choiceHintStyle(on) {
+  return { color: on ? "rgba(16,32,26,0.58)" : "rgba(242,250,246,0.5)" };
+}
 
 export function ChoiceGrid({ label, options, value, values, onChange, multi = false, columns = 1, fill = false }) {
   const selected = multi ? values || [] : [];
 
-  const toggle = async (id) => {
-    await lightTap();
+  const toggle = (id) => {
+    lightTap();
     if (!multi) {
       onChange(id);
       return;
@@ -32,14 +56,16 @@ export function ChoiceGrid({ label, options, value, values, onChange, multi = fa
               key={item.id}
               onPress={() => toggle(item.id)}
               className={`mb-3 rounded-[22px] px-4 py-4 ${columns === 2 ? "w-[48%]" : "w-full"}`}
-              style={glassStyle({
-                variant: fill ? "fill" : undefined,
-                borderRadius: 22,
-                backgroundColor: on ? "rgba(125,255,179,0.16)" : "rgba(255,255,255,0.08)",
-              })}
+              style={choiceSurface(on, { fill, radius: 22 })}
             >
-              <Text className="text-[16px] font-semibold text-white">{item.title}</Text>
-              {item.hint ? <Text className="mt-1 text-[12px] leading-4 text-white/50">{item.hint}</Text> : null}
+              <Text className="text-[16px] font-semibold" style={choiceTitleStyle(on)}>
+                {item.title}
+              </Text>
+              {item.hint ? (
+                <Text className="mt-1 text-[12px] leading-4" style={choiceHintStyle(on)}>
+                  {item.hint}
+                </Text>
+              ) : null}
             </Pressable>
           );
         })}
@@ -51,8 +77,8 @@ export function ChoiceGrid({ label, options, value, values, onChange, multi = fa
 export function ChoiceRow({ options, value, values, onChange, multi = false, fill = true }) {
   const selected = multi ? values || [] : [];
 
-  const toggle = async (id) => {
-    await lightTap();
+  const toggle = (id) => {
+    lightTap();
     if (!multi) {
       onChange(id);
       return;
@@ -76,16 +102,15 @@ export function ChoiceRow({ options, value, values, onChange, multi = false, fil
             onPress={() => toggle(item.id)}
             className="rounded-full px-3"
             style={{
-              ...glassStyle({
-                variant: fill ? "fill" : undefined,
-                borderRadius: 999,
-                backgroundColor: on ? "rgba(125,255,179,0.16)" : "rgba(255,255,255,0.08)",
-              }),
+              ...choiceSurface(on, { fill, radius: 999 }),
               minHeight: 44,
               justifyContent: "center",
+              paddingHorizontal: 14,
             }}
           >
-            <Text className={`text-[14px] font-semibold ${on ? "text-[#9BFFC8]" : "text-white"}`}>{item.title}</Text>
+            <Text className="text-[14px] font-semibold" style={choiceTitleStyle(on)}>
+              {item.title}
+            </Text>
           </Pressable>
         );
       })}

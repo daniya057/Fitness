@@ -7,24 +7,31 @@ const { lookupBarcode, searchNutrition } = require("./nutrition");
 const { noteProgramProgress, openProgramLevel } = require("./program-level");
 const { publicAvatar, setAvatarPhoto, wearAvatar } = require("./avatar");
 const {
-  addFriend,
+  acceptRequest,
+  declineRequest,
   ensureFriends,
   ensureNudges,
-  listFriendCards,
+  forgetPerson,
   markNudgesSeen,
+  normalizeAsymmetric,
   nudgeFriend,
+  packSocial,
   publicCard,
   removeFriend,
+  requestFriend,
   searchPeople,
   unreadNudges,
 } = require("./friends");
 const { sendCodeEmail } = require("./mail");
+const { readShareOrigin } = require("./share-url");
 const { settleStreak, shieldNoticeOpen, utcDay } = require("./streak");
+const { applyTimeZone, DEFAULT_TZ, todayOf } = require("./day");
 
 loadEnv();
 
 const {
   adminUserView,
+  applyAdminUserPatch,
   buildStats,
   clientIp,
   createSession,
@@ -32,6 +39,7 @@ const {
   loadCatalog,
   revokeSession,
   saveCatalog,
+  removeUserFile,
   tooManyLogins,
   verifyAdminLogin,
 } = require("./admin-lib");
@@ -275,7 +283,7 @@ function sanitizeQuiz(raw) {
     }
   }
   return {
-    place: pickAllowed(ALLOWED_PLACE, String(source.place || ""), "anywhere"),
+    place: pickAllowed(ALLOWED_PLACE, String(source.place || ""), "home"),
     timeBudget: coerceTime(source.timeBudget, "60"),
     restrictions: uniqueAllowed(ALLOWED_PAIN, source.restrictions),
     diet,
@@ -297,7 +305,7 @@ function applyCheckin(record, body) {
   if (!raw || typeof raw !== "object") {
     return "Непонятный чек-ин";
   }
-  const date = utcDay();
+  const date = todayOf(record);
   const energy = pickAllowed(ALLOWED_ENERGY, String(raw.energy || ""), "");
   const sleep = pickAllowed(ALLOWED_SLEEP, String(raw.sleep || ""), "");
   const time = coerceTime(raw.time, coerceTime(record.quiz?.timeBudget, "60"));
@@ -327,7 +335,7 @@ function applyCheckinFeel(record, feel) {
   if (!ALLOWED_FEEL.includes(next)) {
     return "Как зашло — один из четырёх ответов";
   }
-  const date = utcDay();
+  const date = todayOf(record);
   const list = Array.isArray(record.checkins) ? [...record.checkins] : [];
   const index = list.findIndex((item) => item.date === date);
   if (index >= 0) {
@@ -359,7 +367,7 @@ function weekStartUtc(iso) {
 
 function weekActivityCount(record) {
   ensureActivityDates(record);
-  const start = weekStartUtc(utcDay());
+  const start = weekStartUtc(todayOf(record));
   const endDate = new Date(`${start}T00:00:00.000Z`);
   endDate.setUTCDate(endDate.getUTCDate() + 7);
   const end = endDate.toISOString().slice(0, 10);
@@ -372,6 +380,21 @@ function friendCountOf(record) {
     return 0;
   }
   return [...new Set(record.friends.filter((id) => typeof id === "string" && id))].length;
+}
+
+function socialPayload(record) {
+  const list = listUsers();
+  const migrated = normalizeAsymmetric(list);
+  const byId = usersById(list);
+  const self = byId.get(record.id) || record;
+  const social = packSocial(self, list, byId);
+  saveDirty([...migrated, ...social.dirty]);
+  return {
+    friends: social.friends,
+    incoming: social.incoming,
+    outgoing: social.outgoing,
+    user: publicUser(self),
+  };
 }
 
 function stampSessionFlags(record, session) {
@@ -440,7 +463,7 @@ function applyWeeklyReview(record, body) {
   if (!Number.isFinite(nextDays) || nextDays < 1 || nextDays > 7) {
     return "Дней на следующей неделе — от 1 до 7";
   }
-  const start = weekStartUtc(String(raw.weekStart || utcDay()));
+  const start = weekStartUtc(String(raw.weekStart || todayOf(record)));
   const weightKg = Number(raw.weightKg);
   const weight =
     !raw.skippedWeight && Number.isFinite(weightKg) && weightKg >= 40 && weightKg <= 160
@@ -472,8 +495,8 @@ function applyWeeklyReview(record, body) {
   return null;
 }
 
-function emptyFuelLog() {
-  return { date: utcDay(), items: [] };
+function emptyFuelLog(record) {
+  return { date: todayOf(record), items: [] };
 }
 
 function countedFuelItems(items) {
@@ -493,8 +516,8 @@ function countedFuelItems(items) {
 }
 
 function ensureFuelLog(record) {
-  if (!record.fuelLog || record.fuelLog.date !== utcDay() || !Array.isArray(record.fuelLog.items)) {
-    record.fuelLog = emptyFuelLog();
+  if (!record.fuelLog || record.fuelLog.date !== todayOf(record) || !Array.isArray(record.fuelLog.items)) {
+    record.fuelLog = emptyFuelLog(record);
     return true;
   }
   const items = record.fuelLog.items;
@@ -579,11 +602,32 @@ function workSecondsOf(session) {
   return rounds * one;
 }
 
+function isSetLike(session) {
+  return Boolean(session?.format === "sets" || session?.custom || (session?.place === "gym" && session?.kind !== "cardio"));
+}
+
+function workSetCountOf(session) {
+  const moves = Array.isArray(session?.moves) ? session.moves : [];
+  return moves
+    .filter((move) => !move.warmup && !move.finisher)
+    .reduce((sum, move) => sum + Math.max(1, Math.min(6, Math.round(Number(move.sets) || 1))), 0);
+}
+
 function minActivitySecOf(session) {
   if (!session) {
     return 60;
   }
+  if (isSetLike(session)) {
+    return Math.max(1, Math.ceil(workSetCountOf(session) / 2));
+  }
   return Math.max(1, Math.round(workSecondsOf(session) / 2));
+}
+
+function activityCounted(session, body) {
+  if (isSetLike(session)) {
+    return Number(body?.workSetsDone) >= minActivitySecOf(session);
+  }
+  return Number(body?.elapsedSec) >= minActivitySecOf(session);
 }
 
 function findActivitySession(record, sessionId, workouts) {
@@ -611,7 +655,7 @@ function ensureActivityDates(record) {
 
 function stampActivityDate(record, day) {
   ensureActivityDates(record);
-  const date = DAY_ISO.test(day) ? day : utcDay();
+  const date = DAY_ISO.test(day) ? day : todayOf(record);
   if (record.lastActivityDate && DAY_ISO.test(record.lastActivityDate) && !record.activityDates.includes(record.lastActivityDate)) {
     record.activityDates.push(record.lastActivityDate);
   }
@@ -622,7 +666,7 @@ function stampActivityDate(record, day) {
 }
 
 function applyActivity(record) {
-  const today = utcDay();
+  const today = todayOf(record);
   stampActivityDate(record, today);
   if (record.lastActivityDate === today) {
     return false;
@@ -698,23 +742,48 @@ function loadWorkoutsFile() {
   }
 }
 
-function loadDailyPool() {
+function dailyFitsPlace(session, place) {
+  const where = String(session?.place || "any");
+  if (where === "any") {
+    return true;
+  }
+  if (place === "anywhere") {
+    return true;
+  }
+  if (place === "gym") {
+    return where === "gym";
+  }
+  return where !== "gym";
+}
+
+function loadDailyPool(place) {
   try {
     const data = JSON.parse(fs.readFileSync(WORKOUTS_PATH, "utf8"));
     const sessions = Array.isArray(data.sessions) ? data.sessions : [];
     return sessions
-      .filter((item) => item && item.daily && item.id)
+      .filter((item) => item && item.daily && item.id && dailyFitsPlace(item, place))
       .map((item) => {
         const moves = Array.isArray(item.moves) ? item.moves : [];
-        const hint = moves
-          .slice(0, 2)
-          .map((move) => String(move.title || "").trim())
-          .filter(Boolean)
-          .join(" · ");
+        const titles = [];
+        const seen = new Set();
+        for (const move of moves) {
+          const title = String(move.title || "").trim();
+          const key = title.toLowerCase().replace(/ё/g, "е");
+          if (!title || seen.has(key)) {
+            continue;
+          }
+          seen.add(key);
+          titles.push(title);
+          if (titles.length >= 2) {
+            break;
+          }
+        }
+        const sessionTitle = String(item.title || "Мини-тренировка");
+        const hint = titles.filter((title) => title.toLowerCase() !== sessionTitle.toLowerCase()).join(" · ");
         return {
           id: item.id,
-          title: String(item.title || "Мини-тренировка"),
-          hint: hint || "Мини-тренировка",
+          title: sessionTitle,
+          hint: hint || "Коротко, ~2 минуты",
           rule: "session",
           sessionId: item.id,
           kind: item.kind || "",
@@ -734,9 +803,9 @@ function dailyHash(text) {
   return hash >>> 0;
 }
 
-function pickDailyTasks(userId, day) {
-  const pool = loadDailyPool();
-  let state = dailyHash(`${userId}|${day}`);
+function pickDailyTasks(userId, day, place) {
+  const pool = loadDailyPool(place);
+  let state = dailyHash(`${userId}|${day}|${place || "home"}`);
   const picked = [];
   while (picked.length < 3 && pool.length) {
     state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
@@ -748,15 +817,22 @@ function pickDailyTasks(userId, day) {
 }
 
 function ensureDaily(record) {
-  const today = utcDay();
+  const today = todayOf(record);
+  const place = String(record?.quiz?.place || "home");
   const tasks = record.daily && Array.isArray(record.daily.tasks) ? record.daily.tasks : [];
-  const fresh = record.daily && record.daily.date === today && tasks.length > 0 && tasks.every((task) => task.rule === "session" && task.sessionId);
+  const fresh =
+    record.daily &&
+    record.daily.date === today &&
+    record.daily.place === place &&
+    tasks.length > 0 &&
+    tasks.every((task) => task.rule === "session" && task.sessionId);
   if (fresh) {
     return false;
   }
   record.daily = {
     date: today,
-    tasks: pickDailyTasks(record.id, today),
+    place,
+    tasks: pickDailyTasks(record.id, today, place),
     done: [],
     shieldGranted: false,
   };
@@ -770,7 +846,7 @@ function dailyTaskMet(record, task) {
     return Array.isArray(record.todaySessions) && record.todaySessions.includes(task.sessionId);
   }
   if (task.rule === "any") {
-    return record.lastActivityDate === utcDay();
+    return record.lastActivityDate === todayOf(record);
   }
   if (task.rule === "kind") {
     return Array.isArray(record.todayKinds) && record.todayKinds.includes(task.kind);
@@ -805,7 +881,14 @@ function scoreDaily(record) {
   }
   record.dailyDoneCount += [...done].filter((id) => !prev.has(id)).length;
   record.daily.done = [...done];
-  if (!record.daily.shieldGranted && tasks.length > 0 && tasks.every((task) => done.has(task.id))) {
+  const dailyIds = new Set(tasks.map((task) => task.sessionId).filter(Boolean));
+  const planDone = (Array.isArray(record.todaySessions) ? record.todaySessions : []).some((id) => {
+    const key = String(id || "");
+    return key && !key.startsWith("warmup-") && !dailyIds.has(key);
+  });
+  const allTasks = tasks.length > 0 && tasks.every((task) => done.has(task.id));
+  const anyToday = record.lastActivityDate === todayOf(record);
+  if (!record.daily.shieldGranted && (allTasks || planDone || anyToday)) {
     record.freezesLeft = clamp((Number(record.freezesLeft) || 0) + 1, 0, 20);
     record.daily.shieldGranted = true;
     record.dailyClearDays += 1;
@@ -915,7 +998,7 @@ function ensureAchievements(record) {
     seeded = true;
   }
   if (record.cleanStreak == null || record.cleanStreak === "") {
-    const gap = record.lastActivityDate ? dayGap(record.lastActivityDate, utcDay()) : 99;
+    const gap = record.lastActivityDate ? dayGap(record.lastActivityDate, todayOf(record)) : 99;
     record.cleanStreak = gap <= 1 ? Number(record.streak) || 0 : 0;
     seeded = true;
   }
@@ -931,7 +1014,7 @@ function ensureAchievements(record) {
     record.sessionsDone = [];
     seeded = true;
   }
-  if (settleStreak(record).changed) {
+  if (settleStreak(record, todayOf(record)).changed) {
     seeded = true;
   }
   if (scoreDaily(record)) {
@@ -973,10 +1056,10 @@ function finiteNonNeg(value) {
   return n;
 }
 
-function sanitizeFuelLog(incoming, previous) {
-  const today = utcDay();
+function sanitizeFuelLog(incoming, previous, record) {
+  const today = todayOf(record);
   if (!incoming || typeof incoming !== "object" || incoming.date !== today) {
-    return emptyFuelLog();
+    return emptyFuelLog(record);
   }
   const prevAt = new Map();
   if (previous && previous.date === today && Array.isArray(previous.items)) {
@@ -1115,6 +1198,56 @@ function applyCustomSessions(record, body) {
   return "";
 }
 
+function loadKgOf(raw) {
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    const kg = Number(raw.kg);
+    return Number.isFinite(kg) ? kg : 0;
+  }
+  const kg = Number(raw);
+  return Number.isFinite(kg) ? kg : 0;
+}
+
+function loadHistoryOf(raw) {
+  if (raw && typeof raw === "object" && Array.isArray(raw.history)) {
+    return raw.history.map(Number).filter((n) => Number.isFinite(n) && n > 0).slice(-12);
+  }
+  const kg = loadKgOf(raw);
+  return kg > 0 ? [kg] : [];
+}
+
+function applyGymLoad(record, payload) {
+  const title = String(payload?.title || "").trim().slice(0, 40);
+  if (title.length < 2) {
+    return "Нет упражнения";
+  }
+  if (!record.gymLoads || typeof record.gymLoads !== "object" || Array.isArray(record.gymLoads)) {
+    record.gymLoads = {};
+  }
+  const prev = record.gymLoads[title];
+  const prevKg = loadKgOf(prev);
+  let kg = Math.round(Number(payload?.kg) * 10) / 10;
+  if (payload?.bump) {
+    kg = Math.round((prevKg + 2.5) * 10) / 10;
+  }
+  if (!Number.isFinite(kg) || kg < 0 || kg > 400) {
+    return "Вес от 0 до 400 кг";
+  }
+  if (kg === 0) {
+    delete record.gymLoads[title];
+  } else {
+    const history = loadHistoryOf(prev);
+    if (prevKg > 0 && prevKg !== kg) {
+      history.push(prevKg);
+    }
+    record.gymLoads[title] = { kg, history: history.slice(-12) };
+  }
+  const keys = Object.keys(record.gymLoads);
+  if (keys.length > 48) {
+    delete record.gymLoads[keys[0]];
+  }
+  return "";
+}
+
 function publicUser(record) {
   ensureDayLogs(record);
   ensureFreezes(record);
@@ -1137,7 +1270,8 @@ function publicUser(record) {
     todaySessions: Array.isArray(record.todaySessions) ? record.todaySessions : [],
     dailyDoneCount: record.dailyDoneCount || 0,
     dailyClearDays: record.dailyClearDays || 0,
-    shieldNotice: shieldNoticeOpen(record),
+    shieldNotice: shieldNoticeOpen(record, todayOf(record)),
+    timeZone: record.timeZone || DEFAULT_TZ,
     daily: record.daily
       ? {
           date: record.daily.date,
@@ -1164,7 +1298,9 @@ function publicUser(record) {
     ...publicAvatar(record),
     incomingNudges: unreadNudges(record, usersById(listUsers())),
     customSessions: Array.isArray(record.customSessions) ? record.customSessions : [],
+    gymLoads: record.gymLoads && typeof record.gymLoads === "object" && !Array.isArray(record.gymLoads) ? record.gymLoads : {},
     quizDone: Boolean(record.quizDone),
+    inviteHidden: Boolean(record.inviteHidden),
     quiz: record.quiz || null,
     checkins: Array.isArray(record.checkins) ? record.checkins : [],
     weeklyReviews: Array.isArray(record.weeklyReviews) ? record.weeklyReviews : [],
@@ -1242,7 +1378,11 @@ function findByToken(token) {
   if (!token) {
     return null;
   }
-  return listUsers().find((user) => Array.isArray(user.tokens) && user.tokens.includes(token)) || null;
+  const record = listUsers().find((user) => Array.isArray(user.tokens) && user.tokens.includes(token)) || null;
+  if (!record || record.disabled) {
+    return null;
+  }
+  return record;
 }
 
 function bearer(req, queryToken) {
@@ -1307,7 +1447,10 @@ const server = http.createServer(async (req, res) => {
         freezesLeft: START_FREEZES,
         onboardingDone: false,
         quizDone: false,
-        quiz: null,
+        quiz: sanitizeQuiz({ place: "home", timeBudget: "60", meals: "3", focus: "habit", diet: ["all"] }),
+        trainDays: [0, 2, 4],
+        daysPerWeek: 3,
+        inviteHidden: false,
         checkins: [],
         weeklyReviews: [],
         sex: null,
@@ -1315,8 +1458,6 @@ const server = http.createServer(async (req, res) => {
         birthDate: null,
         age: null,
         goals: [],
-        daysPerWeek: null,
-        trainDays: [],
         experience: null,
         weight: {
           start: 70,
@@ -1325,25 +1466,24 @@ const server = http.createServer(async (req, res) => {
         },
         fuelLog: { date: now.slice(0, 10), items: [] },
         tokens: [token],
-        emailVerified: false,
+        emailVerified: true,
         avatarFace: "user",
         avatarRing: "mint",
         avatarPhoto: "",
         friends: [],
+        incomingRequests: [],
         nudges: [],
         customSessions: [],
         createdAt: now,
         updatedAt: now,
       };
-      const code = stampVerifyCode(record);
+      applyTimeZone(record, body.timeZone);
+      record.fuelLog = emptyFuelLog(record);
       ensureAchievements(record);
       saveUser(record);
-      const mailed = await sendCodeEmail({ to: email, code, kind: "verify" });
       send(res, 201, {
         token,
         user: publicUser(record),
-        mailed: mailed.sent,
-        ...(mailed.sent ? {} : { code }),
       });
       return;
     }
@@ -1357,8 +1497,13 @@ const server = http.createServer(async (req, res) => {
         send(res, 401, { error: "Почта или пароль не подошли" });
         return;
       }
+      if (record.disabled) {
+        send(res, 403, { error: "Аккаунт отключён" });
+        return;
+      }
       const token = crypto.randomBytes(24).toString("hex");
       record.tokens = [...(record.tokens || []), token].slice(-8);
+      applyTimeZone(record, body.timeZone);
       ensureAchievements(record);
       ensureStatus(record);
       record.updatedAt = new Date().toISOString();
@@ -1380,7 +1525,7 @@ const server = http.createServer(async (req, res) => {
         return;
       }
       const record = findByEmail(email);
-      if (!record) {
+      if (!record || record.disabled) {
         send(res, 200, { ok: true });
         return;
       }
@@ -1393,7 +1538,7 @@ const server = http.createServer(async (req, res) => {
       send(res, 200, {
         ok: true,
         mailed: mailed.sent,
-        ...(mailed.sent ? {} : { code }),
+        code,
       });
       return;
     }
@@ -1479,7 +1624,7 @@ const server = http.createServer(async (req, res) => {
         return;
       }
       const record = findByEmail(email);
-      if (!record || !resetStillValid(record) || !checkPassword(code, record.resetCodeHash)) {
+      if (!record || record.disabled || !resetStillValid(record) || !checkPassword(code, record.resetCodeHash)) {
         send(res, 401, { error: "Код не подошёл или устарел" });
         return;
       }
@@ -1515,7 +1660,9 @@ const server = http.createServer(async (req, res) => {
         send(res, 401, { error: "Нужно войти" });
         return;
       }
+      const zoneChanged = applyTimeZone(record, url.searchParams.get("timeZone"));
       if (
+        zoneChanged ||
         ensureDayLogs(record) ||
         ensureFreezes(record) ||
         ensureAchievements(record) ||
@@ -1538,6 +1685,7 @@ const server = http.createServer(async (req, res) => {
         send(res, 401, { error: "Нужно войти" });
         return;
       }
+      applyTimeZone(record, body.timeZone);
       if (typeof body.name === "string") {
         const name = body.name.trim();
         if (name.length < 2) {
@@ -1568,11 +1716,6 @@ const server = http.createServer(async (req, res) => {
           send(res, 400, { error });
           return;
         }
-      }
-
-      if (body.onboardingDone === true && record.emailVerified === false) {
-        send(res, 403, { error: "Сначала подтверди почту" });
-        return;
       }
 
       if (body.onboardingDone === true || body.updateProfile === true) {
@@ -1616,7 +1759,7 @@ const server = http.createServer(async (req, res) => {
       }
 
       if (Object.prototype.hasOwnProperty.call(body, "fuelLog")) {
-        record.fuelLog = sanitizeFuelLog(body.fuelLog, record.fuelLog);
+        record.fuelLog = sanitizeFuelLog(body.fuelLog, record.fuelLog, record);
       } else {
         ensureFuelLog(record);
       }
@@ -1627,10 +1770,28 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
+      if (body.gymLoad) {
+        const loadError = applyGymLoad(record, body.gymLoad);
+        if (loadError) {
+          send(res, 400, { error: loadError });
+          return;
+        }
+      }
+
+      if (Array.isArray(body.gymLoadBump)) {
+        for (const title of body.gymLoadBump) {
+          const loadError = applyGymLoad(record, { title, bump: true });
+          if (loadError) {
+            send(res, 400, { error: loadError });
+            return;
+          }
+        }
+      }
+
       delete record.stepLog;
       delete record.stepGoal;
       ensureFreezes(record);
-      settleStreak(record);
+      settleStreak(record, todayOf(record));
       ensureDaily(record);
       if (body.shieldNoticeSeen === true && record.shieldSavedDate) {
         record.shieldNoticeSeen = record.shieldSavedDate;
@@ -1638,11 +1799,14 @@ const server = http.createServer(async (req, res) => {
       if (body.nudgeSeen === true) {
         markNudgesSeen(record);
       }
+      if (body.inviteHidden === true) {
+        record.inviteHidden = true;
+      }
       if (body.activityDone === true) {
         const workouts = loadWorkoutsFile();
         const sessionId = String(body.activitySession || "").trim();
         const session = findActivitySession(record, sessionId, workouts);
-        if (Number(body.elapsedSec) >= minActivitySecOf(session)) {
+        if (activityCounted(session, body)) {
           applyActivity(record);
           rememberActivity(record, body);
           stampSessionFlags(record, session);
@@ -1700,9 +1864,7 @@ const server = http.createServer(async (req, res) => {
         send(res, 401, { error: "Нужно войти" });
         return;
       }
-      const listed = listFriendCards(record, usersById(listUsers()));
-      saveDirty(listed.dirty);
-      send(res, 200, { friends: listed.friends });
+      send(res, 200, socialPayload(record));
       return;
     }
 
@@ -1713,17 +1875,57 @@ const server = http.createServer(async (req, res) => {
         send(res, 401, { error: "Нужно войти" });
         return;
       }
-      const error = addFriend(record, findById(body.id));
-      if (error) {
-        send(res, 400, { error });
+      const target = findById(body.id);
+      const result = requestFriend(record, target);
+      if (result.error) {
+        send(res, 400, { error: result.error });
         return;
       }
-      ensureAchievements(record);
-      record.updatedAt = new Date().toISOString();
+      const stamp = new Date().toISOString();
+      if (result.status === "friends") {
+        ensureAchievements(record);
+        if (target) {
+          ensureAchievements(target);
+        }
+      }
+      record.updatedAt = stamp;
       saveUser(record);
-      const listed = listFriendCards(record, usersById(listUsers()));
-      saveDirty(listed.dirty);
-      send(res, 200, { friends: listed.friends, user: publicUser(record) });
+      if (target) {
+        target.updatedAt = stamp;
+        saveUser(target);
+      }
+      send(res, 200, { ...socialPayload(record), status: result.status });
+      return;
+    }
+
+    const friendAction = url.pathname.match(/^\/friends\/([a-f0-9]{16})\/(accept|decline)$/);
+    if (req.method === "POST" && friendAction) {
+      const body = await readBody(req);
+      const record = findByToken(bearer(req, body.token));
+      if (!record) {
+        send(res, 401, { error: "Нужно войти" });
+        return;
+      }
+      const target = findById(friendAction[1]);
+      const result = friendAction[2] === "accept" ? acceptRequest(record, target) : declineRequest(record, target);
+      if (result.error) {
+        send(res, 400, { error: result.error });
+        return;
+      }
+      const stamp = new Date().toISOString();
+      record.updatedAt = stamp;
+      if (result.status === "friends") {
+        ensureAchievements(record);
+        if (target) {
+          ensureAchievements(target);
+        }
+      }
+      saveUser(record);
+      if (target) {
+        target.updatedAt = stamp;
+        saveUser(target);
+      }
+      send(res, 200, { ...socialPayload(record), status: result.status });
       return;
     }
 
@@ -1735,16 +1937,20 @@ const server = http.createServer(async (req, res) => {
         send(res, 401, { error: "Нужно войти" });
         return;
       }
-      const error = removeFriend(record, friendDelete[1]);
+      const target = findById(friendDelete[1]);
+      const error = removeFriend(record, target);
       if (error) {
         send(res, 400, { error });
         return;
       }
-      record.updatedAt = new Date().toISOString();
+      const stamp = new Date().toISOString();
+      record.updatedAt = stamp;
       saveUser(record);
-      const listed = listFriendCards(record, usersById(listUsers()));
-      saveDirty(listed.dirty);
-      send(res, 200, { friends: listed.friends, user: publicUser(record) });
+      if (target) {
+        target.updatedAt = stamp;
+        saveUser(target);
+      }
+      send(res, 200, socialPayload(record));
       return;
     }
 
@@ -1770,6 +1976,11 @@ const server = http.createServer(async (req, res) => {
 
     if (route === "GET /catalog") {
       send(res, 200, loadCatalog());
+      return;
+    }
+
+    if (route === "GET /invite-origin") {
+      send(res, 200, { origin: readShareOrigin() });
       return;
     }
 
@@ -1813,6 +2024,44 @@ const server = http.createServer(async (req, res) => {
         return;
       }
       send(res, 200, { users: listUsers().map(adminUserView) });
+      return;
+    }
+
+    const adminUserMatch = url.pathname.match(/^\/admin\/users\/([a-f0-9]{16})$/);
+    if (adminUserMatch && (req.method === "PATCH" || req.method === "DELETE")) {
+      const body = req.method === "DELETE" ? {} : await readBody(req);
+      if (!findSession(bearer(req, body.token))) {
+        send(res, 401, { error: "Нужна админ-сессия" });
+        return;
+      }
+      const targetId = adminUserMatch[1];
+      const record = findById(targetId);
+      if (!record) {
+        send(res, 404, { error: "Нет такого человека" });
+        return;
+      }
+      if (req.method === "DELETE") {
+        const dirty = forgetPerson(listUsers(), targetId);
+        if (!removeUserFile(targetId)) {
+          send(res, 404, { error: "Нет такого человека" });
+          return;
+        }
+        for (const row of dirty) {
+          row.updatedAt = new Date().toISOString();
+          saveUser(row);
+        }
+        send(res, 200, { ok: true, id: targetId });
+        return;
+      }
+      const nextEmail = body.email != null ? String(body.email).trim().toLowerCase() : "";
+      const taken = Boolean(nextEmail && findByEmail(nextEmail) && findByEmail(nextEmail).id !== record.id);
+      const error = applyAdminUserPatch(record, body, taken);
+      if (error) {
+        send(res, 400, { error });
+        return;
+      }
+      saveUser(record);
+      send(res, 200, { user: adminUserView(record) });
       return;
     }
 

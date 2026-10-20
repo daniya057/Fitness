@@ -44,8 +44,12 @@ export default function AuthScreen() {
         setAwaitingCode(true);
         if (data.code) {
           setCode(data.code);
-          setError(data.mailed ? "" : "Письмо не дошло. Код подставили в поле.");
         }
+        setError(
+          data.mailed
+            ? "Письмо может идти до минуты. Если нет — код уже в поле."
+            : "Письмо не ушло. Код уже в поле ниже, не в консоли."
+        );
         return;
       }
       await resetPassword({ email, code, password });
@@ -85,7 +89,9 @@ export default function AuthScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View className="mt-8 rounded-[28px] px-6 py-8" style={glassStyle({ borderRadius: 28 })}>
-          <Text className="text-[12px] font-medium tracking-[1.2px] text-[#9BFFC8]">FITNESS</Text>
+          <Text className="text-[12px] font-medium tracking-[1.2px]" style={{ color: getPalette().accent }}>
+            FITNESS
+          </Text>
           <Text className="mt-2 text-[28px] font-semibold text-white">{title}</Text>
         </View>
 
@@ -116,9 +122,16 @@ export default function AuthScreen() {
             inputName={mode === "register" ? "fitness-register-email" : "fitness-email"}
             editable={!awaitingCode}
           />
+          {mode === "reset" && !awaitingCode ? (
+            <Text className="mb-4 text-[13px] leading-5 text-white/45">
+              Код придёт на почту. Письмо может идти до минуты. Если не дойдёт — покажем код здесь.
+            </Text>
+          ) : null}
           {mode === "reset" && awaitingCode ? (
-            <Text className="mb-4 text-[13px] text-white/45">
-              {code ? "Код на 15 минут. Если письма нет — он уже в поле." : "Если почта есть — код в письме, 15 минут"}
+            <Text className="mb-4 text-[13px] leading-5 text-white/45">
+              {code
+                ? "Код на 15 минут. Если письма нет — он уже в поле, можно сразу сменить пароль."
+                : "Если почта есть — код в письме, 15 минут. Письмо может идти до минуты."}
             </Text>
           ) : null}
           {mode === "reset" && awaitingCode ? (

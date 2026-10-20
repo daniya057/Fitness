@@ -61,7 +61,7 @@ export default function TabsLayout() {
       <View className="px-3 pt-1" style={{ flexShrink: 0, zIndex: 1, paddingBottom: Math.max(insets.bottom, 10) }}>
           <View
             className="flex-row rounded-[28px] px-1 py-1.5"
-            style={glassStyle({ borderRadius: 28, backgroundColor: "rgba(10, 26, 20, 0.88)" })}
+            style={glassStyle({ borderRadius: 28, backgroundColor: "rgba(16, 28, 24, 0.5)" })}
             onLayout={(event) => setBarWidth(event.nativeEvent.layout.width)}
           >
             {tabWidth ? (
@@ -97,14 +97,6 @@ export default function TabsLayout() {
                     lightTap();
                     router.replace(tab.href);
                   }}
-                  onClick={
-                    Platform.OS === "web"
-                      ? () => {
-                          lightTap();
-                          router.replace(tab.href);
-                        }
-                      : undefined
-                  }
                 >
                   <tab.Icon
                     size={22}

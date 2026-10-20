@@ -1,11 +1,12 @@
+import { useEffect } from "react";
 import { usePathname } from "expo-router";
 import { Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { getPalette } from "../../ui/theme";
+import { captureInvite } from "../friends/invite";
+import { PendingInvite } from "../friends/PendingInvite";
 import { useAuth } from "./AuthContext";
 import AuthScreen from "./AuthScreen";
-import EmailVerifyScreen from "./EmailVerifyScreen";
-import OnboardingScreen from "../onboarding/OnboardingScreen";
 
 function isAdminPath(pathname) {
   if (pathname?.startsWith("/admin")) {
@@ -20,6 +21,12 @@ function isAdminPath(pathname) {
 export function AuthGate({ children }) {
   const pathname = usePathname();
   const { user, booting } = useAuth();
+
+  useEffect(() => {
+    if (!isAdminPath(pathname)) {
+      captureInvite(pathname);
+    }
+  }, [pathname]);
 
   if (isAdminPath(pathname)) {
     return children;
@@ -38,17 +45,10 @@ export function AuthGate({ children }) {
     return <AuthScreen />;
   }
 
-  if (user.emailVerified === false) {
-    return <EmailVerifyScreen />;
-  }
-
-  if (!user.onboardingDone) {
-    return <OnboardingScreen />;
-  }
-
-  if (!user.quizDone) {
-    return <OnboardingScreen extra />;
-  }
-
-  return children;
+  return (
+    <>
+      <PendingInvite />
+      {children}
+    </>
+  );
 }

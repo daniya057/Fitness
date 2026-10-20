@@ -29,6 +29,7 @@ let later = {
   nudge: "",
   dailyHome: "",
   weeklyHome: "",
+  invite: "",
   ...readStore(),
 };
 
@@ -44,6 +45,15 @@ export function skipCheckin(kind, userId, day = utcDay()) {
   writeStore(later);
 }
 
+export function skipForever(kind, userId) {
+  if (later[kind] === undefined) {
+    return;
+  }
+  later = { ...later, [kind]: `${userId || ""}:forever` };
+  writeStore(later);
+}
+
 export function checkinSkipped(kind, userId, day = utcDay()) {
-  return later[kind] === stamp(userId, day);
+  const mark = later[kind];
+  return mark === `${userId || ""}:forever` || mark === stamp(userId, day);
 }

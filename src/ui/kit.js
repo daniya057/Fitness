@@ -1,10 +1,12 @@
-import { Text, TextInput, View } from "react-native";
+import { useState } from "react";
+import { Pressable, Text, TextInput, View } from "react-native";
+import { Eye, EyeOff } from "lucide-react-native";
 import { SoftPress } from "./SoftPress";
 import { glassStyle } from "./Glass";
 import { getPalette } from "./theme";
 import { ctaFill } from "./cta";
 
-const INK = "#07140F";
+const INK = "#10201A";
 const LIGHT_ACCENT = "#2E7D32";
 
 export function ScreenHeader({ title, subtitle, right, glass = false }) {
@@ -146,21 +148,42 @@ export function PillButton({ label, onPress, tone = "ghost", disabled, wide = fa
   );
 }
 
-export function Field({ label, inputName, glass = false, ...props }) {
+export function Field({ label, inputName, glass = false, secureTextEntry, ...props }) {
+  const [shown, setShown] = useState(false);
+  const secret = Boolean(secureTextEntry);
+  const hidden = secret && !shown;
   return (
     <View className="mb-4">
       <Text className={`mb-2 text-[12px] font-medium tracking-[0.8px] ${glass ? "text-white/55" : "text-mute"}`}>{label}</Text>
-      <TextInput
-        className={`rounded-2xl px-4 text-[16px] ${glass ? "text-white" : "bg-card text-ink"}`}
-        placeholderTextColor={glass ? "#8A8A8A" : "#9E9E9E"}
-        style={[
-          { minHeight: 48, paddingVertical: 12 },
-          glass ? glassStyle({ variant: "fill", borderRadius: 16 }) : null,
-        ]}
-        nativeID={inputName}
-        {...(inputName ? { name: inputName } : {})}
-        {...props}
-      />
+      <View>
+        <TextInput
+          className={`rounded-2xl px-4 text-[16px] ${glass ? "text-white" : "bg-card text-ink"}`}
+          placeholderTextColor={glass ? "#8A8A8A" : "#9E9E9E"}
+          style={[
+            { minHeight: 48, paddingVertical: 12, paddingRight: secret ? 52 : 16 },
+            glass ? glassStyle({ variant: "fill", borderRadius: 16 }) : null,
+          ]}
+          nativeID={inputName}
+          secureTextEntry={hidden}
+          {...(inputName ? { name: inputName } : {})}
+          {...props}
+        />
+        {secret ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={shown ? "Скрыть пароль" : "Показать пароль"}
+            onPress={() => setShown((prev) => !prev)}
+            hitSlop={8}
+            style={{ position: "absolute", right: 8, top: 0, bottom: 0, width: 44, alignItems: "center", justifyContent: "center" }}
+          >
+            {shown ? (
+              <EyeOff size={18} color={glass ? "rgba(255,255,255,0.55)" : "#666666"} strokeWidth={1.8} />
+            ) : (
+              <Eye size={18} color={glass ? "rgba(255,255,255,0.55)" : "#666666"} strokeWidth={1.8} />
+            )}
+          </Pressable>
+        ) : null}
+      </View>
     </View>
   );
 }

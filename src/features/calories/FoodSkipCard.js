@@ -6,6 +6,7 @@ import { useAuth } from "../auth/AuthContext";
 import { quizPayload } from "../onboarding/quiz";
 import { FoodSkipEditor } from "./FoodSkipEditor";
 import { parseFoodSkipList } from "./foodSkip";
+import { sumLog, utcDay } from "./foods";
 import { useMealPlan } from "./mealPlanStore";
 
 export async function persistFoodSkip(patch, user, list, rebuild) {
@@ -19,7 +20,8 @@ export async function persistFoodSkip(patch, user, list, rebuild) {
   });
   const store = useMealPlan.getState();
   if (rebuild && updated) {
-    store.compose(updated);
+    const eaten = updated.fuelLog?.date === utcDay() ? sumLog(updated.fuelLog.items).kcal : 0;
+    store.compose(updated, eaten);
   } else {
     store.clear();
   }

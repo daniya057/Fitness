@@ -216,6 +216,8 @@ function adminUserView(record) {
     streak: record.streak || 0,
     freezesLeft: record.freezesLeft == null ? 1 : Number(record.freezesLeft) || 0,
     onboardingDone: Boolean(record.onboardingDone),
+    quizDone: Boolean(record.quizDone),
+    disabled: Boolean(record.disabled),
     heightCm: record.heightCm || null,
     birthDate: record.birthDate || null,
     age: record.age || null,
@@ -225,9 +227,104 @@ function adminUserView(record) {
     experience: ["none", "m1_3", "m3_6", "m6_12", "y1"].includes(record.experience) ? record.experience : null,
     weight: record.weight || null,
     emailVerified: record.emailVerified !== false,
+    programLevel: Number(record.programLevel) || 1,
+    sessionCount: Array.isArray(record.tokens) ? record.tokens.length : 0,
+    lastActivityDate: record.lastActivityDate || null,
     createdAt: record.createdAt,
     updatedAt: record.updatedAt || null,
   };
+}
+
+function applyAdminUserPatch(record, body, emailTaken) {
+  if (!record || !body || typeof body !== "object") {
+    return "Нет данных";
+  }
+  if (body.name != null) {
+    const name = clip(body.name, 40);
+    if (name.length < 2) {
+      return "Имя слишком короткое";
+    }
+    record.name = name;
+  }
+  if (body.email != null) {
+    const email = String(body.email || "").trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return "Нужна нормальная почта";
+    }
+    if (emailTaken) {
+      return "Эта почта уже занята";
+    }
+    record.email = email;
+  }
+  if (body.status != null) {
+    record.status = clip(body.status, 80);
+  }
+  if (body.streak != null) {
+    const streak = Number(body.streak);
+    if (!Number.isFinite(streak) || streak < 0 || streak > 3650) {
+      return "Серия от 0 до 3650";
+    }
+    record.streak = Math.round(streak);
+  }
+  if (body.freezesLeft != null) {
+    const shields = Number(body.freezesLeft);
+    if (!Number.isFinite(shields) || shields < 0 || shields > 99) {
+      return "Щиты от 0 до 99";
+    }
+    record.freezesLeft = Math.round(shields);
+  }
+  if (body.programLevel != null) {
+    const level = Number(body.programLevel);
+    if (!Number.isInteger(level) || level < 1 || level > 5) {
+      return "Уровень программы 1–5";
+    }
+    record.programLevel = level;
+  }
+  if (body.emailVerified != null) {
+    record.emailVerified = Boolean(body.emailVerified);
+    if (record.emailVerified) {
+      delete record.verifyCodeHash;
+      delete record.verifyExpires;
+    }
+  }
+  if (body.disabled != null) {
+    record.disabled = Boolean(body.disabled);
+    if (record.disabled) {
+      record.tokens = [];
+    }
+  }
+  if (body.kickSessions) {
+    record.tokens = [];
+  }
+  if (body.resetQuiz) {
+    record.quizDone = false;
+  }
+  if (body.newPassword) {
+    const password = String(body.newPassword);
+    if (password.length < 8 || password.length > 72) {
+      return "Новый пароль 8–72 символа";
+    }
+    record.passwordHash = hashPassword(password);
+    record.tokens = [];
+  }
+  record.updatedAt = new Date().toISOString();
+  return null;
+}
+
+function userFilePath(id) {
+  if (!/^[a-f0-9]{16}$/.test(id)) {
+    return null;
+  }
+  return path.join(ROOT, "data", "users", `${id}.json`);
+}
+
+function removeUserFile(id) {
+  const file = userFilePath(id);
+  if (!file || !fs.existsSync(file)) {
+    return false;
+  }
+  fs.unlinkSync(file);
+  return true;
 }
 
 function buildStats(users) {
@@ -270,5 +367,7 @@ module.exports = {
   loadCatalog,
   saveCatalog,
   adminUserView,
+  applyAdminUserPatch,
+  removeUserFile,
   buildStats,
 };

@@ -19,17 +19,17 @@ export const useMealPlan = create((set, get) => ({
     return plan;
   },
 
-  compose(user) {
-    const plan = buildMealPlan(user, { attempt: 0 });
+  compose(user, eatenKcal) {
+    const plan = buildMealPlan(user, { attempt: 0, eatenKcal });
     set({ plan, userId: user?.id || null, collapsed: false, addedIds: [] });
     return plan;
   },
 
-  reroll(user) {
+  reroll(user, eatenKcal) {
     const prev = get().current(user);
     const attempt = prev ? prev.attempt + 1 : 0;
     const exclude = prev ? prev.meals.map((meal) => meal.id) : [];
-    const plan = buildMealPlan(user, { attempt, exclude });
+    const plan = buildMealPlan(user, { attempt, exclude, eatenKcal });
     set({ plan, userId: user?.id || null, collapsed: false, addedIds: [] });
     return plan;
   },

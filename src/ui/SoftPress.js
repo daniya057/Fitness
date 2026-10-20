@@ -29,16 +29,16 @@ export function SoftPress({ children, onPress, className, disabled, style, sheen
     transform: [{ translateX: sweep.value * 160 }, { rotate: "18deg" }],
   }));
 
-  const handlePress = async () => {
+  const handlePress = () => {
     if (disabled) {
       return;
     }
     const now = Date.now();
-    if (now - lastPress.current < 350) {
+    if (now - lastPress.current < 180) {
       return;
     }
     lastPress.current = now;
-    await lightTap();
+    lightTap();
     scale.value = withSequence(
       withTiming(0.97, { duration: 80, easing: Easing.out(Easing.quad) }),
       withSpring(1, { damping: 16, stiffness: 260 })
@@ -57,7 +57,6 @@ export function SoftPress({ children, onPress, className, disabled, style, sheen
       accessibilityRole="button"
       accessibilityState={{ disabled: Boolean(disabled) }}
       onPress={handlePress}
-      onClick={Platform.OS === "web" ? handlePress : undefined}
       disabled={disabled}
       className={className}
       style={[
@@ -73,7 +72,7 @@ export function SoftPress({ children, onPress, className, disabled, style, sheen
         sheen && !phoneWeb ? { overflow: "hidden" } : null,
       ]}
     >
-      <Animated.View style={[animated, { alignItems: "center", justifyContent: "center", width: "100%" }]}>
+      <Animated.View style={[animated, { alignItems: "center", justifyContent: "center" }]}>
         {children}
       </Animated.View>
       {sheen ? (

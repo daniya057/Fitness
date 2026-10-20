@@ -3,7 +3,7 @@ import { Play } from "lucide-react-native";
 import { SoftPress } from "../../ui/SoftPress";
 import { glassStyle } from "../../ui/Glass";
 import { getPalette } from "../../ui/theme";
-import { sessionDetail } from "../workouts/catalog";
+import { isSetSession, minSets, sessionDetail } from "../workouts/catalog";
 import { lookOfGroup } from "../workouts/look";
 import { ACCENT_INK } from "../../ui/layout";
 import { todayPlanItem, weekPlan } from "./recommend";
@@ -73,6 +73,11 @@ export function TodayPlanCard({ user, onOpen }) {
       </Text>
       <Text className="mt-1 text-[20px] font-semibold text-white">{item.session.title}</Text>
       <Text className="mt-1 text-[13px] leading-5 text-white/55">{item.reason || sessionDetail(item.session)}</Text>
+      <Text className="mt-2 text-[12px] leading-4 text-white/45">
+        {isSetSession(item.session)
+          ? `Засчитаем от ${minSets(item.session)} рабочих подходов. Разминку и дорожку в конце можно пропустить.`
+          : "Засчитаем, если сделаешь хотя бы половину упражнений по времени. Паузы не считаются."}
+      </Text>
       {onOpen ? (
         <SoftPress
           onPress={() => onOpen(item.session)}

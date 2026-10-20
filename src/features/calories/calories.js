@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ScrollView, Text, TextInput, View } from "react-native";
+import { Alert, ScrollView, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScanLine } from "lucide-react-native";
 import { PillButton, PrimaryButton, ScreenHeader, SectionLabel } from "../../ui/kit";
@@ -25,6 +25,7 @@ import {
 } from "./foods";
 import { FoodSkipCard } from "./FoodSkipCard";
 import { MealPlanCard } from "./MealPlanCard";
+import { BodyTuneCard } from "../onboarding/BodyTune";
 import { dailyKcalTarget, targetHint } from "./target";
 
 function DayTotals({ totals, target, fill, guessedSex }) {
@@ -41,6 +42,7 @@ function DayTotals({ totals, target, fill, guessedSex }) {
       {guessedSex ? (
         <Text className="mt-3 text-[13px] leading-5 text-white/55">Укажи пол в профиле — ориентир станет точнее.</Text>
       ) : null}
+      <Text className="mt-3 text-[12px] leading-4 text-white/45">Ориентир, не назначение врача.</Text>
       <MacroBadges protein={totals.protein} fat={totals.fat} carbs={totals.carbs} />
     </View>
   );
@@ -117,6 +119,7 @@ export default function CaloriesScreen() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [scanOpen, setScanOpen] = useState(false);
+  const [moreCats, setMoreCats] = useState(false);
   const [remote, setRemote] = useState([]);
   const [searching, setSearching] = useState(false);
   const scrollRef = useRef(null);
@@ -215,7 +218,16 @@ export default function CaloriesScreen() {
     if (!food || busy) {
       return;
     }
-    saveItems([...items, makeLogItem(food, portionGrams)]);
+    const next = () => saveItems([...items, makeLogItem(food, portionGrams)]);
+    const same = items.some((item) => item.foodId === food.id);
+    if (same) {
+      Alert.alert("Уже в дневнике", "Добавить ещё раз?", [
+        { text: "Отмена", style: "cancel" },
+        { text: "Добавить", onPress: next },
+      ]);
+      return;
+    }
+    next();
   };
 
   const removeItem = (id) => {
@@ -233,11 +245,12 @@ export default function CaloriesScreen() {
       >
         <ScreenHeader glass title="Калории" subtitle={targetHint(target)} right={<ProfileChip />} />
 
+        <BodyTuneCard />
         <DayTotals totals={totals} target={target} fill={fill} guessedSex={target.guessedSex} />
         {user?.quizDone && !user.quiz?.foodSkipSet ? (
           <FoodSkipCard user={user} />
         ) : (
-          <MealPlanCard user={user} busy={busy} onAddItem={(item) => saveItems([...items, item])} />
+          <MealPlanCard user={user} busy={busy} eatenKcal={totals.kcal} onAddItem={(item) => saveItems([...items, item])} />
         )}
 
         <View className="mt-10">
@@ -275,7 +288,7 @@ export default function CaloriesScreen() {
                 tone={category === "all" ? "glassOn" : "glass"}
                 onPress={() => setCategory("all")}
               />
-              {FOOD_CATEGORIES.map((item) => (
+              {FOOD_CATEGORIES.filter((item) => moreCats || item.id === "meals").map((item) => (
                 <PillButton
                   key={item.id}
                   label={item.title}
@@ -283,6 +296,7 @@ export default function CaloriesScreen() {
                   onPress={() => setCategory(item.id)}
                 />
               ))}
+              <PillButton label={moreCats ? "Скрыть" : "Ещё"} tone="glass" onPress={() => setMoreCats((value) => !value)} />
             </ScrollView>
             <FadeEdge />
           </View>
@@ -326,6 +340,9 @@ export default function CaloriesScreen() {
             </View>
           ) : null}
 
+          {!query.trim() && category === "all" ? (
+            <Text className="mt-4 text-[12px] font-medium tracking-[1px] text-white/45">ЧАСТО КЛАДУТ</Text>
+          ) : null}
           {found.length > 0 ? (
             <View className="mt-4">
               {found.map((food, index) => (
@@ -336,7 +353,7 @@ export default function CaloriesScreen() {
                   action="add"
                   disabled={busy}
                   onPress={() => revealPortion(food)}
-                  onAction={() => addFood(food, 100)}
+                  onAction={() => revealPortion(food)}
                 />
               ))}
             </View>
@@ -346,7 +363,7 @@ export default function CaloriesScreen() {
                 ? "Ищем в таблицах и магазинах…"
                 : query.trim() || category !== "all"
                   ? "Ничего не нашлось. Попробуй другое слово или сканер."
-                  : "Начни вводить название или выбери категорию."}
+                  : "Начни вводить название — сверху полка частых продуктов."}
             </Text>
           )}
         </View>

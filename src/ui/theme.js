@@ -1,18 +1,19 @@
 import { Platform } from "react-native";
 
 const palette = {
-  bg: "#07140F",
-  ink: "#F4FFF8",
-  mute: "rgba(255,255,255,0.55)",
-  faint: "rgba(255,255,255,0.35)",
-  accent: "#9BFFC8",
-  bar: "#7DFFB3",
+  bg: "#101C18",
+  ink: "#F2FAF6",
+  mute: "rgba(242,250,246,0.55)",
+  faint: "rgba(242,250,246,0.35)",
+  accent: "#8FDCB8",
+  bar: "#76C9A8",
   track: "rgba(255,255,255,0.12)",
-  orb: "rgba(46, 170, 96, 0.22)",
-  orbDeep: "rgba(20, 90, 60, 0.28)",
-  pill: "rgba(125,255,179,0.16)",
-  fill: "rgba(255,255,255,0.1)",
-  line: "rgba(255,255,255,0.22)",
+  orb: "rgba(72, 168, 132, 0.2)",
+  orbDeep: "rgba(28, 92, 68, 0.3)",
+  pill: "rgba(143, 220, 184, 0.2)",
+  fill: "rgba(255,255,255,0.055)",
+  line: "rgba(255,255,255,0.18)",
+  onAccent: "#10201A",
 };
 
 if (Platform.OS === "web" && typeof document !== "undefined") {

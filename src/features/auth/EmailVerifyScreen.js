@@ -65,7 +65,9 @@ export default function EmailVerifyScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View className="mt-8 rounded-[28px] px-6 py-8" style={glassStyle({ borderRadius: 28 })}>
-          <Text className="text-[12px] font-medium tracking-[1.2px] text-[#9BFFC8]">FITNESS</Text>
+          <Text className="text-[12px] font-medium tracking-[1.2px]" style={{ color: getPalette().accent }}>
+            FITNESS
+          </Text>
           <Text className="mt-2 text-[28px] font-semibold text-white">Почта</Text>
           <Text className="mt-3 text-[14px] leading-5 text-white/55">
             {emailCode

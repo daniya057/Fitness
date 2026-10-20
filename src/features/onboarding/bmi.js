@@ -41,6 +41,6 @@ export function bmiBand(value) {
   const band = BANDS.find((item) => value < item.max);
   return {
     ...band,
-    color: band.id === "ok" ? "#9BFFC8" : "rgba(255,255,255,0.72)",
+    color: band.id === "ok" ? "#8FDCB8" : "rgba(255,255,255,0.72)",
   };
 }

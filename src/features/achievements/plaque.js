@@ -2,7 +2,7 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { ChevronRight } from "lucide-react-native";
 import { glassStyle } from "../../ui/Glass";
 import { getPalette } from "../../ui/theme";
-import { ACHIEVEMENTS, conditionOf, earnedSet, iconOf, shownAchievements } from "./catalog";
+import { ACHIEVEMENTS, conditionOf, earnedSet, iconOf, nearbyAchievements, shownAchievements } from "./catalog";
 import { Medal } from "./Medal";
 
 function AchievementTile({ item, open, glass, plain, onPress }) {
@@ -38,13 +38,15 @@ function AchievementTile({ item, open, glass, plain, onPress }) {
   );
 }
 
-export function AchievementPlaque({ user, onPress, tone = "mint", framed = true }) {
+export function AchievementPlaque({ user, onPress, tone = "mint", framed = true, nearby = false }) {
   const earned = earnedSet(user);
-  const visible = shownAchievements(user).filter((item) => !item.secret || earned.has(item.id));
+  const visible = nearby
+    ? nearbyAchievements(user, 4)
+    : shownAchievements(user).filter((item) => !item.secret || earned.has(item.id));
   const glass = tone === "glass";
   const have = earned.size;
   const total = ACHIEVEMENTS.length;
-  const more = visible.length > 3;
+  const more = nearby || visible.length > 3;
   const plain = !framed;
 
   return (
@@ -53,9 +55,11 @@ export function AchievementPlaque({ user, onPress, tone = "mint", framed = true 
       style={framed && glass ? glassStyle({ borderRadius: 24 }) : undefined}
     >
       <Pressable onPress={onPress} className={`mb-2 flex-row items-end justify-between ${framed ? "px-4" : ""}`}>
-        <Text className={`font-semibold ${glass ? "text-[15px] text-white" : "text-[15px] text-ink"}`}>Достижения</Text>
+        <Text className={`font-semibold ${glass ? "text-[15px] text-white" : "text-[15px] text-ink"}`}>
+          {nearby ? "Ближайшая цель" : "Достижения"}
+        </Text>
         <Text className="text-[13px] font-semibold tabular-nums" style={{ color: glass ? getPalette().accent : "#2E7D32" }}>
-          {have} / {total}
+          {nearby ? "все" : `${have} / ${total}`}
         </Text>
       </Pressable>
       <View>

@@ -1,5 +1,6 @@
 import { Text, View } from "react-native";
 import { glassStyle } from "../../ui/Glass";
+import { getPalette } from "../../ui/theme";
 import { FOCUS_LABELS } from "../onboarding/quiz";
 import { dayLoad, loadLabel, macroTargets, nutrientHints, quizOf, todayCheckin, todayPlanItem, weekPlan } from "./recommend";
 import { WeekPlan } from "./WeekPlan";
@@ -17,7 +18,11 @@ export function AdviceView({ user, onOpen }) {
       <View className="mb-5 rounded-[24px] px-5 py-5" style={glassStyle({ borderRadius: 24 })}>
         <Text className="text-[13px] text-white/55">Собрали из твоих ответов</Text>
         <Text className="mt-1 text-[22px] font-semibold text-white">{FOCUS_LABELS[quiz.focus]}</Text>
-        {load ? <Text className="mt-2 text-[14px] text-[#9BFFC8]">{load}</Text> : null}
+        {load ? (
+          <Text className="mt-2 text-[14px]" style={{ color: getPalette().accent }}>
+            {load}
+          </Text>
+        ) : null}
         {today?.reason ? <Text className="mt-2 text-[14px] leading-5 text-white/60">{today.reason}</Text> : null}
       </View>
 

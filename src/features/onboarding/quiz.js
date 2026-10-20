@@ -164,7 +164,7 @@ export const MEAL_LABELS = labelsOf(MEAL_OPTIONS);
 export const FOCUS_LABELS = labelsOf(FOCUS_OPTIONS);
 
 export const QUIZ_DEFAULTS = {
-  place: "anywhere",
+  place: "home",
   timeBudget: "60",
   restrictions: [],
   diet: ["all"],

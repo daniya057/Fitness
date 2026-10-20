@@ -4,13 +4,13 @@ import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { lightTap } from "../../lib/haptics";
 import { GhostButton, PrimaryButton, ScreenHeader, SectionLabel } from "../../ui/kit";
-import { AmbientWash, glassStyle } from "../../ui/Glass";
+import { AmbientWash } from "../../ui/Glass";
 import { getPalette } from "../../ui/theme";
 import { useAuth } from "../auth/AuthContext";
 import { AdviceView } from "../checkins/AdviceView";
 import { draftUser } from "../checkins/recommend";
 import { BirthdayCalendar } from "./BirthdayCalendar";
-import { ChoiceGrid } from "./ChoiceGrid";
+import { ChoiceGrid, choiceHintStyle, choiceSurface, choiceTitleStyle } from "./ChoiceGrid";
 import { GOALS, SEX_OPTIONS, ageFromBirthDate } from "./catalog";
 import { BmiMark } from "./BmiMark";
 import { ExperiencePicker } from "./ExperiencePicker";
@@ -135,7 +135,7 @@ export default function OnboardingScreen({ extra = false }) {
 
   const skip = async () => {
     if (step === "place") {
-      setQuizField("place", "anywhere");
+      setQuizField("place", "home");
     }
     if (step === "time") {
       setQuizField("timeBudget", "60");
@@ -246,12 +246,11 @@ export default function OnboardingScreen({ extra = false }) {
                         setError("");
                       }}
                       className="h-14 flex-1 items-center justify-center rounded-full"
-                      style={glassStyle({
-                        borderRadius: 999,
-                        backgroundColor: on ? "rgba(125,255,179,0.16)" : "rgba(255,255,255,0.08)",
-                      })}
+                      style={choiceSurface(on, { radius: 999 })}
                     >
-                      <Text className="text-[18px] font-semibold text-white">{item.title}</Text>
+                      <Text className="text-[18px] font-semibold" style={choiceTitleStyle(on)}>
+                        {item.title}
+                      </Text>
                     </Pressable>
                   );
                 })}
@@ -271,13 +270,16 @@ export default function OnboardingScreen({ extra = false }) {
                       key={item.id}
                       onPress={() => toggleGoal(item.id)}
                       className="mb-3 w-[48%] rounded-[22px] px-4 py-4"
-                      style={glassStyle({
-                        borderRadius: 22,
-                        backgroundColor: on ? "rgba(125,255,179,0.16)" : "rgba(255,255,255,0.08)",
-                      })}
+                      style={choiceSurface(on, { radius: 22 })}
                     >
-                      <Text className="text-[16px] font-semibold text-white">{item.title}</Text>
-                      {item.hint ? <Text className="mt-1 text-[12px] leading-4 text-white/50">{item.hint}</Text> : null}
+                      <Text className="text-[16px] font-semibold" style={choiceTitleStyle(on)}>
+                        {item.title}
+                      </Text>
+                      {item.hint ? (
+                        <Text className="mt-1 text-[12px] leading-4" style={choiceHintStyle(on)}>
+                          {item.hint}
+                        </Text>
+                      ) : null}
                     </Pressable>
                   );
                 })}

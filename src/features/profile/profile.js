@@ -13,7 +13,19 @@ import { useAuth } from "../auth/AuthContext";
 import { BirthdayCalendar } from "../onboarding/BirthdayCalendar";
 import { BmiMark } from "../onboarding/BmiMark";
 import { GOALS, EXPERIENCE_LABELS, SEX_LABELS, SEX_OPTIONS } from "../onboarding/catalog";
-import { coerceTrainDayIds, DIET_LABELS, FOCUS_LABELS, PLACE_LABELS, TIME_LABELS, trainDaysLabel } from "../onboarding/quiz";
+import {
+  coerceTrainDayIds,
+  DIET_LABELS,
+  FOCUS_LABELS,
+  FOCUS_OPTIONS,
+  PLACE_LABELS,
+  PLACE_OPTIONS,
+  TIME_LABELS,
+  TIME_OPTIONS,
+  quizPayload,
+  trainDaysLabel,
+} from "../onboarding/quiz";
+import { ChoiceGrid, choiceHintStyle, choiceSurface, choiceTitleStyle } from "../onboarding/ChoiceGrid";
 import { DaysPicker } from "../onboarding/DaysPicker";
 import { ExperiencePicker } from "../onboarding/ExperiencePicker";
 import { ValueSlider } from "../onboarding/ValueSlider";
@@ -92,6 +104,9 @@ function seedForm(user) {
     daysPerWeek: Number(user?.daysPerWeek) || 3,
     trainDays: coerceTrainDayIds(user?.trainDays, user?.daysPerWeek || 3),
     experience: EXPERIENCE_LABELS[user?.experience] ? user.experience : "",
+    place: user?.quiz?.place || "home",
+    timeBudget: user?.quiz?.timeBudget || "60",
+    focus: user?.quiz?.focus || "habit",
   };
 }
 
@@ -165,6 +180,13 @@ export default function ProfileScreen() {
         daysPerWeek: form.trainDays.length || form.daysPerWeek,
         trainDays: form.trainDays,
         experience: form.experience,
+        saveQuiz: true,
+        quiz: quizPayload({
+          ...(user?.quiz || {}),
+          place: form.place,
+          timeBudget: form.timeBudget,
+          focus: form.focus,
+        }),
       });
       setEditing(false);
     } catch (err) {
@@ -256,12 +278,11 @@ export default function ProfileScreen() {
                       setForm((prev) => ({ ...prev, sex: item.id }));
                     }}
                     className="h-14 flex-1 items-center justify-center rounded-full"
-                    style={glassStyle({
-                      borderRadius: 999,
-                      backgroundColor: on ? "rgba(125,255,179,0.16)" : "rgba(255,255,255,0.08)",
-                    })}
+                    style={choiceSurface(on, { radius: 999 })}
                   >
-                    <Text className="text-[18px] font-semibold text-white">{item.title}</Text>
+                    <Text className="text-[18px] font-semibold" style={choiceTitleStyle(on)}>
+                      {item.title}
+                    </Text>
                   </Pressable>
                 );
               })}
@@ -279,13 +300,16 @@ export default function ProfileScreen() {
                     key={item.id}
                     onPress={() => toggleGoal(item.id)}
                     className="mb-3 w-[48%] rounded-[22px] px-4 py-4"
-                    style={glassStyle({
-                      borderRadius: 22,
-                      backgroundColor: on ? "rgba(125,255,179,0.16)" : "rgba(255,255,255,0.08)",
-                    })}
+                    style={choiceSurface(on, { radius: 22 })}
                   >
-                    <Text className="text-[16px] font-semibold text-white">{item.title}</Text>
-                    {item.hint ? <Text className="mt-1 text-[12px] text-white/50">{item.hint}</Text> : null}
+                    <Text className="text-[16px] font-semibold" style={choiceTitleStyle(on)}>
+                      {item.title}
+                    </Text>
+                    {item.hint ? (
+                      <Text className="mt-1 text-[12px]" style={choiceHintStyle(on)}>
+                        {item.hint}
+                      </Text>
+                    ) : null}
                   </Pressable>
                 );
               })}
@@ -301,6 +325,26 @@ export default function ProfileScreen() {
               label="В какие дни удобно"
               values={form.trainDays}
               onChange={(value) => setForm((prev) => ({ ...prev, trainDays: value, daysPerWeek: value.length || 1 }))}
+            />
+            <ChoiceGrid
+              label="Где занимаешься"
+              options={PLACE_OPTIONS}
+              value={form.place}
+              onChange={(id) => setForm((prev) => ({ ...prev, place: id }))}
+              columns={2}
+            />
+            <ChoiceGrid
+              label="Сколько времени"
+              options={TIME_OPTIONS}
+              value={form.timeBudget}
+              onChange={(id) => setForm((prev) => ({ ...prev, timeBudget: id }))}
+              columns={2}
+            />
+            <ChoiceGrid
+              label="Что важнее сейчас"
+              options={FOCUS_OPTIONS}
+              value={form.focus}
+              onChange={(id) => setForm((prev) => ({ ...prev, focus: id }))}
             />
             {error ? <Text className="mb-3 text-[14px] font-medium text-accent">{error}</Text> : null}
             <PrimaryButton label="Сохранить" onPress={save} busy={busy} />

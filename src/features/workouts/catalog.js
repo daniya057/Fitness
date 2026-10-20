@@ -143,30 +143,238 @@ export function secFromReps(title, reps) {
   return Math.max(10, Math.min(90, count * tempo));
 }
 
-export function sessionRounds(session) {
-  return Math.max(1, Math.min(8, Math.round(Number(session?.rounds) || 1)));
+export function isSetSession(session) {
+  return Boolean(session?.format === "sets" || (session?.place === "gym" && session?.kind !== "cardio" && !session?.custom));
 }
 
-function buildCustomPlaylist(session) {
+export function isTapSet(step, session) {
+  if (!step || step.kind === "rest") {
+    return false;
+  }
+  if (!(isSetSession(session) || session?.custom)) {
+    return false;
+  }
+  const title = String(step.title || "").trim();
+  if (step.finisher || CARDIO_TITLES.has(title) || isHoldMove(title)) {
+    return false;
+  }
+  return true;
+}
+
+const CARDIO_TITLES = new Set(["Ходьба на дорожке", "Велотренажёр", "Эллипс"]);
+
+const GYM_WARMUP = {
+  push: [
+    { title: "Круги плечами", sets: 1, reps: 16, warmup: true },
+    { title: "Подъёмы рук в стороны", sets: 1, reps: 12, warmup: true },
+  ],
+  pull: [
+    { title: "Сведение лопаток", sets: 1, reps: 12, warmup: true },
+    { title: "Круги плечами", sets: 1, reps: 16, warmup: true },
+  ],
+  legs: [
+    { title: "Подъём на носки", sets: 1, reps: 15, warmup: true },
+    { title: "Приседания", sets: 1, reps: 10, warmup: true },
+  ],
+  full: [
+    { title: "Круги плечами", sets: 1, reps: 16, warmup: true },
+    { title: "Подъём на носки", sets: 1, reps: 12, warmup: true },
+  ],
+};
+
+const GYM_EXTRAS = {
+  push: [
+    { title: "Разведение гантелей стоя", sets: 3, reps: 12 },
+    { title: "Сгибание рук с гантелями", sets: 3, reps: 12 },
+    { title: "Жим на трицепс на блоке", sets: 3, reps: 12 },
+    { title: "Сведение рук в тренажёре", sets: 3, reps: 12 },
+  ],
+  pull: [
+    { title: "Тяга к лицу на блоке", sets: 3, reps: 12 },
+    { title: "Гиперэкстензия", sets: 3, reps: 12 },
+    { title: "Пуловер на блоке", sets: 3, reps: 12 },
+    { title: "Сгибание рук с гантелями", sets: 3, reps: 12 },
+  ],
+  legs: [
+    { title: "Разгибание ног", sets: 3, reps: 12 },
+    { title: "Подъём на носки", sets: 4, reps: 15 },
+    { title: "Сгибание ног", sets: 3, reps: 12 },
+    { title: "Румынская тяга с гантелями", sets: 3, reps: 10 },
+  ],
+  full: [
+    { title: "Гиперэкстензия", sets: 3, reps: 12 },
+    { title: "Планка", sets: 3, reps: 30 },
+    { title: "Скручивания в тренажёре", sets: 3, reps: 12 },
+    { title: "Разведение ног", sets: 3, reps: 12 },
+  ],
+};
+
+function cloneSession(session) {
+  return {
+    ...session,
+    moves: (session?.moves || []).map((move) => ({ ...move })),
+  };
+}
+
+function workSecCap(title, hold) {
+  if (CARDIO_TITLES.has(title)) {
+    return 2400;
+  }
+  return hold ? 90 : 90;
+}
+
+export function budgetMinutes(user) {
+  const raw = String(user?.quiz?.timeBudget || user?.checkins?.slice?.(-1)?.[0]?.time || "60");
+  const n = Number(raw);
+  if (n >= 100) {
+    return 120;
+  }
+  if (n >= 75) {
+    return 90;
+  }
+  if (n >= 45) {
+    return 60;
+  }
+  return 30;
+}
+
+export function fitSessionToBudget(session, minutes) {
+  if (!session) {
+    return session;
+  }
+  const cap = Math.max(25, Math.min(120, Math.round(Number(minutes) || 60)));
+  if (session.fittedTo === cap) {
+    return session;
+  }
+  const next = cloneSession(session);
+  next.fittedTo = cap;
+  if (next.custom) {
+    return next;
+  }
+  if (next.kind === "cardio") {
+    const nowMin = sessionMinutes(next);
+    const factor = cap / Math.max(8, nowMin);
+    next.rounds = Math.max(1, Math.min(30, Math.round((Number(next.rounds) || 1) * factor)));
+    return next;
+  }
+  if (!isSetSession(next)) {
+    return next;
+  }
+  const slot = next.slot && GYM_EXTRAS[next.slot] ? next.slot : "full";
+  const have = new Set(next.moves.map((move) => String(move.title || "").trim()));
+  const warm = (GYM_WARMUP[slot] || GYM_WARMUP.full).filter((item) => !have.has(item.title));
+  next.moves = [...warm, ...next.moves];
+  warm.forEach((item) => have.add(item.title));
+  if (cap >= 50) {
+    next.moves = next.moves.map((move) => (move.warmup ? move : { ...move, sets: Math.max(Number(move.sets) || 3, 4) }));
+  }
+  const extras = GYM_EXTRAS[slot] || GYM_EXTRAS.full;
+  for (const extra of extras) {
+    if (sessionMinutes(next) >= cap - 8) {
+      break;
+    }
+    if (!have.has(extra.title)) {
+      next.moves.push({ ...extra, sets: cap >= 50 ? 4 : 3 });
+      have.add(extra.title);
+    }
+  }
+  const fillCardio = (title) => {
+    const left = cap - sessionMinutes(next);
+    if (left < 8) {
+      return;
+    }
+    const sec = Math.min(2400, Math.max(480, left * 60));
+    next.moves.push({
+      title,
+      sets: 1,
+      reps: 1,
+      sec,
+      warmup: false,
+      finisher: true,
+    });
+  };
+  fillCardio("Ходьба на дорожке");
+  if (cap - sessionMinutes(next) >= 8) {
+    fillCardio("Велотренажёр");
+  }
+  return next;
+}
+
+export function sessionForUser(session, user) {
+  if (!session) {
+    return session;
+  }
+  if (session.fittedTo) {
+    return session;
+  }
+  return fitSessionToBudget(session, budgetMinutes(user));
+}
+
+export function workSetCount(session) {
+  const moves = Array.isArray(session?.moves) ? session.moves : [];
+  if (isSetSession(session) || session?.custom) {
+    return moves
+      .filter((move) => !move.warmup && !move.finisher)
+      .reduce((sum, move) => sum + Math.max(1, Math.min(6, Math.round(Number(move.sets) || 1))), 0);
+  }
+  const rounds = sessionRounds(session);
+  return rounds * moves.length;
+}
+
+export function minSets(session) {
+  return Math.max(1, Math.ceil(workSetCount(session) / 2));
+}
+
+export function sessionRounds(session) {
+  return Math.max(1, Math.min(12, Math.round(Number(session?.rounds) || 1)));
+}
+
+function buildSetPlaylist(session, gymRest) {
   const restRaw = Number(session?.restSec);
-  const rest = Number.isFinite(restRaw) ? Math.max(0, Math.min(25, Math.round(restRaw))) : 15;
-  const roundRest = Math.max(20, Math.min(90, Math.round(Number(session?.roundRestSec) || 40)));
+  const restCap = gymRest ? 90 : 25;
+  const rest = Number.isFinite(restRaw) ? Math.max(0, Math.min(restCap, Math.round(restRaw))) : gymRest ? 60 : 15;
+  const roundRest = Math.max(20, Math.min(120, Math.round(Number(session?.roundRestSec) || (gymRest ? 90 : 40))));
   const moves = Array.isArray(session?.moves) ? session.moves : [];
   const steps = [];
   moves.forEach((move, moveIndex) => {
     const title = String(move.title || "Движение").trim();
     const sets = Math.max(1, Math.min(6, Math.round(Number(move.sets) || 1)));
-    const reps = Math.max(1, Math.min(40, Math.round(Number(move.reps) || 10)));
-    const sec = Math.max(10, Math.min(90, Math.round(Number(move.sec) || secFromReps(title, reps))));
-    const counted = isHoldMove(title) ? 0 : reps;
+    const hold = isHoldMove(title);
+    const reps = Math.max(1, Math.min(40, Math.round(Number(move.reps) || (hold ? 30 : 10))));
+    const cap = workSecCap(title, hold);
+    const sec = hold
+      ? Math.max(10, Math.min(cap, Math.round(Number(move.sec) || reps)))
+      : Math.max(10, Math.min(cap, Math.round(Number(move.sec) || secFromReps(title, reps))));
+    const counted = hold || CARDIO_TITLES.has(title) ? 0 : reps;
     for (let set = 1; set <= sets; set += 1) {
-      steps.push({ kind: "work", title, sec, reps: counted, round: set, rounds: sets });
+      steps.push({
+        kind: "work",
+        title,
+        sec,
+        reps: counted,
+        round: set,
+        rounds: sets,
+        warmup: Boolean(move.warmup),
+        finisher: Boolean(move.finisher),
+      });
       const lastSet = set === sets;
       const lastMove = moveIndex === moves.length - 1;
       if (!lastSet) {
-        steps.push({ kind: "rest", title: "Между подходами", sec: roundRest, round: set, rounds: sets });
+        steps.push({
+          kind: "rest",
+          title: gymRest ? `Отдых ${roundRest} сек` : "Между подходами",
+          sec: roundRest,
+          round: set,
+          rounds: sets,
+        });
       } else if (!lastMove && rest > 0) {
-        steps.push({ kind: "rest", title: "Отдых", sec: rest, round: set, rounds: sets });
+        steps.push({
+          kind: "rest",
+          title: gymRest ? "Следующий тренажёр" : "Отдых",
+          sec: rest,
+          round: set,
+          rounds: sets,
+        });
       }
     }
   });
@@ -174,8 +382,8 @@ function buildCustomPlaylist(session) {
 }
 
 export function buildPlaylist(session) {
-  if (session?.custom) {
-    return buildCustomPlaylist(session);
+  if (session?.custom || isSetSession(session)) {
+    return buildSetPlaylist(session, isSetSession(session));
   }
   const restRaw = Number(session?.restSec);
   const rest = Number.isFinite(restRaw) ? Math.max(0, Math.min(25, Math.round(restRaw))) : 15;
@@ -193,7 +401,7 @@ export function buildPlaylist(session) {
       if (!lastMove && rest > 0) {
         steps.push({ kind: "rest", title: "Отдых", sec: rest, round, rounds });
       } else if (!lastRound) {
-        steps.push({ kind: "rest", title: "Между подходами", sec: roundRest, round, rounds });
+        steps.push({ kind: "rest", title: "Между кругами", sec: roundRest, round, rounds });
       }
     });
   }
@@ -207,6 +415,9 @@ export function workSeconds(session) {
 }
 
 export function minActivitySec(session) {
+  if (isSetSession(session) || session?.custom) {
+    return minSets(session);
+  }
   return Math.max(1, Math.round(workSeconds(session) / 2));
 }
 
@@ -233,9 +444,21 @@ export function sessionDetail(session) {
     const blocks = Array.isArray(session.moves) ? session.moves.length : 0;
     return `${minutes} мин · ${blocks} ${movesWord(blocks)}`;
   }
+  if (isSetSession(session)) {
+    const first =
+      (Array.isArray(session.moves) ? session.moves : []).find((move) => !move.warmup && !move.finisher) ||
+      session.moves?.[0];
+    const sets = Math.max(1, Math.round(Number(first?.sets) || 3));
+    const reps = Math.max(1, Math.round(Number(first?.reps) || 10));
+    const hold = first && isHoldMove(first.title);
+    return hold ? `${minutes} мин · ${sets}×${reps} сек` : `${minutes} мин · ${sets}×${reps}`;
+  }
+  if (session?.kind === "cardio" || session?.place === "gym") {
+    return `${minutes} мин`;
+  }
   const rounds = sessionRounds(session);
   if (rounds > 1) {
-    const word = rounds >= 5 ? "подходов" : "подхода";
+    const word = rounds >= 5 ? "кругов" : "круга";
     return `${minutes} мин · ${rounds} ${word}`;
   }
   const blocks = Array.isArray(session?.moves) ? session.moves.length : 0;
@@ -299,6 +522,11 @@ const SECONDS_PER_REP = {
   "Сгибание рук с гантелями": 3,
   "Жим на трицепс на блоке": 3,
   "Гиперэкстензия": 3,
+  "Разведение гантелей стоя": 3,
+  "Румынская тяга с гантелями": 4,
+  "Пуловер на блоке": 4,
+  "Скручивания в тренажёре": 2,
+  "Разведение ног": 3,
   "Велотренажёр": 1,
   "Ходьба на дорожке": 1,
   "Эллипс": 1,

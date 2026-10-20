@@ -6,15 +6,13 @@ import { glassStyle } from "../../ui/Glass";
 import { coerceTimeId, DAY_TIME_OPTIONS, ENERGY_OPTIONS, PAIN_OPTIONS, SLEEP_OPTIONS } from "../onboarding/quiz";
 import { ChoiceRow } from "../onboarding/ChoiceGrid";
 import { useAuth } from "../auth/AuthContext";
-import { PromptRow } from "./PromptRow";
 import { todayCheckin } from "./recommend";
 import { checkinSkipped, skipCheckin } from "./skip";
 
-export function CheckinCard({ compact = false } = {}) {
+export function CheckinCard({ startOpen = false, onClose } = {}) {
   const { user, patch } = useAuth();
   const existing = todayCheckin(user);
   const [hidden, setHidden] = useState(false);
-  const [open, setOpen] = useState(!compact);
   const [energy, setEnergy] = useState(existing?.energy || "");
   const [sleep, setSleep] = useState(existing?.sleep || "");
   const [pain, setPain] = useState(Array.isArray(existing?.pain) ? existing.pain : []);
@@ -30,6 +28,7 @@ export function CheckinCard({ compact = false } = {}) {
     await lightTap();
     skipCheckin("dailyHome", user.id);
     setHidden(true);
+    onClose?.();
   };
 
   const save = async () => {
@@ -41,6 +40,7 @@ export function CheckinCard({ compact = false } = {}) {
     setBusy(true);
     try {
       await patch({ checkin: { energy, sleep, pain, time } });
+      onClose?.();
     } catch (err) {
       setError(err.message || "Не сохранилось");
     } finally {
@@ -48,17 +48,17 @@ export function CheckinCard({ compact = false } = {}) {
     }
   };
 
-  if (compact && !open) {
-    return <PromptRow kicker="СЕГОДНЯ" title="Как ты?" action="Ответить" onPress={() => setOpen(true)} />;
+  if (!startOpen) {
+    return null;
   }
 
   return (
     <View
-      className="mb-5 rounded-[24px] px-5 py-5"
+      className="mt-5 rounded-[24px] px-5 py-5"
       style={glassStyle({
         borderRadius: 24,
         lens: false,
-        backgroundColor: "rgba(7, 20, 15, 0.55)",
+        backgroundColor: "rgba(16, 28, 24, 0.18)",
       })}
     >
       <Text className="text-[11px] font-medium tracking-[1px] text-white/55">СЕГОДНЯ</Text>

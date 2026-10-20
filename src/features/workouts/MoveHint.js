@@ -5,6 +5,8 @@ import { glassStyle } from "../../ui/Glass";
 import { getPalette } from "../../ui/theme";
 import { PillButton } from "../../ui/kit";
 import { lightTap } from "../../lib/haptics";
+import { isHoldMove, isSetSession } from "./catalog";
+import { MoveDiagram } from "./MoveDiagram";
 import { moveHint, uniqueMoveTitles } from "./moves";
 
 function HelpIcon() {
@@ -34,7 +36,7 @@ export function MoveHintButton({ title, onPress }) {
   );
 }
 
-export function MoveHintRow({ title, onPress }) {
+export function MoveHintRow({ title, line, onPress }) {
   return (
     <Pressable
       onPress={async () => {
@@ -45,7 +47,7 @@ export function MoveHintRow({ title, onPress }) {
       style={{ minHeight: 44 }}
     >
       <Text className="mr-3 flex-1 text-[13px] leading-5 text-white" numberOfLines={1}>
-        {title}
+        {line || title}
       </Text>
       <HelpIcon />
     </Pressable>
@@ -58,6 +60,7 @@ export function MoveList({ session, onHint }) {
   if (!titles.length) {
     return null;
   }
+  const setMode = isSetSession(session);
 
   return (
     <View className="mt-3">
@@ -80,7 +83,19 @@ export function MoveList({ session, onHint }) {
         />
       </Pressable>
       {open
-        ? titles.map((title) => <MoveHintRow key={title} title={title} onPress={onHint} />)
+        ? (session.moves || []).map((move, index) => {
+            const title = String(move?.title || "").trim();
+            if (!title) {
+              return null;
+            }
+            const sets = Math.round(Number(move.sets) || 0);
+            const reps = Math.round(Number(move.reps) || 0);
+            const line =
+              setMode && sets && reps
+                ? `${title} · ${sets}×${reps}${isHoldMove(title) ? " сек" : ""}`
+                : title;
+            return <MoveHintRow key={`${title}-${index}`} title={title} line={line} onPress={onHint} />;
+          })
         : null}
     </View>
   );
@@ -96,6 +111,9 @@ export function MoveHintModal({ title, onClose }) {
       <View className="flex-1 items-center justify-center px-6" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
         <View style={{ width: "100%", maxWidth: 360, borderRadius: 32, paddingHorizontal: 24, paddingVertical: 28, ...glassStyle({ borderRadius: 32 }) }}>
           <Text className="text-center text-[20px] font-semibold text-white">{title}</Text>
+          <View className="mt-4">
+            <MoveDiagram title={title} />
+          </View>
           <Text className="mt-3 text-center text-[15px] leading-6 text-white/70">{moveHint(title)}</Text>
           <View className="mt-6 items-center">
             <PillButton label="Понятно" onPress={onClose} tone="glassOn" />

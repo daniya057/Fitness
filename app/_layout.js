@@ -10,7 +10,7 @@ import { PortraitShell } from "../src/ui/PortraitShell";
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#07140F" }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#101C18" }}>
       <SafeAreaProvider>
         <AuthProvider>
           <PortraitShell>

@@ -1,5 +1,6 @@
 const { publicAvatar } = require("./avatar");
-const { settleStreak, utcDay } = require("./streak");
+const { settleStreak } = require("./streak");
+const { todayOf } = require("./day");
 
 const NUDGE_MS = 4 * 60 * 60 * 1000;
 const SEARCH_LIMIT = 12;
@@ -12,12 +13,30 @@ function friendIds(record) {
   return [...new Set(record.friends.filter((id) => typeof id === "string" && id))];
 }
 
+function requestIds(record) {
+  if (!Array.isArray(record?.incomingRequests)) {
+    return [];
+  }
+  return [...new Set(record.incomingRequests.filter((id) => typeof id === "string" && id))];
+}
+
 function ensureFriends(record) {
   if (!record) {
     return false;
   }
   if (!Array.isArray(record.friends)) {
     record.friends = [];
+    return true;
+  }
+  return false;
+}
+
+function ensureRequests(record) {
+  if (!record) {
+    return false;
+  }
+  if (!Array.isArray(record.incomingRequests)) {
+    record.incomingRequests = [];
     return true;
   }
   return false;
@@ -35,8 +54,8 @@ function ensureNudges(record) {
 }
 
 function publicCard(record) {
-  const result = settleStreak(record);
-  const today = utcDay();
+  const today = todayOf(record);
+  const result = settleStreak(record, today);
   const daily = record.daily && record.daily.date === today ? record.daily : null;
   return {
     changed: Boolean(result.changed),
@@ -89,6 +108,21 @@ function searchPeople(list, query, selfId) {
   return { people: hits, dirty };
 }
 
+function becomeFriends(self, target) {
+  ensureFriends(self);
+  ensureFriends(target);
+  ensureRequests(self);
+  ensureRequests(target);
+  if (!self.friends.includes(target.id)) {
+    self.friends.push(target.id);
+  }
+  if (!target.friends.includes(self.id)) {
+    target.friends.push(self.id);
+  }
+  self.incomingRequests = self.incomingRequests.filter((id) => id !== target.id);
+  target.incomingRequests = target.incomingRequests.filter((id) => id !== self.id);
+}
+
 function listFriendCards(self, byId) {
   ensureFriends(self);
   const cards = [];
@@ -113,28 +147,144 @@ function listFriendCards(self, byId) {
   return { friends: cards, dirty };
 }
 
-function addFriend(self, target) {
+function outgoingIds(selfId, list) {
+  const ids = [];
+  for (const record of list || []) {
+    if (record && requestIds(record).includes(selfId)) {
+      ids.push(record.id);
+    }
+  }
+  return ids;
+}
+
+function packSocial(self, list, byId) {
+  const listed = listFriendCards(self, byId);
+  ensureRequests(self);
+  const incoming = [];
+  const keptReq = [];
+  for (const id of requestIds(self)) {
+    if (self.friends.includes(id)) {
+      continue;
+    }
+    const record = byId.get(id);
+    if (!record) {
+      continue;
+    }
+    keptReq.push(id);
+    const { card, changed } = publicCard(record);
+    incoming.push(card);
+    if (changed) {
+      listed.dirty.push(record);
+    }
+  }
+  if (keptReq.length !== self.incomingRequests.length) {
+    self.incomingRequests = keptReq;
+    listed.dirty.push(self);
+  }
+  return {
+    friends: listed.friends,
+    incoming,
+    outgoing: outgoingIds(self.id, list),
+    dirty: listed.dirty,
+  };
+}
+
+function normalizeAsymmetric(list) {
+  const byId = new Map((list || []).map((user) => [user.id, user]));
+  const dirty = new Set();
+  for (const self of list || []) {
+    if (!self) {
+      continue;
+    }
+    ensureFriends(self);
+    ensureRequests(self);
+    const kept = [];
+    for (const id of friendIds(self)) {
+      const other = byId.get(id);
+      if (!other) {
+        continue;
+      }
+      ensureFriends(other);
+      ensureRequests(other);
+      if (other.friends.includes(self.id)) {
+        kept.push(id);
+        continue;
+      }
+      if (!other.incomingRequests.includes(self.id) && !self.incomingRequests.includes(id)) {
+        other.incomingRequests.push(self.id);
+        dirty.add(other);
+      }
+    }
+    if (kept.length !== self.friends.length) {
+      self.friends = kept;
+      dirty.add(self);
+    }
+  }
+  return [...dirty];
+}
+
+function requestFriend(self, target) {
+  if (!target) {
+    return { error: "Нет такого человека" };
+  }
+  if (self.id === target.id) {
+    return { error: "Это ты" };
+  }
+  ensureFriends(self);
+  ensureFriends(target);
+  ensureRequests(self);
+  ensureRequests(target);
+  if (self.friends.includes(target.id) && target.friends.includes(self.id)) {
+    return { status: "friends" };
+  }
+  if (self.incomingRequests.includes(target.id)) {
+    becomeFriends(self, target);
+    return { status: "friends" };
+  }
+  if (target.incomingRequests.includes(self.id)) {
+    return { status: "requested" };
+  }
+  target.incomingRequests.push(self.id);
+  return { status: "requested" };
+}
+
+function acceptRequest(self, target) {
+  if (!target) {
+    return { error: "Нет такого человека" };
+  }
+  ensureRequests(self);
+  if (!self.incomingRequests.includes(target.id)) {
+    return { error: "Нет такой заявки" };
+  }
+  becomeFriends(self, target);
+  return { status: "friends" };
+}
+
+function declineRequest(self, target) {
+  if (!target) {
+    return { error: "Нет такого человека" };
+  }
+  ensureRequests(self);
+  const next = self.incomingRequests.filter((id) => id !== target.id);
+  if (next.length === self.incomingRequests.length) {
+    return { error: "Нет такой заявки" };
+  }
+  self.incomingRequests = next;
+  return { status: "declined" };
+}
+
+function removeFriend(self, target) {
   if (!target) {
     return "Нет такого человека";
   }
-  if (self.id === target.id) {
-    return "Это ты";
-  }
   ensureFriends(self);
-  if (self.friends.includes(target.id)) {
-    return null;
-  }
-  self.friends.push(target.id);
-  return null;
-}
-
-function removeFriend(self, id) {
-  ensureFriends(self);
-  const next = self.friends.filter((item) => item !== id);
-  if (next.length === self.friends.length) {
+  ensureFriends(target);
+  const had = self.friends.includes(target.id) || target.friends.includes(self.id);
+  self.friends = self.friends.filter((id) => id !== target.id);
+  target.friends = target.friends.filter((id) => id !== self.id);
+  if (!had) {
     return "Его нет в списке";
   }
-  self.friends = next;
   return null;
 }
 
@@ -143,8 +293,9 @@ function nudgeFriend(self, target) {
     return "Нет такого человека";
   }
   ensureFriends(self);
-  if (!self.friends.includes(target.id)) {
-    return "Сначала добавь";
+  ensureFriends(target);
+  if (!self.friends.includes(target.id) || !target.friends.includes(self.id)) {
+    return "Сначала друзья";
   }
   ensureNudges(target);
   const now = Date.now();
@@ -168,6 +319,35 @@ function unreadNudges(record, byId) {
     }));
 }
 
+function forgetPerson(list, id) {
+  const dirty = [];
+  for (const record of list || []) {
+    if (!record || record.id === id) {
+      continue;
+    }
+    let changed = false;
+    if (Array.isArray(record.friends) && record.friends.includes(id)) {
+      record.friends = record.friends.filter((item) => item !== id);
+      changed = true;
+    }
+    if (Array.isArray(record.incomingRequests) && record.incomingRequests.includes(id)) {
+      record.incomingRequests = record.incomingRequests.filter((item) => item !== id);
+      changed = true;
+    }
+    if (Array.isArray(record.nudges)) {
+      const next = record.nudges.filter((item) => item && item.from !== id);
+      if (next.length !== record.nudges.length) {
+        record.nudges = next;
+        changed = true;
+      }
+    }
+    if (changed) {
+      dirty.push(record);
+    }
+  }
+  return dirty;
+}
+
 function markNudgesSeen(record) {
   ensureNudges(record);
   let changed = false;
@@ -181,14 +361,20 @@ function markNudgesSeen(record) {
 }
 
 module.exports = {
-  addFriend,
+  acceptRequest,
+  declineRequest,
   ensureFriends,
   ensureNudges,
+  ensureRequests,
+  forgetPerson,
   listFriendCards,
   markNudgesSeen,
+  normalizeAsymmetric,
   nudgeFriend,
+  packSocial,
   publicCard,
   removeFriend,
+  requestFriend,
   searchPeople,
   unreadNudges,
 };

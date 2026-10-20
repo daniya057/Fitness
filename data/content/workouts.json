@@ -68,7 +68,7 @@
     },
     {
       "id": "meal",
-      "title": "Еда"
+      "title": "Приём пищи"
     }
   ],
   "extraMoves": [
@@ -107,7 +107,12 @@
     "Гиперэкстензия",
     "Велотренажёр",
     "Ходьба на дорожке",
-    "Эллипс"
+    "Эллипс",
+    "Разведение гантелей стоя",
+    "Румынская тяга с гантелями",
+    "Пуловер на блоке",
+    "Скручивания в тренажёре",
+    "Разведение ног"
   ],
   "sessions": [
     {
@@ -2769,494 +2774,6 @@
       ]
     },
     {
-      "id": "gym-full-1",
-      "group": "gym",
-      "slot": "full",
-      "place": "gym",
-      "kind": "strength",
-      "level": 1,
-      "title": "Знакомство с залом",
-      "restSec": 22,
-      "roundRestSec": 90,
-      "rounds": 6,
-      "moves": [
-        {
-          "title": "Жим ногами",
-          "sec": 40
-        },
-        {
-          "title": "Жим в тренажёре",
-          "sec": 35
-        },
-        {
-          "title": "Тяга нижнего блока",
-          "sec": 35
-        },
-        {
-          "title": "Велотренажёр",
-          "sec": 40
-        }
-      ]
-    },
-    {
-      "id": "gym-full-2",
-      "group": "gym",
-      "slot": "full",
-      "place": "gym",
-      "kind": "strength",
-      "level": 2,
-      "title": "Круг в зале",
-      "restSec": 22,
-      "roundRestSec": 90,
-      "rounds": 7,
-      "moves": [
-        {
-          "title": "Жим ногами",
-          "sec": 40
-        },
-        {
-          "title": "Жим в тренажёре",
-          "sec": 35
-        },
-        {
-          "title": "Тяга верхнего блока",
-          "sec": 35
-        },
-        {
-          "title": "Сгибание рук с гантелями",
-          "sec": 30
-        },
-        {
-          "title": "Велотренажёр",
-          "sec": 35
-        }
-      ]
-    },
-    {
-      "id": "gym-full-3",
-      "group": "gym",
-      "slot": "full",
-      "place": "gym",
-      "kind": "strength",
-      "level": 3,
-      "title": "Зал целиком",
-      "restSec": 22,
-      "roundRestSec": 90,
-      "rounds": 8,
-      "moves": [
-        {
-          "title": "Приседания с гантелей",
-          "sec": 40
-        },
-        {
-          "title": "Жим в тренажёре",
-          "sec": 35
-        },
-        {
-          "title": "Тяга верхнего блока",
-          "sec": 35
-        },
-        {
-          "title": "Жим от плеч в тренажёре",
-          "sec": 30
-        },
-        {
-          "title": "Сгибание ног",
-          "sec": 30
-        },
-        {
-          "title": "Планка",
-          "sec": 25
-        }
-      ]
-    },
-    {
-      "id": "gym-push-1",
-      "group": "gym",
-      "slot": "push",
-      "place": "gym",
-      "kind": "strength",
-      "level": 1,
-      "title": "Жим в зале",
-      "restSec": 22,
-      "roundRestSec": 90,
-      "rounds": 7,
-      "moves": [
-        {
-          "title": "Жим в тренажёре",
-          "sec": 40
-        },
-        {
-          "title": "Жим от плеч в тренажёре",
-          "sec": 30
-        },
-        {
-          "title": "Жим на трицепс на блоке",
-          "sec": 30
-        },
-        {
-          "title": "Планка на коленях",
-          "sec": 25
-        }
-      ]
-    },
-    {
-      "id": "gym-push-2",
-      "group": "gym",
-      "slot": "push",
-      "place": "gym",
-      "kind": "strength",
-      "level": 2,
-      "title": "Грудь и плечи",
-      "restSec": 22,
-      "roundRestSec": 90,
-      "rounds": 8,
-      "moves": [
-        {
-          "title": "Жим в тренажёре",
-          "sec": 40
-        },
-        {
-          "title": "Сведение рук в тренажёре",
-          "sec": 30
-        },
-        {
-          "title": "Жим от плеч в тренажёре",
-          "sec": 35
-        },
-        {
-          "title": "Жим на трицепс на блоке",
-          "sec": 30
-        }
-      ]
-    },
-    {
-      "id": "gym-push-3",
-      "group": "gym",
-      "slot": "push",
-      "place": "gym",
-      "kind": "strength",
-      "level": 3,
-      "title": "Верхний жим",
-      "restSec": 22,
-      "roundRestSec": 90,
-      "rounds": 8,
-      "moves": [
-        {
-          "title": "Жим в тренажёре",
-          "sec": 40
-        },
-        {
-          "title": "Жим от плеч в тренажёре",
-          "sec": 35
-        },
-        {
-          "title": "Сведение рук в тренажёре",
-          "sec": 30
-        },
-        {
-          "title": "Жим на трицепс на блоке",
-          "sec": 30
-        },
-        {
-          "title": "Планка",
-          "sec": 25
-        }
-      ]
-    },
-    {
-      "id": "gym-pull-1",
-      "group": "gym",
-      "slot": "pull",
-      "place": "gym",
-      "kind": "strength",
-      "level": 1,
-      "title": "Тяга в зале",
-      "restSec": 22,
-      "roundRestSec": 90,
-      "rounds": 7,
-      "moves": [
-        {
-          "title": "Тяга верхнего блока",
-          "sec": 40
-        },
-        {
-          "title": "Тяга нижнего блока",
-          "sec": 35
-        },
-        {
-          "title": "Сгибание рук с гантелями",
-          "sec": 30
-        },
-        {
-          "title": "Гиперэкстензия",
-          "sec": 30
-        }
-      ]
-    },
-    {
-      "id": "gym-pull-2",
-      "group": "gym",
-      "slot": "pull",
-      "place": "gym",
-      "kind": "strength",
-      "level": 2,
-      "title": "Спина в зале",
-      "restSec": 22,
-      "roundRestSec": 90,
-      "rounds": 8,
-      "moves": [
-        {
-          "title": "Тяга верхнего блока",
-          "sec": 40
-        },
-        {
-          "title": "Тяга нижнего блока",
-          "sec": 40
-        },
-        {
-          "title": "Тяга к лицу на блоке",
-          "sec": 30
-        },
-        {
-          "title": "Сгибание рук с гантелями",
-          "sec": 30
-        }
-      ]
-    },
-    {
-      "id": "gym-pull-3",
-      "group": "gym",
-      "slot": "pull",
-      "place": "gym",
-      "kind": "strength",
-      "level": 3,
-      "title": "Тяги и руки",
-      "restSec": 22,
-      "roundRestSec": 90,
-      "rounds": 8,
-      "moves": [
-        {
-          "title": "Тяга верхнего блока",
-          "sec": 40
-        },
-        {
-          "title": "Тяга нижнего блока",
-          "sec": 40
-        },
-        {
-          "title": "Тяга к лицу на блоке",
-          "sec": 30
-        },
-        {
-          "title": "Сгибание рук с гантелями",
-          "sec": 30
-        },
-        {
-          "title": "Гиперэкстензия",
-          "sec": 30
-        }
-      ]
-    },
-    {
-      "id": "gym-legs-1",
-      "group": "gym",
-      "slot": "legs",
-      "place": "gym",
-      "kind": "strength",
-      "level": 1,
-      "title": "Ноги в зале",
-      "restSec": 22,
-      "roundRestSec": 90,
-      "rounds": 7,
-      "moves": [
-        {
-          "title": "Жим ногами",
-          "sec": 45
-        },
-        {
-          "title": "Разгибание ног",
-          "sec": 30
-        },
-        {
-          "title": "Сгибание ног",
-          "sec": 30
-        },
-        {
-          "title": "Подъём на носки",
-          "sec": 30
-        }
-      ]
-    },
-    {
-      "id": "gym-legs-2",
-      "group": "gym",
-      "slot": "legs",
-      "place": "gym",
-      "kind": "strength",
-      "level": 2,
-      "title": "Ноги и ягодицы",
-      "restSec": 22,
-      "roundRestSec": 90,
-      "rounds": 8,
-      "moves": [
-        {
-          "title": "Жим ногами",
-          "sec": 45
-        },
-        {
-          "title": "Приседания с гантелей",
-          "sec": 35
-        },
-        {
-          "title": "Сгибание ног",
-          "sec": 30
-        },
-        {
-          "title": "Ягодичный мост",
-          "sec": 35
-        }
-      ]
-    },
-    {
-      "id": "gym-legs-3",
-      "group": "gym",
-      "slot": "legs",
-      "place": "gym",
-      "kind": "strength",
-      "level": 3,
-      "title": "Низ в зале",
-      "restSec": 22,
-      "roundRestSec": 90,
-      "rounds": 8,
-      "moves": [
-        {
-          "title": "Жим ногами",
-          "sec": 45
-        },
-        {
-          "title": "Приседания с гантелей",
-          "sec": 40
-        },
-        {
-          "title": "Выпады с гантелями",
-          "sec": 35
-        },
-        {
-          "title": "Сгибание ног",
-          "sec": 30
-        },
-        {
-          "title": "Подъём на носки",
-          "sec": 30
-        }
-      ]
-    },
-    {
-      "id": "gym-core-1",
-      "group": "gym",
-      "slot": "core",
-      "place": "gym",
-      "kind": "strength",
-      "level": 1,
-      "title": "Пресс в зале",
-      "restSec": 22,
-      "roundRestSec": 90,
-      "rounds": 6,
-      "moves": [
-        {
-          "title": "Скручивания",
-          "sec": 30
-        },
-        {
-          "title": "Мёртвый жук",
-          "sec": 30
-        },
-        {
-          "title": "Планка",
-          "sec": 25
-        }
-      ]
-    },
-    {
-      "id": "gym-core-2",
-      "group": "gym",
-      "slot": "core",
-      "place": "gym",
-      "kind": "strength",
-      "level": 2,
-      "title": "Корпус в зале",
-      "restSec": 22,
-      "roundRestSec": 90,
-      "rounds": 7,
-      "moves": [
-        {
-          "title": "Скручивания",
-          "sec": 30
-        },
-        {
-          "title": "Подъём ног лёжа",
-          "sec": 30
-        },
-        {
-          "title": "Гиперэкстензия",
-          "sec": 30
-        },
-        {
-          "title": "Планка",
-          "sec": 30
-        }
-      ]
-    },
-    {
-      "id": "gym-cardio-1",
-      "group": "gym",
-      "slot": "cardio",
-      "place": "gym",
-      "kind": "cardio",
-      "level": 1,
-      "title": "Дорожка спокойно",
-      "restSec": 15,
-      "roundRestSec": 45,
-      "rounds": 6,
-      "moves": [
-        {
-          "title": "Ходьба на дорожке",
-          "sec": 50
-        },
-        {
-          "title": "Велотренажёр",
-          "sec": 50
-        }
-      ]
-    },
-    {
-      "id": "gym-cardio-2",
-      "group": "gym",
-      "slot": "cardio",
-      "place": "gym",
-      "kind": "cardio",
-      "level": 2,
-      "title": "Кардио в зале",
-      "restSec": 15,
-      "roundRestSec": 45,
-      "rounds": 7,
-      "moves": [
-        {
-          "title": "Ходьба на дорожке",
-          "sec": 40
-        },
-        {
-          "title": "Велотренажёр",
-          "sec": 40
-        },
-        {
-          "title": "Эллипс",
-          "sec": 40
-        }
-      ]
-    },
-    {
       "id": "warmup-morning",
       "group": "stretch",
       "kind": "stretch",
@@ -3323,6 +2840,7 @@
       "group": "legs",
       "kind": "strength",
       "daily": true,
+      "place": "home",
       "title": "Двадцать приседаний",
       "restSec": 15,
       "moves": [
@@ -3341,6 +2859,7 @@
       "group": "push",
       "kind": "strength",
       "daily": true,
+      "place": "home",
       "title": "Отжимания у стены",
       "restSec": 12,
       "moves": [
@@ -3359,6 +2878,7 @@
       "group": "core",
       "kind": "strength",
       "daily": true,
+      "place": "any",
       "title": "Короткая планка",
       "restSec": 10,
       "moves": [
@@ -3385,6 +2905,7 @@
       "group": "cardio",
       "kind": "walk",
       "daily": true,
+      "place": "home",
       "title": "Марш на месте",
       "restSec": 10,
       "moves": [
@@ -3403,6 +2924,7 @@
       "group": "legs",
       "kind": "strength",
       "daily": true,
+      "place": "home",
       "title": "Ягодичный мост",
       "restSec": 15,
       "moves": [
@@ -3421,6 +2943,7 @@
       "group": "core",
       "kind": "strength",
       "daily": true,
+      "place": "any",
       "title": "Кор за две минуты",
       "restSec": 10,
       "moves": [
@@ -3443,6 +2966,7 @@
       "group": "stretch",
       "kind": "stretch",
       "daily": true,
+      "place": "any",
       "title": "Плечи и спина",
       "restSec": 8,
       "moves": [
@@ -3465,6 +2989,7 @@
       "group": "legs",
       "kind": "strength",
       "daily": true,
+      "place": "home",
       "title": "Выпады",
       "restSec": 15,
       "moves": [
@@ -3481,8 +3006,9 @@
     {
       "id": "daily-run",
       "group": "cardio",
-      "kind": "run",
+      "kind": "walk",
       "daily": true,
+      "place": "home",
       "title": "Лёгкий марш",
       "restSec": 8,
       "moves": [
@@ -3503,9 +3029,10 @@
     {
       "id": "daily-bike",
       "group": "cardio",
-      "kind": "bike",
+      "kind": "walk",
       "daily": true,
-      "title": "Короткий велосипед",
+      "place": "home",
+      "title": "Марш и икры",
       "restSec": 10,
       "moves": [
         {
@@ -3515,6 +3042,1177 @@
         {
           "title": "Подъём на носки",
           "sec": 30
+        }
+      ]
+    },
+    {
+      "id": "daily-gym-treadmill",
+      "group": "gym",
+      "place": "gym",
+      "kind": "walk",
+      "daily": true,
+      "title": "Дорожка две минуты",
+      "restSec": 0,
+      "moves": [
+        {
+          "title": "Ходьба на дорожке",
+          "sec": 60
+        },
+        {
+          "title": "Ходьба на дорожке",
+          "sec": 60
+        }
+      ]
+    },
+    {
+      "id": "daily-gym-bike",
+      "group": "gym",
+      "place": "gym",
+      "kind": "bike",
+      "daily": true,
+      "title": "Велотренажёр",
+      "restSec": 0,
+      "moves": [
+        {
+          "title": "Велотренажёр",
+          "sec": 90
+        }
+      ]
+    },
+    {
+      "id": "daily-gym-hold",
+      "group": "gym",
+      "place": "gym",
+      "kind": "strength",
+      "daily": true,
+      "title": "Планка у стойки",
+      "restSec": 10,
+      "moves": [
+        {
+          "title": "Планка",
+          "sec": 30
+        },
+        {
+          "title": "Планка",
+          "sec": 30
+        }
+      ]
+    },
+    {
+      "id": "gym-full-1",
+      "group": "gym",
+      "slot": "full",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 1,
+      "title": "Знакомство с залом",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Жим ногами",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Жим в тренажёре",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Тяга верхнего блока",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Сгибание ног",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Планка",
+          "sets": 3,
+          "reps": 20
+        }
+      ]
+    },
+    {
+      "id": "gym-full-2",
+      "group": "gym",
+      "slot": "full",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 2,
+      "title": "Все тренажёры",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Жим ногами",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Жим в тренажёре",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Тяга верхнего блока",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Тяга нижнего блока",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Жим от плеч в тренажёре",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Планка",
+          "sets": 3,
+          "reps": 25
+        }
+      ]
+    },
+    {
+      "id": "gym-full-3",
+      "group": "gym",
+      "slot": "full",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 3,
+      "title": "Зал целиком",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Жим ногами",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Приседания с гантелей",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Жим в тренажёре",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Тяга верхнего блока",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Тяга нижнего блока",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Сгибание рук с гантелями",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Планка",
+          "sets": 3,
+          "reps": 30
+        }
+      ]
+    },
+    {
+      "id": "gym-full-4",
+      "group": "gym",
+      "slot": "full",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 4,
+      "title": "Силовой зал",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Жим ногами",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Приседания с гантелей",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Жим в тренажёре",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Тяга верхнего блока",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Тяга нижнего блока",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Жим от плеч в тренажёре",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Планка",
+          "sets": 3,
+          "reps": 30
+        }
+      ]
+    },
+    {
+      "id": "gym-full-5",
+      "group": "gym",
+      "slot": "full",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 5,
+      "title": "Полный зал",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Жим ногами",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Румынская тяга с гантелями",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Жим в тренажёре",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Тяга верхнего блока",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Тяга нижнего блока",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Жим от плеч в тренажёре",
+          "sets": 3,
+          "reps": 8
+        },
+        {
+          "title": "Сгибание рук с гантелями",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Планка",
+          "sets": 3,
+          "reps": 35
+        }
+      ]
+    },
+    {
+      "id": "gym-push-1",
+      "group": "gym",
+      "slot": "push",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 1,
+      "title": "Жим в зале",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Жим в тренажёре",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Жим от плеч в тренажёре",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Жим на трицепс на блоке",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Планка на коленях",
+          "sets": 2,
+          "reps": 20
+        }
+      ]
+    },
+    {
+      "id": "gym-push-2",
+      "group": "gym",
+      "slot": "push",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 2,
+      "title": "Грудь и плечи",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Жим в тренажёре",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Сведение рук в тренажёре",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Жим от плеч в тренажёре",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Жим на трицепс на блоке",
+          "sets": 3,
+          "reps": 12
+        }
+      ]
+    },
+    {
+      "id": "gym-push-3",
+      "group": "gym",
+      "slot": "push",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 3,
+      "title": "Верхний жим",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Жим в тренажёре",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Сведение рук в тренажёре",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Жим от плеч в тренажёре",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Разведение гантелей стоя",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Жим на трицепс на блоке",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Планка",
+          "sets": 3,
+          "reps": 25
+        }
+      ]
+    },
+    {
+      "id": "gym-push-4",
+      "group": "gym",
+      "slot": "push",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 4,
+      "title": "Сильный жим",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Жим в тренажёре",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Сведение рук в тренажёре",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Жим от плеч в тренажёре",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Разведение гантелей стоя",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Жим на трицепс на блоке",
+          "sets": 3,
+          "reps": 10
+        }
+      ]
+    },
+    {
+      "id": "gym-push-5",
+      "group": "gym",
+      "slot": "push",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 5,
+      "title": "Жим опытный",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Жим в тренажёре",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Сведение рук в тренажёре",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Жим от плеч в тренажёре",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Разведение гантелей стоя",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Жим на трицепс на блоке",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Планка",
+          "sets": 3,
+          "reps": 30
+        }
+      ]
+    },
+    {
+      "id": "gym-pull-1",
+      "group": "gym",
+      "slot": "pull",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 1,
+      "title": "Тяга в зале",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Тяга верхнего блока",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Тяга нижнего блока",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Сгибание рук с гантелями",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Гиперэкстензия",
+          "sets": 3,
+          "reps": 10
+        }
+      ]
+    },
+    {
+      "id": "gym-pull-2",
+      "group": "gym",
+      "slot": "pull",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 2,
+      "title": "Спина в зале",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Тяга верхнего блока",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Тяга нижнего блока",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Тяга к лицу на блоке",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Сгибание рук с гантелями",
+          "sets": 3,
+          "reps": 10
+        }
+      ]
+    },
+    {
+      "id": "gym-pull-3",
+      "group": "gym",
+      "slot": "pull",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 3,
+      "title": "Тяги и руки",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Тяга верхнего блока",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Тяга нижнего блока",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Тяга к лицу на блоке",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Сгибание рук с гантелями",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Гиперэкстензия",
+          "sets": 3,
+          "reps": 12
+        }
+      ]
+    },
+    {
+      "id": "gym-pull-4",
+      "group": "gym",
+      "slot": "pull",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 4,
+      "title": "Широкая спина",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Тяга верхнего блока",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Тяга нижнего блока",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Тяга к лицу на блоке",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Сгибание рук с гантелями",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Гиперэкстензия",
+          "sets": 3,
+          "reps": 12
+        }
+      ]
+    },
+    {
+      "id": "gym-pull-5",
+      "group": "gym",
+      "slot": "pull",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 5,
+      "title": "Спина опытный",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Тяга верхнего блока",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Тяга нижнего блока",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Тяга к лицу на блоке",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Пуловер на блоке",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Сгибание рук с гантелями",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Гиперэкстензия",
+          "sets": 3,
+          "reps": 12
+        }
+      ]
+    },
+    {
+      "id": "gym-legs-1",
+      "group": "gym",
+      "slot": "legs",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 1,
+      "title": "Ноги в зале",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Жим ногами",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Разгибание ног",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Сгибание ног",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Подъём на носки",
+          "sets": 3,
+          "reps": 12
+        }
+      ]
+    },
+    {
+      "id": "gym-legs-2",
+      "group": "gym",
+      "slot": "legs",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 2,
+      "title": "Ноги и ягодицы",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Жим ногами",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Приседания с гантелей",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Сгибание ног",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Ягодичный мост",
+          "sets": 3,
+          "reps": 12
+        }
+      ]
+    },
+    {
+      "id": "gym-legs-3",
+      "group": "gym",
+      "slot": "legs",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 3,
+      "title": "Низ в зале",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Жим ногами",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Приседания с гантелей",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Выпады с гантелями",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Сгибание ног",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Подъём на носки",
+          "sets": 3,
+          "reps": 15
+        }
+      ]
+    },
+    {
+      "id": "gym-legs-4",
+      "group": "gym",
+      "slot": "legs",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 4,
+      "title": "Сильные ноги",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Жим ногами",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Приседания с гантелей",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Румынская тяга с гантелями",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Сгибание ног",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Ягодичный мост",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Подъём на носки",
+          "sets": 3,
+          "reps": 15
+        }
+      ]
+    },
+    {
+      "id": "gym-legs-5",
+      "group": "gym",
+      "slot": "legs",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 5,
+      "title": "Ноги опытный",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Жим ногами",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Приседания с гантелей",
+          "sets": 4,
+          "reps": 8
+        },
+        {
+          "title": "Выпады с гантелями",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Румынская тяга с гантелями",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Разведение ног",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Подъём на носки",
+          "sets": 3,
+          "reps": 15
+        }
+      ]
+    },
+    {
+      "id": "gym-core-1",
+      "group": "gym",
+      "slot": "core",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 1,
+      "title": "Пресс в зале",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Скручивания",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Мёртвый жук",
+          "sets": 3,
+          "reps": 8
+        },
+        {
+          "title": "Планка",
+          "sets": 3,
+          "reps": 20
+        }
+      ]
+    },
+    {
+      "id": "gym-core-2",
+      "group": "gym",
+      "slot": "core",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 2,
+      "title": "Корпус в зале",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Скручивания",
+          "sets": 3,
+          "reps": 15
+        },
+        {
+          "title": "Подъём ног лёжа",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Гиперэкстензия",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Планка",
+          "sets": 3,
+          "reps": 30
+        }
+      ]
+    },
+    {
+      "id": "gym-core-3",
+      "group": "gym",
+      "slot": "core",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 3,
+      "title": "Пресс и поясница",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Скручивания в тренажёре",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Подъём ног лёжа",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Гиперэкстензия",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Боковая планка слева",
+          "sets": 2,
+          "reps": 20
+        },
+        {
+          "title": "Боковая планка справа",
+          "sets": 2,
+          "reps": 20
+        }
+      ]
+    },
+    {
+      "id": "gym-core-4",
+      "group": "gym",
+      "slot": "core",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 4,
+      "title": "Корпус сильный",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Скручивания в тренажёре",
+          "sets": 3,
+          "reps": 15
+        },
+        {
+          "title": "Подъём ног лёжа",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Мёртвый жук",
+          "sets": 3,
+          "reps": 10
+        },
+        {
+          "title": "Гиперэкстензия",
+          "sets": 3,
+          "reps": 12
+        },
+        {
+          "title": "Планка",
+          "sets": 3,
+          "reps": 40
+        }
+      ]
+    },
+    {
+      "id": "gym-core-5",
+      "group": "gym",
+      "slot": "core",
+      "place": "gym",
+      "kind": "strength",
+      "format": "sets",
+      "level": 5,
+      "title": "Корпус опытный",
+      "restSec": 60,
+      "roundRestSec": 90,
+      "moves": [
+        {
+          "title": "Скручивания в тренажёре",
+          "sets": 4,
+          "reps": 12
+        },
+        {
+          "title": "Подъём ног лёжа",
+          "sets": 3,
+          "reps": 15
+        },
+        {
+          "title": "Гиперэкстензия",
+          "sets": 3,
+          "reps": 15
+        },
+        {
+          "title": "Боковая планка слева",
+          "sets": 3,
+          "reps": 25
+        },
+        {
+          "title": "Боковая планка справа",
+          "sets": 3,
+          "reps": 25
+        },
+        {
+          "title": "Планка",
+          "sets": 3,
+          "reps": 45
+        }
+      ]
+    },
+    {
+      "id": "gym-cardio-1",
+      "group": "gym",
+      "slot": "cardio",
+      "place": "gym",
+      "kind": "cardio",
+      "level": 1,
+      "title": "Дорожка спокойно",
+      "restSec": 0,
+      "roundRestSec": 15,
+      "rounds": 10,
+      "moves": [
+        {
+          "title": "Ходьба на дорожке",
+          "sec": 60
+        }
+      ]
+    },
+    {
+      "id": "gym-cardio-2",
+      "group": "gym",
+      "slot": "cardio",
+      "place": "gym",
+      "kind": "cardio",
+      "level": 2,
+      "title": "Кардио в зале",
+      "restSec": 12,
+      "roundRestSec": 20,
+      "rounds": 8,
+      "moves": [
+        {
+          "title": "Ходьба на дорожке",
+          "sec": 50
+        },
+        {
+          "title": "Велотренажёр",
+          "sec": 50
+        }
+      ]
+    },
+    {
+      "id": "gym-cardio-3",
+      "group": "gym",
+      "slot": "cardio",
+      "place": "gym",
+      "kind": "cardio",
+      "level": 3,
+      "title": "Дорожка и эллипс",
+      "restSec": 12,
+      "roundRestSec": 20,
+      "rounds": 8,
+      "moves": [
+        {
+          "title": "Ходьба на дорожке",
+          "sec": 45
+        },
+        {
+          "title": "Эллипс",
+          "sec": 45
+        },
+        {
+          "title": "Велотренажёр",
+          "sec": 40
+        }
+      ]
+    },
+    {
+      "id": "gym-cardio-4",
+      "group": "gym",
+      "slot": "cardio",
+      "place": "gym",
+      "kind": "cardio",
+      "level": 4,
+      "title": "Интервалы в зале",
+      "restSec": 12,
+      "roundRestSec": 20,
+      "rounds": 8,
+      "moves": [
+        {
+          "title": "Ходьба на дорожке",
+          "sec": 40
+        },
+        {
+          "title": "Эллипс",
+          "sec": 50
+        },
+        {
+          "title": "Велотренажёр",
+          "sec": 40
+        }
+      ]
+    },
+    {
+      "id": "gym-cardio-5",
+      "group": "gym",
+      "slot": "cardio",
+      "place": "gym",
+      "kind": "cardio",
+      "level": 5,
+      "title": "Длинное кардио",
+      "restSec": 12,
+      "roundRestSec": 20,
+      "rounds": 10,
+      "moves": [
+        {
+          "title": "Ходьба на дорожке",
+          "sec": 50
+        },
+        {
+          "title": "Эллипс",
+          "sec": 50
+        },
+        {
+          "title": "Велотренажёр",
+          "sec": 40
         }
       ]
     }
